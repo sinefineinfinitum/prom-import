@@ -6,7 +6,7 @@
   "license": "GPL-2.0-or-later",
   "authors": [
     {
-      "name": "PSerg"
+      "name": "sinefine"
     }
   ],
   "require": {
@@ -14,12 +14,25 @@
     "ext-simplexml": "*",
     "campo/random-user-agent": "*"
   },
+  "require-dev": {
+    "phpstan/extension-installer": "^1.4.3",
+    "szepeviktor/phpstan-wordpress": "^2.0.3"
+  },
   "autoload": {
     "psr-4": {
       "SineFine\\PromImport\\": "src/"
     }
   },
   "config": {
-    "vendor-dir": "vendor"
+    "vendor-dir": "vendor",
+    "allow-plugins": {
+      "composer/installers": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "scripts": {
+    "cs": [
+      "phpstan analyse --memory-limit 1G"
+    ]
   }
 }

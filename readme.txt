@@ -1,5 +1,5 @@
 === Prom.ua Products Importer for WooCommerce ===
-Contributors: pserg 
+Contributors: sinefine
 Tags: woocommerce, products, prom.ua, importer, api
 Requires PHP: >=7.4
 License: GPLv2 or later
