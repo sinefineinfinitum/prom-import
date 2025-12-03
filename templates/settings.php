@@ -1,0 +1,13 @@
+<div class="wrap">
+    <h1>
+        <?php echo __('Prom.ua Settings', 'prom-import') ?>
+    </h1>
+
+    <form action='options.php' method='post'>
+        <?php
+        settings_fields('prom_importer_group');
+        do_settings_sections('prom_importer_settings');
+        submit_button();
+        ?>
+    </form>
+</div>

@@ -1,4 +1,4 @@
-=== REST API Products Importer for WooCommerce ===
+=== Prom.ua Products Importer for WooCommerce ===
 Contributors: pserg 
 Tags: woocommerce, products, prom.ua, importer, api
 Requires PHP: >=7.4

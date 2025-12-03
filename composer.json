@@ -1,0 +1,25 @@
+{
+  "name": "sinefineinfinitum/prom-import",
+  "description": "Prom Ua Import",
+  "minimum-stability": "stable",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "PSerg"
+    }
+  ],
+  "require": {
+    "php": ">=8.0",
+    "ext-simplexml": "*",
+    "campo/random-user-agent": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "SineFine\\PromImport\\": "src/"
+    }
+  },
+  "config": {
+    "vendor-dir": "vendor"
+  }
+}
