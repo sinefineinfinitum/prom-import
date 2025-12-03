@@ -10,6 +10,10 @@ class WpHttpClient
 {
 	private const CACHE_PROM_RESPONSE = "prom_response_v1_";
 	private const CACHE_TIMEOUT_SEC = 60;
+    /**
+     * @param array<string, mixed> $args
+     * @return array<string, mixed>|WP_Error
+     */
     public function get(string $url, array $args = []): array|WP_Error
     {
 	    $cacheKey = self::CACHE_PROM_RESPONSE . md5($url);
@@ -38,14 +42,17 @@ class WpHttpClient
 
 	    return $response;
     }
-
-	private function getHeader(): array
-	{
-		return [
-			'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-			'Cache-control' => 'max-age=0',
-		];
-	}
+    
+    /**
+     * @return array<string, string>
+     */
+    private function getHeader(): array
+    {
+        return [
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Cache-control' => 'max-age=0',
+        ];
+    }
 
 	private function getRandomUserAgent(): string|WP_Error
 	{

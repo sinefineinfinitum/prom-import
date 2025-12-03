@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport\Application\Import;
 
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
@@ -51,30 +53,15 @@ class XmlParser
         return $products;
     }
 
-	public function getTotalProducts($xml): int
+	public function getTotalProducts(SimpleXMLElement $xml): int
 	{
 		return $xml->shop->offers->offer->count() ? $xml->shop->offers->offer->count() : 0;
 	}
 
     /**
-     * Find a single product by id in XML and parse into DTO.
-     */
-    public function parseSingleProductById(SimpleXMLElement $root, int $id, array $categories = []): ?ProductDto
-    {
-        if (! isset($root->shop->offers->offer)) {
-            return null;
-        }
-        foreach ($root->shop->offers->offer as $offer) {
-            $oid = isset($offer['id']) ? (int) $offer['id'] : 0;
-            if ($oid === $id) {
-                return $this->mapOfferToProductDto($offer, $categories);
-            }
-        }
-        return null;
-    }
-
-    /**
      * Map a single <offer> item to ProductDto
+     * @param SimpleXMLElement $offer
+     * @param array<int, CategoryDto> $categories
      */
     private function mapOfferToProductDto(SimpleXMLElement $offer, array $categories = []): ?ProductDto
     {
@@ -133,12 +120,11 @@ class XmlParser
         if ($html === '') {
             return '';
         }
-        // Match legacy behavior: remove anchors, emails, and auto-linked URLs
-        $html = preg_replace([
+        //remove anchors, emails, and auto-linked URLs
+        return preg_replace([
             '/<\/?a( [^>]*)?>/i',
             '/[^@\s]*@[^@\s]*\.[^@\s]*/',
-            '/(?<!src=")(?:(https?)+[:\/\/]+([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![\.,:])/i',
+            '/(?<!src=")(?:(https?)+[:\/]+([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![.,:])/i',
         ], ['', '', ''], $html) ?? '';
-        return $html;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport\Application\Import\Dto;
 
 use SineFine\PromImport\Application\Import\ValueObject\Price;

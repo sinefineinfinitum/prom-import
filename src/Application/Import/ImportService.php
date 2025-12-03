@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport\Application\Import;
 
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
@@ -12,11 +14,22 @@ class ImportService
     ) {
     }
 
-    /**
-     * Import a single product from provided payload.
-     * Returns created post ID or WP_Error.
-     */
-    public function importSingle(int $skuId, array $payload = []): int|WP_Error
+	/**
+	 * Import a single product from provided payload.
+	 * Returns created post ID or WP_Error
+	 *
+	 * @param int $skuId
+	 * @param array{
+	 *     title: string,
+	 *     description: string,
+	 *     price: float|int,
+	 *     category: string,
+	 *     featured_media: array<int, string>
+	 * } $payload
+	 *
+	 * @return int|WP_Error
+	 */
+    public function importSingle(int $skuId, array $payload): int|WP_Error
     {
         $existingId = $this->repository->findIdBySkuId($skuId);
         if ($existingId) {
@@ -25,7 +38,7 @@ class ImportService
 
 	    $preparedPostData = $this->preparePostData($payload);
 	    $preparedProductData = $this->preparedProductData($payload);
-	    if ( $preparedPostData['title'] === '' ) {
+	    if ( $preparedPostData['post_title'] === '' ) {
 		    return new WP_Error(
 			    'has no title',
 			    __( 'Post has no title', 'prom-import' )
@@ -69,30 +82,60 @@ class ImportService
 
     }
 
-	public function preparePostData(array $payload = []): array
-	{
 
-		$title               = (string) ( $payload['title'] ?? '' );
-		$description         = (string) ( $payload['description'] ?? '' );
+	/**
+	 * @param array{
+	 *     title: string,
+	 *     description: string,
+	 *     price: float|int,
+	 *     category: string,
+	 *     featured_media: array<int, string>
+	 * } $payload
+	 * @return array{
+	 *     post_type: string,
+	 *     post_title: string,
+	 *     post_status: string,
+	 *     post_author: int,
+	 *     post_excerpt: string,
+	 *     post_content: string
+	 * }
+	 */
+
+	public function preparePostData(array $payload): array
+	{
 		return  [
 			'post_type'    => 'product',
-			'post_title'   => sanitize_text_field( $title ),
+			'post_title'   => sanitize_text_field( $payload['title'] ),
 			'post_status'  => 'publish',
 			'post_author'  => get_current_user_id(),
-			'post_excerpt' => wp_kses_post( $description ),
+			'post_excerpt' => wp_kses_post( $payload['description'] ),
 			'post_content' => wp_kses_post( preg_replace( [
 				'/<\/?a( [^>]*)?>/i',
 				'/[^@\s]*@[^@\s]*\.[^@\s]*/',
 				'/(?<!src=")(?:(https?)+[:\/]+([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![.,:])/i',
-			], [ '', '', '' ], $description ) ),
+			], [ '', '', '' ], $payload['description'] ) ),
 		];
 	}
 
-	public function preparedProductData( array $payload = [] ): array {
+	/**
+	 * @param array{
+	 *     title: string,
+	 *     description: string,
+	 *     price: float|int,
+	 *     category: string,
+	 *     featured_media: array<int, string>
+	 * } $payload
+	 * @return array{
+	 *     price: float,
+	 *     category: string,
+	 *     mediaUrls: array<int, string>
+	 * }
+	 */
+	public function preparedProductData( array $payload): array {
 		return [
-			'price'     => isset( $payload['price'] ) ? (float) $payload['price'] : 0.0,
-			'category'  => (string) ( $payload['category'] ?? '' ),
-			'mediaUrls' => $payload['featured_media'] ?? [],
+			'price'     =>  (float) $payload['price'],
+			'category'  => (string) ( $payload['category'] ),
+			'mediaUrls' => $payload['featured_media'],
 		];
 	}
 }

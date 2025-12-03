@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport\Infrastructure\Admin;
 
 use SineFine\PromImport\Presentation\AdminController;
@@ -32,7 +34,7 @@ class MenuPage
     public function register_settings(): void
     {
 	    add_settings_section(
-		    'wcapi_importer_section',
+		    'prom_importer_section',
 		    __('General Settings', 'prom-import'),
 		    [new AdminController(), 'importer_section_callback'],
 		    'prom_importer_settings');
@@ -47,10 +49,10 @@ class MenuPage
 		    ]);
 
 	    add_settings_field(
-		    'wcapi_domain_url_field',
+		    'prom_domain_url_field',
 		    __('Prom.ua export XML URL', 'prom-import'),
 		    [new AdminController(), 'url_setting_callback' ],
 		    'prom_importer_settings',
-		    'wcapi_importer_section');
+		    'prom_importer_section');
     }
 }
