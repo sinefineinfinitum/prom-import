@@ -58,10 +58,10 @@ jobs:
         continue-on-error: true
         run: composer install
 
-      - name: Create wpconfig ... the composer.json creation didn't work
-        run: |
-          export $(grep -v '^#' .env.testing | xargs);
-          sudo vendor/bin/wp config create --dbname=$TEST_SITE_DB_NAME --dbuser=$TEST_SITE_DB_USER --dbpass=$TEST_SITE_DB_PASSWORD --dbhost=127.0.0.1:${{ job.services.mysql.ports['3306'] }} --allow-root --extra-php="define( 'WP_DEBUG', true ); define( 'WP_DEBUG_LOG', true );"
+#      - name: Create wpconfig ... the composer.json creation didn't work
+#        run: |
+#          export $(grep -v '^#' .env.testing | xargs);
+#          sudo vendor/bin/wp config create --dbname=$TEST_SITE_DB_NAME --dbuser=$TEST_SITE_DB_USER --dbpass=$TEST_SITE_DB_PASSWORD --dbhost=127.0.0.1:${{ job.services.mysql.ports['3306'] }} --allow-root --extra-php="define( 'WP_DEBUG', true ); define( 'WP_DEBUG_LOG', true );"
 
       - name: Run PHPStan to add annotations to the code
         continue-on-error: true
