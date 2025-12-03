@@ -12,7 +12,8 @@
   "require": {
     "php": ">=8.0",
     "ext-simplexml": "*",
-    "campo/random-user-agent": "*"
+    "campo/random-user-agent": "*",
+    "wp-cli/wp-cli-bundle": "*"
   },
   "require-dev": {
     "phpstan/extension-installer": "^1.4.3",
