@@ -4,7 +4,7 @@
         <span class="displaying-num">
             <?php
             /* translators: %d: Number of items */
-            printf( __( '%d items', 'prom-import' ), esc_html( $total_products ) );
+            printf( esc_html(__( '%d items', 'prom-import' )), esc_html( $total_products ) );
             ?>
         </span>
         <span class="pagination-links">
@@ -27,7 +27,7 @@
                 <span class="tablenav-paging-text">
                     <?php
                     /* translators: 1: Current page number, 2: Total number of pages */
-                    printf( __( '%1$s of %2$s', 'prom-import' ), esc_html( $page_num ), esc_html( $totalpages ) );
+                    printf( esc_html(__( '%1$s of %2$s', 'prom-import')), esc_html( $page_num ), esc_html( $totalpages ) );
                     ?>
                 </span>
             </span>

@@ -25,10 +25,10 @@ class Assets
 
 	    wp_localize_script('prom-importer-plugin', 'promImporterAjaxObj', [
 		    'ajaxurl' => admin_url('admin-ajax.php'),
-		    'importing_text' => __('Importing...', 'prom-import'),
-		    'success_text' => __('Successfully imported!', 'prom-import'),
-		    'error_text' => __('Error importing product', 'prom-import'),
-		    'imported_text' => __('Imported', 'prom-import'),
+		    'importing_text' => esc_html(__('Importing...', 'prom-import')),
+		    'success_text' => esc_html(__('Successfully imported!', 'prom-import')),
+		    'error_text' => esc_html(__('Error importing product', 'prom-import')),
+		    'imported_text' => esc_html(__('Imported', 'prom-import')),
 		    'nonce' => wp_create_nonce('prom_importer_nonce')
 	    ]);
     }

@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'sinefineinfinitum/prom-import',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => 'de7ccede730baa759ab14130c7521b9f475cc8df',
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
+        'reference' => null,
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'sinefineinfinitum/prom-import' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => 'de7ccede730baa759ab14130c7521b9f475cc8df',
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
+            'reference' => null,
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

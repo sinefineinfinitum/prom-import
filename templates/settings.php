@@ -1,6 +1,6 @@
 <div class="wrap">
     <h1>
-        <?php echo __('Prom.ua Settings', 'prom-import') ?>
+        <?php echo esc_html(__('Prom.ua Settings', 'prom-import')) ?>
     </h1>
 
     <form action='options.php' method='post'>

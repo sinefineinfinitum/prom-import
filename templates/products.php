@@ -1,31 +1,31 @@
 <div class="wrap">
     <h1>
-        <?php echo __('Products Importer', 'prom-import') ?>
+        <?php echo esc_html(__('Products Importer', 'prom-import')) ?>
     </h1>
     <div class="white-padding importer">
         <ul>
             <li>
                 <?php
                 /* translators: %s: Total number of products */
-                printf(__('Total Products: %s', 'prom-import'), esc_html($total_products));
+                printf(esc_html(__('Total Products: %s', 'prom-import')), esc_html($total_products));
                 ?>
             </li>
             <li>
                 <?php
                 /* translators: %s: Total number of pages */
-                printf(__('Total Pages: %s', 'prom-import'), esc_html($totalpages));
+                printf(esc_html(__('Total Pages: %s', 'prom-import')), esc_html($totalpages));
                 ?>
             </li>
         </ul>
         <table class="wp-list-table widefat fixed striped">
             <thead>
             <tr>
-                <th><?php echo __('Thumbnail', 'prom-import') ?></th>
-                <th><?php echo __('Title', 'prom-import') ?></th>
-                <th><?php echo __('Category', 'prom-import') ?></th>
-                <th><?php echo __('Description', 'prom-import') ?></th>
-                <th><?php echo __('Price', 'prom-import') ?></th>
-                <th><?php echo __('Action', 'prom-import') ?></th>
+                <th><?php echo esc_html(__('Thumbnail', 'prom-import')) ?></th>
+                <th><?php echo esc_html(__('Title', 'prom-import')) ?></th>
+                <th><?php echo esc_html(__('Category', 'prom-import')) ?></th>
+                <th><?php echo esc_html(__('Description', 'prom-import')) ?></th>
+                <th><?php echo esc_html(__('Price', 'prom-import')) ?></th>
+                <th><?php echo esc_html(__('Action', 'prom-import')) ?></th>
             </tr>
             </thead>
             <tbody id="append-result">
@@ -56,7 +56,7 @@
                         if (!empty($product->category)) {
                             echo esc_html($product->category);
                         } else {
-                            echo __('Uncategorized', 'prom-import');
+                            echo esc_html(__('Uncategorized', 'prom-import'));
                         }
                         ?>
                     </td>
@@ -84,7 +84,7 @@
                             <a href="<?php echo esc_url(get_edit_post_link($product->existedId)); ?>"
                                style="background:green;color: white;"
                                class="button">
-                                <?php echo __('Edit Imported', 'prom-import') ?>
+                                <?php echo esc_html(__('Edit Imported', 'prom-import')) ?>
                             </a>
                         <?php } else { ?>
                             <a href="#"
@@ -98,7 +98,7 @@
 
                                data-nonce="<?php echo esc_attr(wp_create_nonce('prom_importer_nonce')); ?>"
                                class="import-product button-primary">
-                                <?php echo __('Import', 'prom-import') ?>
+                                <?php echo esc_html(__('Import', 'prom-import')) ?>
                             </a>
                         <?php } ?>
                     </td>

@@ -16,27 +16,30 @@ class ImportController
     {
         // Capability check
         if (! current_user_can('manage_options')) {
-            wp_send_json_error(['message' => __('Insufficient permissions', 'prom-import')]);
+            wp_send_json_error(['message' => esc_html(__('Insufficient permissions', 'prom-import'))]);
         }
 
         // Nonce check
         $nonce = isset($_REQUEST['nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['nonce'])) : '';
         if (! wp_verify_nonce($nonce, 'prom_importer_nonce')) {
-            wp_send_json_error(['message' => __('Security check failed', 'prom-import')]);
+            wp_send_json_error(['message' => esc_html(__('Security check failed', 'prom-import'))]);
         }
 
         // Collect and sanitize input
         $sku_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
         if ($sku_id <= 0) {
-            wp_send_json_error(['message' => __('Invalid Product ID', 'prom-import')]);
+            wp_send_json_error(['message' => esc_html(__('Invalid Product ID', 'prom-import'))]);
         }
 
         $title       = isset($_POST['product_title']) ? sanitize_text_field(wp_unslash($_POST['product_title'])) : '';
         $description = isset($_POST['product_description']) ? wp_kses_post(wp_unslash($_POST['product_description'])) : '';
-        $priceVal    = isset($_POST['product_price']) ? (float) wp_unslash($_POST['product_price']) : 0.0;
+        // Sanitize price input before casting
+        $priceVal    = isset($_POST['product_price'])
+            ? (float) sanitize_text_field(wp_unslash($_POST['product_price']))
+            : 0.0;
         $category    = isset($_POST['product_category']) ? sanitize_text_field(wp_unslash($_POST['product_category'])) : '';
-        $media       = isset($_POST['product_featured_media']) && json_decode(wp_unslash($_POST['product_featured_media']), true)
-            ? (array) json_decode(wp_unslash($_POST['product_featured_media']), true)
+        $media       = isset($_POST['product_featured_media']) && json_decode(sanitize_text_field(wp_unslash($_POST['product_featured_media'])), true)
+            ? (array) json_decode(sanitize_text_field(wp_unslash(($_POST['product_featured_media']))), true)
             : [];
 
         $dto = new ProductDto(
@@ -57,7 +60,7 @@ class ImportController
         }
 
         wp_send_json_success([
-            'message' => __('Successfully imported', 'prom-import'),
+            'message' => esc_html(__('Successfully imported', 'prom-import')),
             'url'     => get_edit_post_link($result, ''),
         ]);
     }

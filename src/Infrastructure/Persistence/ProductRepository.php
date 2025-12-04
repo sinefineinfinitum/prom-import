@@ -31,7 +31,6 @@ class ProductRepository
             'no_found_rows'          => true,
             'update_post_meta_cache' => false,
             'update_post_term_cache' => false,
-            'suppress_filters'       => true,
         ]);
 
         $postId = $query->have_posts() ? (int) $query->posts[0] : 0;
