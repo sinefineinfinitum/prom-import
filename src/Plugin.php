@@ -15,7 +15,7 @@ final class Plugin
 {
     public function boot(): void
     {
-        //Infrosructure
+        //Infrasructure
 	    $hooks = new HookRegistrar();
 
 
@@ -37,5 +37,13 @@ final class Plugin
 	    $hooks->addAction('admin_init', [$menu, 'register_settings']);
 	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue']);
 	    $hooks->addAction('wp_ajax_ajax_import_product', [$ajax, 'import']);
+	    $hooks->addFilter(
+		    'upload_mimes',
+		    function ($mimes) {
+			    $mimes['xml'] = 'application/xml';
+
+			    return $mimes;
+		    }
+		);
     }
 }
