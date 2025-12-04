@@ -29,13 +29,9 @@
             </tr>
             </thead>
             <tbody id="append-result">
-            <?php foreach ($products as $key => $product):?>
             <?php
-                /** @var \SineFine\PromImport\Application\Import\Dto\ProductDto $product */
-                if ($key > 20){
-                    break;
-                }
-                ?>
+            /** @var \SineFine\PromImport\Application\Import\Dto\ProductDto $product */
+            foreach ($products as $key => $product):?>
                 <tr>
                     <td class="text-center" width="150">
                         <?php if (!empty($product->mediaUrls)): ?>

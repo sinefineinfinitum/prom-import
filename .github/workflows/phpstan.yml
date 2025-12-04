@@ -15,26 +15,22 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: wordpress
+          MYSQL_DATABASE: wordpress
         ports:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
-    strategy:
-      matrix:
-        php: [ '8.0' ]
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
+          php-version: '8.1'
           tools: composer, cs2pr
-          extensions: zip
+          extensions: zip, simplexml
 
       - name: Update environment config for GitHub Actions
         env:
@@ -56,7 +52,7 @@ jobs:
 
       - name: Run composer install
         continue-on-error: true
-        run: composer install
+        run: composer install  --no-interaction --prefer-dist --no-progress
 
 #      - name: Create wpconfig ... the composer.json creation didn't work
 #        run: |
