@@ -7,4 +7,3 @@ parameters:
   reportUnmatchedIgnoredErrors: true
 includes:
   - vendor/szepeviktor/phpstan-wordpress/extension.neon
-  - vendor/szepeviktor/phpstan-wordpress/rules.neon
