@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Application\Import\Dto;
 
-use SineFine\PromImport\Application\Import\ValueObject\Price;
-use SineFine\PromImport\Application\Import\ValueObject\Sku;
+use SineFine\PromImport\Domain\Product\ValueObject\Price;
+use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 
 class ProductDto
 {

@@ -4,8 +4,8 @@ namespace SineFine\PromImport\Presentation\Ajax;
 
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
-use SineFine\PromImport\Application\Import\ValueObject\Sku;
-use SineFine\PromImport\Application\Import\ValueObject\Price;
+use SineFine\PromImport\Domain\Product\ValueObject\Sku;
+use SineFine\PromImport\Domain\Product\ValueObject\Price;
 
 class ImportController
 {

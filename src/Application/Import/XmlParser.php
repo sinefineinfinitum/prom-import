@@ -6,8 +6,8 @@ namespace SineFine\PromImport\Application\Import;
 
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
-use SineFine\PromImport\Application\Import\ValueObject\Price;
-use SineFine\PromImport\Application\Import\ValueObject\Sku;
+use SineFine\PromImport\Domain\Product\ValueObject\Price;
+use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SimpleXMLElement;
 
 class XmlParser

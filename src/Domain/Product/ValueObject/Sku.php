@@ -1,6 +1,8 @@
 <?php
 
-namespace SineFine\PromImport\Application\Import\ValueObject;
+declare(strict_types=1);
+
+namespace SineFine\PromImport\Domain\Product\ValueObject;
 
 class Sku
 {
