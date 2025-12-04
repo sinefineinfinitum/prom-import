@@ -3,6 +3,9 @@
 namespace SineFine\PromImport\Presentation\Ajax;
 
 use SineFine\PromImport\Application\Import\ImportService;
+use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Application\Import\ValueObject\Sku;
+use SineFine\PromImport\Application\Import\ValueObject\Price;
 
 class ImportController
 {
@@ -28,17 +31,26 @@ class ImportController
             wp_send_json_error(['message' => __('Invalid Product ID', 'prom-import')]);
         }
 
-        $payload = [
-            'title'          => isset($_POST['product_title']) ? sanitize_text_field(wp_unslash($_POST['product_title'])) : '',
-            'description'    => isset($_POST['product_description']) ? wp_kses_post(wp_unslash($_POST['product_description'])) : '',
-            'price'          => isset($_POST['product_price']) ? (float) wp_unslash($_POST['product_price']) : 0.0,
-            'category'       => isset($_POST['product_category']) ? sanitize_text_field(wp_unslash($_POST['product_category'])) : '',
-            'featured_media' => isset($_POST['product_featured_media']) && json_decode(wp_unslash($_POST['product_featured_media']), true)
-	            ? json_decode(wp_unslash($_POST['product_featured_media']), true)
-	            : [],
-        ];
+        $title       = isset($_POST['product_title']) ? sanitize_text_field(wp_unslash($_POST['product_title'])) : '';
+        $description = isset($_POST['product_description']) ? wp_kses_post(wp_unslash($_POST['product_description'])) : '';
+        $priceVal    = isset($_POST['product_price']) ? (float) wp_unslash($_POST['product_price']) : 0.0;
+        $category    = isset($_POST['product_category']) ? sanitize_text_field(wp_unslash($_POST['product_category'])) : '';
+        $media       = isset($_POST['product_featured_media']) && json_decode(wp_unslash($_POST['product_featured_media']), true)
+            ? (array) json_decode(wp_unslash($_POST['product_featured_media']), true)
+            : [];
 
-        $result = $this->service->importSingle($sku_id, $payload);
+        $dto = new ProductDto(
+            new Sku($sku_id),
+            $title,
+            $description,
+            new Price($priceVal),
+            $category !== '' ? $category : null,
+            [],
+            $media,
+            ''
+        );
+
+        $result = $this->service->importFromDto($dto);
 
         if (is_wp_error($result)) {
             wp_send_json_error(['message' => $result->get_error_message()]);
@@ -46,7 +58,6 @@ class ImportController
 
         wp_send_json_success([
             'message' => __('Successfully imported', 'prom-import'),
-			'payload' => $payload,
             'url'     => get_edit_post_link($result, ''),
         ]);
     }
