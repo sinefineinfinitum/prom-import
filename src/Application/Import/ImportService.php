@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Application\Import;
 
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
-use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
+use SineFine\PromImport\Domain\Product\Product;
+use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use WP_Error;
 
 class ImportService
 {
     public function __construct(
-        private ProductRepository $repository,
+        private ProductRepositoryInterface $repository,
     ) {
     }
 
@@ -27,7 +28,19 @@ class ImportService
             return new WP_Error('has no title', esc_html(__('Post has no title', 'prom-import')));
         }
 
-        $postId = $this->repository->upsertFromDto($dto);
+        // Map DTO to Domain entity
+        $product = new Product(
+            $dto->sku,
+            $dto->title,
+            $dto->description,
+            $dto->price,
+            $dto->category,
+            $dto->tags,
+            $dto->mediaUrls,
+            $dto->link
+        );
+
+        $postId = $this->repository->save($product);
         if (is_wp_error($postId)) {
             return $postId;
         }
