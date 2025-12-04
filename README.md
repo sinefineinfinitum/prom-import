@@ -1,4 +1,4 @@
- [![PHPStan ](https://img.shields.io/badge/PHPStan-Level%205%20-2a5ea7.svg)](https://github.com/szepeviktor/phpstan-wordpress)
+ [![PHPStan ](https://img.shields.io/badge/PHPStan-Level%206%20-2a5ea7.svg)](https://github.com/szepeviktor/phpstan-wordpress)
 
 
 ## Description

@@ -1,2 +1,10 @@
 parameters:
-    level: 8
+  level: 6
+  paths:
+    - src
+  inferPrivatePropertyTypeFromConstructor: true
+  checkMissingIterableValueType: true
+  reportUnmatchedIgnoredErrors: true
+includes:
+  - vendor/szepeviktor/phpstan-wordpress/extension.neon
+  - vendor/szepeviktor/phpstan-wordpress/rules.neon
