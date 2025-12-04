@@ -5,5 +5,3 @@ parameters:
   inferPrivatePropertyTypeFromConstructor: true
   checkMissingIterableValueType: true
   reportUnmatchedIgnoredErrors: true
-includes:
-  - vendor/szepeviktor/phpstan-wordpress/extension.neon
