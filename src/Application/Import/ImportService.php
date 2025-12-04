@@ -24,7 +24,7 @@ class ImportService
     public function importFromDto(ProductDto $dto): int|WP_Error
     {
         if (trim($dto->title) === '') {
-            return new WP_Error('has no title', __('Post has no title', 'prom-import'));
+            return new WP_Error('has no title', esc_html(__('Post has no title', 'prom-import')));
         }
 
         $postId = $this->repository->upsertFromDto($dto);

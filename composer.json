@@ -14,11 +14,6 @@
     "ext-simplexml": "*",
     "campo/random-user-agent": "*"
   },
-  "require-dev": {
-    "phpstan/extension-installer": "^1.4.3",
-    "szepeviktor/phpstan-wordpress": "^2.0.3",
-    "phpstan/phpstan": "^2.1"
-  },
   "autoload": {
     "psr-4": {
       "SineFine\\PromImport\\": "src/"
@@ -27,13 +22,7 @@
   "config": {
     "vendor-dir": "vendor",
     "allow-plugins": {
-      "composer/installers": true,
-      "phpstan/extension-installer": true
+      "composer/installers": true
     }
-  },
-  "scripts": {
-    "cs": [
-      "phpstan analyse --memory-limit 1G"
-    ]
   }
 }

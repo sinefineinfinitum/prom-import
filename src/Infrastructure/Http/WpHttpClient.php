@@ -32,7 +32,7 @@ class WpHttpClient
 		    if (str_contains($response->get_error_message(), 'cURL error 28')) {
                 return new WP_Error(
                     'timeout',
-                    __( 'Request timeout. The remote server is taking too long to respond.', 'prom-import' )
+	                esc_html(__('Request timeout. Server respond is too long.', 'prom-import'))
                 );
             }
             return $response;
@@ -61,7 +61,7 @@ class WpHttpClient
 		} catch ( Exception $e ) {
 			return new WP_Error(
 				'problem with user agent',
-				__( $e->getMessage(), 'prom-import' )
+				esc_html(__('Problem with user agent generation', 'prom-import'))
 			);
 		}
 	}
