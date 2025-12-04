@@ -6,8 +6,13 @@ namespace SineFine\PromImport\Infrastructure\Hooks;
 
 class HookRegistrar {
 
-	public function addAction(string $hook_name, callable $callback, int $priority = 10, int $accepted_args = 1): void
+	public function addAction(string $hookName, callable $callback, int $priority = 10, int $acceptedArgs = 1): void
 	{
-		add_action($hook_name, $callback, $priority = 10, $accepted_args = 1);
+		add_action($hookName, $callback, $priority = 10, $acceptedArgs = 1);
+	}
+
+	public function addFilter(string $hookName, callable $callback, int $priority = 10, int $acceptedArgs = 1): void
+	{
+		add_filter($hookName, $callback, $priority = 10, $acceptedArgs = 1);
 	}
 }
