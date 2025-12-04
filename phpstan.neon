@@ -3,5 +3,4 @@ parameters:
   paths:
     - src
   inferPrivatePropertyTypeFromConstructor: true
-  checkMissingIterableValueType: true
   reportUnmatchedIgnoredErrors: true

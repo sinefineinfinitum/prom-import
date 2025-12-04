@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport\Infrastructure\Persistence;
 
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
@@ -91,7 +93,7 @@ class ProductRepository
         // Featured image: use first available media url
         if (! empty($dto->mediaUrls)) {
             $first = reset($dto->mediaUrls);
-            if (is_string($first) && $first !== '') {
+            if ($first) {
                 $this->assignFeatureImageToProduct($first, (int) $postId, $dto->title);
             }
         }

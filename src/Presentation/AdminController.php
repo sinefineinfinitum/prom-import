@@ -21,7 +21,7 @@ class AdminController {
 
 	}
 
-	public function prom_settings_page_content()
+	public function prom_settings_page_content(): mixed
 	{
 		if (!current_user_can('manage_options')) {
    wp_die(__('You do not have sufficient permissions to access this page.', 'prom-import'));
@@ -51,7 +51,7 @@ class AdminController {
 //		if (isset($_GET['page_num'])) {
 //			// Verify nonce first before processing page_num
 //			if (!isset($_GET['_wpnonce'])
-//			    || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'wcapi_products_page')) {
+//			    || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'prom_products_page')) {
 //				echo '<div class="error notice"><p>'
 //				     . __('Security verification failed. Please try again.', 'prom-importer')
 //				     . '</p></div>';
@@ -121,16 +121,16 @@ class AdminController {
         );
 
 		// Create nonce for pagination links
-		//$nonce = wp_create_nonce('wcapi_products_page');
+		//$nonce = wp_create_nonce('prom_products_page');
 
 		return require_once( __DIR__ . "/../../templates/products.php");
 	}
-	function importer_section_callback() {
+	function importer_section_callback(): void {
   echo '<p>'
              . esc_html__('Please enter valid Prom.ua export URL you want to import from.', 'prom-import')
              . '</p>';
 	}
-	function url_setting_callback() {
+	function url_setting_callback(): void {
 		?>
 		<label>
             <input type='url'
