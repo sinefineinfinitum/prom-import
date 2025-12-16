@@ -1,6 +1,7 @@
+<?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
 <div class="wrap">
     <h1>
-        <?php echo esc_html(__('Prom.ua Settings', 'prom-import')) ?>
+        <?php echo esc_html(__('Prom.ua Settings', 'spss12-import-prom-woo')) ?>
     </h1>
 
     <form action='options.php' method='post'>

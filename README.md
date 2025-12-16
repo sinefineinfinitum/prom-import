@@ -57,5 +57,11 @@ Next tasks and improvements (public plan):
 
 ## Changelog
 
+= 0.0.2 (2025-12-15): =
+
+- WordPress tested 6.9
+- WooCommerce tested  10.3.6
+- PHPStan warning fixed
+
 = 0.0.1 (2025-12-04): =
 - First plugin's version

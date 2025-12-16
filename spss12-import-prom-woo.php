@@ -8,11 +8,12 @@
  * Plugin Uri:        https://wordpress.org/plugins/
  * Description:       Import products from prom.ua to woo
  * Version:           0.0.1
- * Author:            P Serg
+ * Author:            spss12
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       prom-import
+ * Text Domain:       spss12-import-prom-woo
  * Domain Path:       /languages
+ * Requires Plugins:  woocommerce
  */
 
 defined('ABSPATH') or die();

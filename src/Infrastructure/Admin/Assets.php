@@ -17,18 +17,18 @@ class Assets
 	    }
 
 		wp_enqueue_script(
-			'prom-importer-plugin',
+			'spss12-import-prom-woo-plugin',
 		    plugin_dir_url( __FILE__ ) . '/../../../../assets/js/plugin.js',
 			['jquery'],
 			'1.0.0',
 			true);
 
-	    wp_localize_script('prom-importer-plugin', 'promImporterAjaxObj', [
+	    wp_localize_script('spss12-import-prom-woo-plugin', 'promImporterAjaxObj', [
 		    'ajaxurl' => admin_url('admin-ajax.php'),
-		    'importing_text' => esc_html(__('Importing...', 'prom-import')),
-		    'success_text' => esc_html(__('Successfully imported!', 'prom-import')),
-		    'error_text' => esc_html(__('Error importing product', 'prom-import')),
-		    'imported_text' => esc_html(__('Imported', 'prom-import')),
+		    'importing_text' => esc_html(__('Importing...', 'spss12-import-prom-woo')),
+		    'success_text' => esc_html(__('Successfully imported!', 'spss12-import-prom-woo')),
+		    'error_text' => esc_html(__('Error importing product', 'spss12-import-prom-woo')),
+		    'imported_text' => esc_html(__('Imported', 'spss12-import-prom-woo')),
 		    'nonce' => wp_create_nonce('prom_importer_nonce')
 	    ]);
     }

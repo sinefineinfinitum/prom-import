@@ -12,23 +12,23 @@ class ImportController
     public function __construct(private ImportService $service)
     {}
 
-    public function import(): void
+    public function importProducts(): void
     {
         // Capability check
         if (! current_user_can('manage_options')) {
-            wp_send_json_error(['message' => esc_html(__('Insufficient permissions', 'prom-import'))]);
+            wp_send_json_error(['message' => esc_html(__('Insufficient permissions', 'spss12-import-prom-woo'))]);
         }
 
         // Nonce check
         $nonce = isset($_REQUEST['nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['nonce'])) : '';
         if (! wp_verify_nonce($nonce, 'prom_importer_nonce')) {
-            wp_send_json_error(['message' => esc_html(__('Security check failed', 'prom-import'))]);
+            wp_send_json_error(['message' => esc_html(__('Security check failed', 'spss12-import-prom-woo'))]);
         }
 
         // Collect and sanitize input
         $sku_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
         if ($sku_id <= 0) {
-            wp_send_json_error(['message' => esc_html(__('Invalid Product ID', 'prom-import'))]);
+            wp_send_json_error(['message' => esc_html(__('Invalid Product ID', 'spss12-import-prom-woo'))]);
         }
 
         $title       = isset($_POST['product_title']) ? sanitize_text_field(wp_unslash($_POST['product_title'])) : '';
@@ -60,8 +60,13 @@ class ImportController
         }
 
         wp_send_json_success([
-            'message' => esc_html(__('Successfully imported', 'prom-import')),
+            'message' => esc_html(__('Successfully imported', 'spss12-import-prom-woo')),
             'url'     => get_edit_post_link($result, ''),
         ]);
     }
+
+	public function importCategories(): void
+	{
+
+	}
 }
