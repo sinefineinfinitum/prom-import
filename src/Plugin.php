@@ -15,7 +15,7 @@ final class Plugin
 {
     public function boot(): void
     {
-        //Infrasructure
+        //Infrastructure
 	    $hooks = new HookRegistrar();
 
 
@@ -35,9 +35,9 @@ final class Plugin
         // Register hooks
         $hooks->addAction('admin_menu', [$menu, 'register']);
 	    $hooks->addAction('admin_init', [$menu, 'register_settings']);
-	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue']);
-	    $hooks->addAction('wp_ajax_ajax_spss12_import_products', [$ajax, 'importProducts']);
-	    $hooks->addAction('wp_ajax_ajax_spss12_import_categories', [$ajax, 'importCategories']);
+	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue'], 1);
+	    $hooks->addAction('wp_ajax_ajax_import_product', [$ajax, 'importProducts']);
+	    $hooks->addAction('wp_ajax_ajax_import_categories', [$ajax, 'importCategories']);
 	    $hooks->addFilter(
 		    'upload_mimes',
 		    function ($mimes) {

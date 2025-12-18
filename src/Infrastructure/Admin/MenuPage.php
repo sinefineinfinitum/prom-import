@@ -18,7 +18,7 @@ class MenuPage
 			    'spss12-import-prom-woo',
 			    [new AdminController(), 'prom_settings_page_content'],
 			    'dashicons-products',
-			    10
+			    11
 		    );
 
 		    add_submenu_page(

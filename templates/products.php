@@ -8,13 +8,13 @@
             <li>
                 <?php
                 /* translators: %s: Total number of products */
-                printf(esc_html(__('Total Products: %s', 'spss12-import-prom-woo')), esc_html($total_products));
+                printf(esc_html(__('Total Products: %s', 'spss12-import-prom-woo')), esc_html($totalProducts ?? 0));
                 ?>
             </li>
             <li>
                 <?php
                 /* translators: %s: Total number of pages */
-                printf(esc_html(__('Total Pages: %s', 'spss12-import-prom-woo')), esc_html($totalpages));
+                printf(esc_html(__('Total Pages: %s', 'spss12-import-prom-woo')), esc_html($totalPages ?? 1));
                 ?>
             </li>
         </ul>

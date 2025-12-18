@@ -1,11 +1,11 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
-<?php if ( $totalpages > 1 ) { ?>
+<?php if ( $totalPages > 1 ) { ?>
 <div class="tablenav">
     <div class="tablenav-pages">
         <span class="displaying-num">
             <?php
             /* translators: %d: Number of items */
-            printf( esc_html(__( '%d items', 'spss12-import-prom-woo' )), esc_html( $total_products ) );
+            printf( esc_html(__( '%d items', 'spss12-import-prom-woo' )), esc_html( $totalProducts ?? 1  ) );
             ?>
         </span>
         <span class="pagination-links">
@@ -28,11 +28,11 @@
                 <span class="tablenav-paging-text">
                     <?php
                     /* translators: 1: Current page number, 2: Total number of pages */
-                    printf( esc_html(__( '%1$s of %2$s', 'spss12-import-prom-woo')), esc_html( $page_num ), esc_html( $totalpages ) );
+                    printf( esc_html(__( '%1$s of %2$s', 'spss12-import-prom-woo')), esc_html( $page_num ), esc_html( $totalPages ) );
                     ?>
                 </span>
             </span>
-            <?php if ( $page_num < $totalpages ): ?>
+            <?php if ( $page_num < $totalPages ): ?>
                 <a class="next-page button"
                    href="<?php echo esc_url( add_query_arg( array(
 		               'page_num' => $next_num,

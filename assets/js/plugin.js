@@ -47,4 +47,55 @@
         $(this).text(promImporterAjaxObj.imported_text).removeClass('import-product').attr("data-nonce", '');
     });
 
+    function import_categories(nonce, btn) {
+        var mappings = [];
+
+        // Iterate each row in categories table
+        $('#categories-table tbody tr').each(function(index, row) {
+            var $row = $(row);
+            // Column 1 contains XML category id inside span
+            var xmlId = $.trim($row.find('td').eq(0).find('span').text());
+            // The select is in the 3rd column
+            var $select = $row.find('td').eq(2).find('select');
+            var selectedValue = $select.val(); // slug by default (value_field = 'slug')
+            var selectedTermId = $select.find('option:selected').attr('value');
+
+            if (xmlId !== '' && typeof selectedValue !== 'undefined') {
+                mappings.push({
+                    id: xmlId,          // Prom XML category id
+                    selected: selectedValue // Woo category (slug by current dropdown config)
+                });
+            }
+        });
+        console.log(mappings);
+
+        $.ajax({
+            url: promImporterAjaxObj.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'ajax_import_categories',
+                nonce: nonce,
+                categories: JSON.stringify(mappings)
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    btn
+                        .text(promImporterAjaxObj.saved_text)
+                        .removeClass('import-category')
+                        .attr('data-nonce', '')
+                        .prop('disabled', true);
+                }
+            },
+            error: function() {
+                alert('Request failed');
+            }
+        });
+    }
+
+    $('#import-categories').on('click', function(event) {
+        event.preventDefault();
+        var $btn = $(this);
+        import_categories($btn.attr('data-nonce'), $btn);
+    });
+
 })(jQuery);
