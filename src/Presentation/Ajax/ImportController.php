@@ -1,29 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport\Presentation\Ajax;
 
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
+use SineFine\PromImport\Presentation\BaseController;
 
-class ImportController
+class ImportController extends BaseController
 {
     public function __construct(private ImportService $service)
     {}
 
     public function importProducts(): void
     {
-        // Capability check
-        if (! current_user_can('manage_options')) {
-            wp_send_json_error(['message' => esc_html(__('Insufficient permissions', 'spss12-import-prom-woo'))]);
-        }
-
-        // Nonce check
-        $nonce = isset($_REQUEST['nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['nonce'])) : '';
-        if (! wp_verify_nonce($nonce, 'prom_importer_nonce')) {
-            wp_send_json_error(['message' => esc_html(__('Security check failed', 'spss12-import-prom-woo'))]);
-        }
+	    $this->checkUserPermission();
+		$this->checkNonce('prom_importer_nonce');
 
         // Collect and sanitize input
         $sku_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
@@ -67,14 +62,8 @@ class ImportController
 
 	public function importCategories(): void
 	{
-		if (! current_user_can('manage_options')) {
-			wp_send_json_error(['message' => esc_html(__('Insufficient permissions', 'spss12-import-prom-woo'))]);
-		}
-
-		$nonce = isset($_REQUEST['nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['nonce'])) : '';
-		if (! wp_verify_nonce($nonce, 'prom_importer_nonce')) {
-			wp_send_json_error(['message' => esc_html(__('Security check failed', 'spss12-import-prom-woo'))]);
-		}
+		$this->checkUserPermission();
+		$this->checkNonce('prom_importer_nonce');
 
 		$categories = json_decode(wp_unslash($_REQUEST['categories']), true);
 

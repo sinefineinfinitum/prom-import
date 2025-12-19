@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Presentation;
 
-use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
-use WP_Error;
 
-class AdminController {
+class AdminController extends BaseController {
 
     private WpHttpClient $httpClient;
     private XmlParser $xmlParser;
@@ -78,7 +76,7 @@ class AdminController {
 
         foreach ( $products as $product ) {
             $existedId = $this->productRepository->findIdBySkuId( $product->sku->value() );
-            $product->existedId = $existedId ? $existedId : null;
+            $product->existedId = $existedId ?: null;
         }
 
         $this->render(
@@ -120,50 +118,5 @@ class AdminController {
             <?php echo esc_html__( 'Enter Prom.ua export URL you want to import from', 'spss12-import-prom-woo' ); ?>
         </p>
         <?php
-    }
-
-    private function checkUserPermission(): void
-    {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html( __( 'You do not have sufficient permissions to access this page.', 'spss12-import-prom-woo' ) ) );
-        }
-    }
-
-    private function validateXml( mixed $xml): void
-    {
-        if ( ! $xml instanceof SimpleXMLElement ) {
-            echo '<div class="error notice"><p>'
-                 . esc_html( __( 'Failed to retrieve products data', 'spss12-import-prom-woo' ) )
-                 . '</p></div>';
-            wp_die();
-        }
-    }
-
-    private function validateResponse(array|WP_Error $response): void
-    {
-        if ( is_wp_error( $response ) ) {
-            if ( $response->get_error_code() === 'timeout' ) {
-                echo '<div class="error notice"><p>'
-                     . esc_html( __( 'Request timeout. The remote server is taking too long to respond.', 'spss12-import-prom-woo' ) )
-                     . '</p></div>';
-            } else {
-                echo '<div class="error notice"><p>'
-                     . esc_html( $response->get_error_message() )
-                     . '</p></div>';
-            }
-            wp_die();
-        }
-        if ( $response['response']['code'] != 200 ) {
-            echo '<div class="error notice"><p>'
-                 . esc_html(__('Failed to fetch products. Make sure website URL is set correctly.', 'spss12-import-prom-woo'))
-                 . '</p></div>';
-            wp_die();
-        }
-    }
-
-    private function render(string $template, array $vars = []): void
-    {
-        extract($vars, EXTR_SKIP);
-        require __DIR__ . "/../../templates/$template.php";
     }
 }
