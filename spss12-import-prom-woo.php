@@ -1,13 +1,13 @@
 <?php
 /**
- * @package           PromUaImport
- * @version           0.0.1
+ * @package           Spss12ImportPromWoo
+ * @version           0.0.3
  *
  * @wordpress-plugin
- * Plugin Name:       Prom.ua Products Importer for WooCommerce
- * Plugin Uri:        https://wordpress.org/plugins/
+ * Plugin Name:       spss21 Importer from Prom.ua to Woo
+ * Plugin Uri:        https://github.com/sinefineinfinitum/prom-import
  * Description:       Import products from prom.ua to woo
- * Version:           0.0.1
+ * Version:           0.0.3
  * Author:            spss12
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt

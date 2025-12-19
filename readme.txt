@@ -1,7 +1,7 @@
-=== Prom.ua Products Importer for WooCommerce ===
+=== spss21 Importer from Prom.ua to Woo ===
 Contributors: spss12
 Tags: woocommerce, products, prom.ua, importer, api
-Stable tag: 0.0.1
+Stable tag: 0.0.3
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 8.1

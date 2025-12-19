@@ -57,6 +57,10 @@ Next tasks and improvements (public plan):
 
 ## Changelog
 
+= 0.0.3 (2025-12-19): =
+
+- Save category mapping configuration 
+
 = 0.0.2 (2025-12-15): =
 
 - WordPress tested 6.9
