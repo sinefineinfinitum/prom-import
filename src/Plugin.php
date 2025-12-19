@@ -34,7 +34,8 @@ final class Plugin
 
         // Register hooks
         $hooks->addAction('admin_menu', [$menu, 'register']);
-	    $hooks->addAction('admin_init', [$menu, 'register_settings']);
+	    $hooks->addAction('admin_init', [$menu, 'register_setting_url' ]);
+	    $hooks->addAction('admin_init', [$menu, 'register_setting_categories' ]);
 	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue'], 1);
 	    $hooks->addAction('wp_ajax_ajax_import_product', [$ajax, 'importProducts']);
 	    $hooks->addAction('wp_ajax_ajax_import_categories', [$ajax, 'importCategories']);

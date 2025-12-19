@@ -44,19 +44,17 @@
 						</a>
 					</td>
                     <td>
-                        <?php
-                        $walker = new Walker;
-                        wp_dropdown_categories([
-                            'id' => 'category-'. $key,
-                            'type' => 'product',
-                            'taxonomy' => 'product_cat',
-                            'hide_if_empty' => true,
-                            'show_option_none' => 'None category',
-                            'hierarchical' => true,
-                            'value_field' => 'slug',
-                            'tab_index' => 1,
-                            'selected' => sanitize_title(sanitize_title($category->name), '', 'query'),
-                        ]); ?>
+                        <select name="cat" id="category-<?php echo $key; ?>" class="postform" tabindex="1">
+                            <option value="0">None category</option>
+                            <?php foreach ( $existingCategories as $existingCategory ) {
+                                $isSaved = $existingCategory->cat_ID == ($savedCategories[$category->id] ?? false);
+                                $isEqualName = sanitize_title(sanitize_title($category->name), '', 'query')
+                                               === $existingCategory->slug && !$isSaved; ?>
+                            <option class="level-<?php echo count( get_ancestors($existingCategory->id, 'category') ) ?>"
+                                    <?php if ( $isSaved OR $isEqualName ): ?>selected="selected"<?php endif; ?>
+                                    value="<?php echo $existingCategory->cat_ID; ?>"><?php echo $existingCategory->name ?></option>
+                            <?php }; ?>
+                        </select>
                     </td>
 				</tr>
 			<?php endforeach ?>

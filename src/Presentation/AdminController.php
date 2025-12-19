@@ -45,7 +45,18 @@ class AdminController {
         $this->validateXml( $xml );
         $categories = $this->xmlParser->parseCategories( $xml );
 
-        $this->render( 'categories', compact( 'categories',  ) );
+        $savedCategories = array_combine(
+                array_column(get_option('prom_categories_input'), 'id'),
+                array_column(get_option('prom_categories_input'), 'selected'),
+        );
+        $existingCategories = get_categories( [
+                'taxonomy'     => 'product_cat',
+                'show_count'   => 1,
+                'pad_counts'   => 0,
+                'hierarchical' => 1,
+        ] );
+
+        $this->render( 'categories', compact( 'categories', 'existingCategories', 'savedCategories' ) );
     }
 
     public function prom_products_importer(): void

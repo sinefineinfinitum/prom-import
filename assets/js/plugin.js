@@ -57,8 +57,7 @@
             var xmlId = $.trim($row.find('td').eq(0).find('span').text());
             // The select is in the 3rd column
             var $select = $row.find('td').eq(2).find('select');
-            var selectedValue = $select.val(); // slug by default (value_field = 'slug')
-            var selectedTermId = $select.find('option:selected').attr('value');
+            var selectedValue = $select.val();
 
             if (xmlId !== '' && typeof selectedValue !== 'undefined') {
                 mappings.push({
@@ -86,8 +85,8 @@
                         .prop('disabled', true);
                 }
             },
-            error: function() {
-                alert('Request failed');
+            error: function(response) {
+                alert(response.data.message);
             }
         });
     }

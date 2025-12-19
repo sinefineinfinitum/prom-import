@@ -41,7 +41,7 @@ class MenuPage
 	    }
     }
 
-    public function register_settings(): void
+    public function register_setting_url(): void
     {
 	    add_settings_section(
 		    'prom_importer_section',
@@ -65,4 +65,15 @@ class MenuPage
 		    'prom_importer_settings',
 		    'prom_importer_section');
     }
+
+	public function register_setting_categories(): void
+	{
+		register_setting(
+			'prom_importer_group',
+			'prom_categories_input',
+			[
+				'type' => 'array',
+				'default' => NULL,
+			]);
+	}
 }

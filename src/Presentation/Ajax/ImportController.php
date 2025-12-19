@@ -67,22 +67,27 @@ class ImportController
 
 	public function importCategories(): void
 	{
-		// Capability check
 		if (! current_user_can('manage_options')) {
 			wp_send_json_error(['message' => esc_html(__('Insufficient permissions', 'spss12-import-prom-woo'))]);
 		}
 
-		// Nonce check
 		$nonce = isset($_REQUEST['nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['nonce'])) : '';
 		if (! wp_verify_nonce($nonce, 'prom_importer_nonce')) {
 			wp_send_json_error(['message' => esc_html(__('Security check failed', 'spss12-import-prom-woo'))]);
 		}
 
-		// Collect and sanitize input
-		$categories = json_decode(sanitize_text_field(wp_unslash($_REQUEST['categories'])), true);
+		$categories = json_decode(wp_unslash($_REQUEST['categories']), true);
+
+		foreach ($categories as $category) {
+			if (! ctype_digit($category['id']) || !ctype_digit($category['selected']) ) {
+				wp_send_json_error(['message' => esc_html(__('Validation error', 'spss12-import-prom-woo'))]);
+			}
+		}
+		update_option( 'prom_categories_input', $categories);
 
 		wp_send_json_success([
 			'message' => esc_html(__('Successfully imported', 'spss12-import-prom-woo')),
+			'data' => get_option('prom_categories_input'),
 		]);
 	}
 }
