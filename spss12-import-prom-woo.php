@@ -4,7 +4,7 @@
  * @version           0.0.3
  *
  * @wordpress-plugin
- * Plugin Name:       spss21 Importer from Prom.ua to Woo
+ * Plugin Name:       spss12 Importer from Prom.ua to Woo
  * Plugin Uri:        https://github.com/sinefineinfinitum/prom-import
  * Description:       Import products from prom.ua to woo
  * Version:           0.0.3

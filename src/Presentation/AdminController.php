@@ -35,17 +35,20 @@ class AdminController extends BaseController {
         $xml          = simplexml_load_string( $responseBody );
 
         $this->validateXml( $xml );
-        $categories = $this->xmlParser->parseCategories( $xml );
+        $spssCategories = $this->xmlParser->parseCategories( $xml );
 
-        $savedCategories = $this->categoryMappingRepository->getCategoryMapping();
-        $existingCategories = get_categories( [
+        $spssSavedCategories = $this->categoryMappingRepository->getCategoryMapping();
+        $spssExistingCategories = get_categories( [
                 'taxonomy'     => 'product_cat',
                 'show_count'   => 1,
                 'pad_counts'   => 0,
                 'hierarchical' => 1,
         ] );
 
-        $this->render( 'categories', compact( 'categories', 'existingCategories', 'savedCategories' ) );
+        $this->render(
+			'categories',
+	        compact( 'spssCategories', 'spssExistingCategories', 'spssSavedCategories' )
+        );
     }
 
     public function prom_products_importer(): void
@@ -63,9 +66,9 @@ class AdminController extends BaseController {
         $totalPages     = 1;
         $totalProducts  = $this->xmlParser->getTotalProducts( $xml );
         $categories     = $this->xmlParser->parseCategories( $xml );
-        $products       = $this->xmlParser->parseProducts( $xml, $categories );
+        $spssProducts       = $this->xmlParser->parseProducts( $xml, $categories );
 
-        foreach ( $products as $product ) {
+        foreach ( $spssProducts as $product ) {
             $existedId = $this->productRepository->findIdBySkuId( $product->sku->value() );
             $product->existedId = $existedId ?: null;
             $product->categoryName = $product->category->id
@@ -76,7 +79,7 @@ class AdminController extends BaseController {
 
         $this->render(
             'products',
-            compact( 'products', 'categories', 'totalPages', 'totalProducts' )
+            compact( 'spssProducts', 'totalPages', 'totalProducts' )
         );
     }
 

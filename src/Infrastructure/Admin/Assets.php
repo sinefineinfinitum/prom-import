@@ -23,7 +23,7 @@ class Assets
 			'spss12-import-prom-woo-plugin-v2',
 			plugin_dir_url( __FILE__ ) . '/../../../../assets/js/plugin.js',
 			[ 'jquery' ],
-			date( "h:i:s" ), //'1.0.2'
+			'1.0.3',
 			[ 'in_footer' => true ]
 		);
 

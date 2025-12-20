@@ -36,7 +36,9 @@ class ImportController extends BaseController
         $priceVal    = isset($_POST['product_price'])
             ? (float) sanitize_text_field(wp_unslash($_POST['product_price']))
             : 0.0;
-        $externalCategoryId = isset($_POST['product_category']) ? sanitize_text_field(wp_unslash($_POST['product_category'])) : '';
+        $externalCategoryId = isset($_POST['product_category'])
+	        ? sanitize_text_field(wp_unslash($_POST['product_category']))
+	        : '';
         $media       = isset($_POST['product_featured_media']) && json_decode(sanitize_text_field(wp_unslash($_POST['product_featured_media'])), true)
             ? (array) json_decode(sanitize_text_field(wp_unslash(($_POST['product_featured_media']))), true)
             : [];
@@ -53,13 +55,11 @@ class ImportController extends BaseController
         );
 
         $productId = $this->service->importProductFromDto($dto);
-
         if (is_wp_error($productId)) {
             wp_send_json_error(['message' => $productId->get_error_message()]);
         }
 
 		$categoryId = $this->service->addCategoryForProduct((int) $productId, (int) $externalCategoryId);
-
 	    if (is_wp_error($categoryId)) {
 		    wp_send_json_error(['message' => $categoryId->get_error_message()]);
 	    }
@@ -74,8 +74,15 @@ class ImportController extends BaseController
 	{
 		$this->checkUserPermission();
 		$this->checkNonce('prom_importer_nonce');
+		if (empty($_REQUEST['categories'])) {
+			wp_send_json_error(['message' => esc_html(__('"сategories" is missing', 'spss12-import-prom-woo'))]);
+		}
 
-		$categories = json_decode(wp_unslash($_REQUEST['categories']), true);
+		$categories = json_decode(sanitize_text_field(wp_unslash($_REQUEST['categories'])), true);
+
+		if (!is_array($categories)) {
+			wp_send_json_error(['message' => esc_html(__('Invalid imported categories', 'spss12-import-prom-woo'))]);
+		}
 
 		foreach ($categories as $category) {
 			if (! ctype_digit($category['id']) || !ctype_digit($category['selected']) ) {

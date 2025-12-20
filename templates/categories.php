@@ -8,7 +8,7 @@
 			<li>
 				<?php
 				/* translators: %s: Total number of categories */
-				printf(esc_html(__('Total Categories: %s', 'spss12-import-prom-woo')), esc_html(count($categories)));
+				printf(esc_html(__('Total Categories: %s', 'spss12-import-prom-woo')), esc_html(count($spssCategories)));
 				?>
 			</li>
             <li>
@@ -30,29 +30,29 @@
 			</thead>
 			<tbody id="append-result">
 			<?php
-			/** @var \SineFine\PromImport\Application\Import\Dto\CategoryDto $category */
-			foreach ($categories as $key => $category):?>
+			/** @var \SineFine\PromImport\Application\Import\Dto\CategoryDto $spssCategory */
+			foreach ($spssCategories as $spssKey => $spssCategory):?>
 				<tr>
                     <td>
                         <span>
-                            <?php echo esc_html($category->id) ?>
+                            <?php echo esc_html($spssCategory->id) ?>
                         </span>
                     </td>
 					<td>
-						<a href="<?php echo esc_url($category->id) ?>" target="_blank">
-							<h3><?php echo esc_html($category->name) ?></h3>
+						<a href="<?php echo esc_url($spssCategory->id) ?>" target="_blank">
+							<h3><?php echo esc_html($spssCategory->name) ?></h3>
 						</a>
 					</td>
                     <td>
-                        <select name="cat" id="category-<?php echo $key; ?>" class="postform" tabindex="1">
+                        <select name="cat" id="category-<?php echo esc_html($spssKey); ?>" class="postform" tabindex="1">
                             <option value="0">None category</option>
-                            <?php foreach ( $existingCategories as $existingCategory ) {
-                                $isSaved = $existingCategory->cat_ID == ($savedCategories[$category->id] ?? false);
-                                $isEqualName = sanitize_title(sanitize_title($category->name), '', 'query')
-                                               === $existingCategory->slug && !$isSaved; ?>
-                            <option class="level-<?php echo count( get_ancestors($existingCategory->id, 'category') ) ?>"
-                                    <?php if ( $isSaved OR $isEqualName ): ?>selected="selected"<?php endif; ?>
-                                    value="<?php echo $existingCategory->cat_ID; ?>"><?php echo $existingCategory->name ?></option>
+                            <?php foreach ( $spssExistingCategories as $existingCategory ) {
+                                $spssIsSaved     = $existingCategory->cat_ID == ( $spssSavedCategories[$spssCategory->id] ?? false);
+                                $spssIsEqualName = sanitize_title(sanitize_title($spssCategory->name), '', 'query')
+                                                   === $existingCategory->slug && !$spssIsSaved; ?>
+                            <option class="level-<?php echo count( get_ancestors($existingCategory->id, 'spssCategory') ) ?>"
+                                    <?php if ( $spssIsSaved OR $spssIsEqualName ): ?>selected="selected"<?php endif; ?>
+                                    value="<?php echo esc_html($existingCategory->cat_ID); ?>"><?php echo esc_html($existingCategory->name); ?></option>
                             <?php }; ?>
                         </select>
                     </td>
