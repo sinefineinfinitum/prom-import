@@ -14,7 +14,6 @@ class AdminController extends BaseController {
     private WpHttpClient $httpClient;
     private XmlParser $xmlParser;
     private ProductRepository $productRepository;
-
     private CategoryMappingRepository $categoryMappingRepository;
 
     public function __construct() {
@@ -66,15 +65,16 @@ class AdminController extends BaseController {
         $totalPages     = 1;
         $totalProducts  = $this->xmlParser->getTotalProducts( $xml );
         $categories     = $this->xmlParser->parseCategories( $xml );
-        $spssProducts       = $this->xmlParser->parseProducts( $xml, $categories );
+        $spssProducts   = $this->xmlParser->parseProducts( $xml, $categories );
 
         foreach ( $spssProducts as $product ) {
             $existedId = $this->productRepository->findIdBySkuId( $product->sku->value() );
             $product->existedId = $existedId ?: null;
-            $product->categoryName = $product->category->id
-                                     && $this->categoryMappingRepository->mapping($product->category->id)
-	            ? $this->categoryMappingRepository->mapping($product->category->id)->name
-	            : "None";
+	        $product->categoryName = $product->category
+	                                 && $product->category->id
+	                                 && $this->categoryMappingRepository->mapping( $product->category->id )
+		        ? $this->categoryMappingRepository->mapping( $product->category->id )->name
+		        : "None";
         }
 
         $this->render(
