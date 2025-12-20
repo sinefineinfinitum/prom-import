@@ -6,6 +6,7 @@ namespace SineFine\PromImport\Presentation;
 
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
+use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 
 class AdminController extends BaseController {
@@ -14,20 +15,13 @@ class AdminController extends BaseController {
     private XmlParser $xmlParser;
     private ProductRepository $productRepository;
 
+    private CategoryMappingRepository $categoryMappingRepository;
+
     public function __construct() {
         $this->httpClient        = new WpHttpClient();
         $this->xmlParser         = new XmlParser();
         $this->productRepository = new ProductRepository();
-
-    }
-
-    public function prom_settings_page_content(): mixed
-    {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html(__( 'You do not have sufficient permissions to access this page.', 'spss12-import-prom-woo' )));
-        }
-
-        return require_once( __DIR__ . "/../../templates/settings.php" );
+        $this->categoryMappingRepository = new CategoryMappingRepository();
     }
 
     public function prom_categories_importer(): void
@@ -43,10 +37,7 @@ class AdminController extends BaseController {
         $this->validateXml( $xml );
         $categories = $this->xmlParser->parseCategories( $xml );
 
-        $savedCategories = array_combine(
-                array_column(get_option('prom_categories_input'), 'id'),
-                array_column(get_option('prom_categories_input'), 'selected'),
-        );
+        $savedCategories = $this->categoryMappingRepository->getCategoryMapping();
         $existingCategories = get_categories( [
                 'taxonomy'     => 'product_cat',
                 'show_count'   => 1,
@@ -77,6 +68,10 @@ class AdminController extends BaseController {
         foreach ( $products as $product ) {
             $existedId = $this->productRepository->findIdBySkuId( $product->sku->value() );
             $product->existedId = $existedId ?: null;
+            $product->categoryName = $product->category->id
+                                     && $this->categoryMappingRepository->mapping($product->category->id)
+	            ? $this->categoryMappingRepository->mapping($product->category->id)->name
+	            : "None";
         }
 
         $this->render(
@@ -96,27 +91,5 @@ class AdminController extends BaseController {
         }
 
         return $domain_url;
-    }
-
-    public function importer_section_callback(): void
-    {
-        echo '<p>'
-             . esc_html__( 'Please enter valid Prom.ua export URL you want to import from.', 'spss12-import-prom-woo' )
-             . '</p>';
-    }
-    public function url_setting_callback(): void
-    {
-        ?>
-        <label>
-            <input type='url'
-                   class="regular-text"
-                   name="prom_domain_url_input"
-                   value="<?php echo esc_url( get_option( 'prom_domain_url_input' ) ); ?>"
-                   placeholder="https://prom.ua/products_feed.xml?...">
-        </label>
-        <p class="description">
-            <?php echo esc_html__( 'Enter Prom.ua export URL you want to import from', 'spss12-import-prom-woo' ); ?>
-        </p>
-        <?php
     }
 }

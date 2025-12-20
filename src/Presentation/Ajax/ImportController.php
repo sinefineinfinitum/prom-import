@@ -8,12 +8,16 @@ use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
+use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Presentation\BaseController;
 
 class ImportController extends BaseController
 {
-    public function __construct(private ImportService $service)
-    {}
+    public function __construct(
+	    private ImportService $service,
+	    private CategoryMappingRepository $categoryMappingRepository,
+    ) {
+    }
 
     public function importProducts(): void
     {
@@ -32,7 +36,7 @@ class ImportController extends BaseController
         $priceVal    = isset($_POST['product_price'])
             ? (float) sanitize_text_field(wp_unslash($_POST['product_price']))
             : 0.0;
-        $category    = isset($_POST['product_category']) ? sanitize_text_field(wp_unslash($_POST['product_category'])) : '';
+        $externalCategoryId = isset($_POST['product_category']) ? sanitize_text_field(wp_unslash($_POST['product_category'])) : '';
         $media       = isset($_POST['product_featured_media']) && json_decode(sanitize_text_field(wp_unslash($_POST['product_featured_media'])), true)
             ? (array) json_decode(sanitize_text_field(wp_unslash(($_POST['product_featured_media']))), true)
             : [];
@@ -42,21 +46,27 @@ class ImportController extends BaseController
             $title,
             $description,
             new Price($priceVal),
-            $category !== '' ? $category : null,
+    null,
             [],
             $media,
             ''
         );
 
-        $result = $this->service->importFromDto($dto);
+        $productId = $this->service->importProductFromDto($dto);
 
-        if (is_wp_error($result)) {
-            wp_send_json_error(['message' => $result->get_error_message()]);
+        if (is_wp_error($productId)) {
+            wp_send_json_error(['message' => $productId->get_error_message()]);
         }
+
+		$categoryId = $this->service->addCategoryForProduct((int) $productId, (int) $externalCategoryId);
+
+	    if (is_wp_error($categoryId)) {
+		    wp_send_json_error(['message' => $categoryId->get_error_message()]);
+	    }
 
         wp_send_json_success([
             'message' => esc_html(__('Successfully imported', 'spss12-import-prom-woo')),
-            'url'     => get_edit_post_link($result, ''),
+            'url'     => get_edit_post_link($productId, ''),
         ]);
     }
 
@@ -72,7 +82,7 @@ class ImportController extends BaseController
 				wp_send_json_error(['message' => esc_html(__('Validation error', 'spss12-import-prom-woo'))]);
 			}
 		}
-		update_option( 'prom_categories_input', $categories);
+		$this->categoryMappingRepository->setCategoryMapping($categories);
 
 		wp_send_json_success([
 			'message' => esc_html(__('Successfully imported', 'spss12-import-prom-woo')),

@@ -77,10 +77,10 @@ class XmlParser
         $currency = (string) ($offer->currencyId ?? 'UAH');
         $price = new Price($priceVal, $currency);
 
-        $catName = '';
+        $categoryDto = null;
         $catId = isset($offer->categoryId) ? (int) $offer->categoryId : 0;
         if ($catId && isset($categories[$catId])) {
-            $catName = $categories[$catId]->name;
+            $categoryDto = $categories[$catId];
         }
 
         $media = [];
@@ -108,7 +108,7 @@ class XmlParser
             $name,
             $description,
             $price,
-            $catName ?: null,
+            $categoryDto,
             $tags,
             $media,
             $url

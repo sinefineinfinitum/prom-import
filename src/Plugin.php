@@ -6,6 +6,7 @@ use SineFine\PromImport\Infrastructure\Admin\Assets;
 use SineFine\PromImport\Infrastructure\Admin\MenuPage;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
+use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\XmlParser;
@@ -22,15 +23,16 @@ final class Plugin
 		// Build services
         $http    = new WpHttpClient();
         $parser  = new XmlParser();
-        $repo    = new ProductRepository();
-        $service = new ImportService($repo);
+        $productRepo = new ProductRepository();
+        $categoryMappingRepo = new CategoryMappingRepository();
+        $service = new ImportService($productRepo, $categoryMappingRepo);
 
         // Admin pages and assets (currently self-contained)
         $menu  = new MenuPage();
         $assets = new Assets();
 
         // AJAX controller uses new ImportService
-        $ajax = new ImportController($service);
+        $ajax = new ImportController($service, $categoryMappingRepo);
 
         // Register hooks
         $hooks->addAction('admin_menu', [$menu, 'register']);

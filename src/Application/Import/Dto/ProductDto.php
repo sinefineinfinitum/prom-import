@@ -18,7 +18,8 @@ class ProductDto
     public string $title;
     public string $description;
     public Price $price;
-    public ?string $category;
+    public ?CategoryDto $category;
+    public ?string $categoryName = null;
     /** @var string[] */
     public array $tags;
     /** @var string[] */
@@ -34,7 +35,7 @@ class ProductDto
         string $title,
         string $description,
         Price $price,
-        ?string $category = null,
+        ?CategoryDto $category = null,
         array $tags = [],
         array $mediaUrls = [],
         string $link = ''

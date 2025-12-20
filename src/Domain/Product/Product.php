@@ -24,7 +24,6 @@ class Product
         private string $link = ''
     ) {
         $this->title = trim($this->title);
-        $this->description = $this->description; // already sanitized at application layer
         $this->category = ($this->category !== null && $this->category !== '') ? $this->category : null;
     }
 

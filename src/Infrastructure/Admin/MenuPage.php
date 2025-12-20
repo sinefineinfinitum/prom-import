@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Infrastructure\Admin;
 
 use SineFine\PromImport\Presentation\AdminController;
+use SineFine\PromImport\Presentation\SettingController;
 
 class MenuPage
 {
@@ -16,7 +17,7 @@ class MenuPage
 			    esc_html(__('Prom Ua Importer', 'spss12-import-prom-woo')),
 			    'manage_options',
 			    'spss12-import-prom-woo',
-			    [new AdminController(), 'prom_settings_page_content'],
+			    [new SettingController(), 'prom_settings_page_content'],
 			    'dashicons-products',
 			    11
 		    );
@@ -46,7 +47,7 @@ class MenuPage
 	    add_settings_section(
 		    'prom_importer_section',
 		    esc_html(__('General Settings', 'spss12-import-prom-woo')),
-		    [new AdminController(), 'importer_section_callback'],
+		    [new SettingController(), 'importer_section_callback'],
 		    'prom_importer_settings');
 
 	    register_setting(
@@ -61,7 +62,7 @@ class MenuPage
 	    add_settings_field(
 		    'prom_domain_url_field',
 		    esc_html(__('Prom.ua export XML URL', 'spss12-import-prom-woo')),
-		    [new AdminController(), 'url_setting_callback' ],
+		    [new SettingController(), 'url_setting_callback' ],
 		    'prom_importer_settings',
 		    'prom_importer_section');
     }
