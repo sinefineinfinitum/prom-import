@@ -9,5 +9,5 @@ use WP_Term;
 interface CategoryMappingRepositoryInterface {
 	public function getCategoryMapping(): array;
 	public function setCategoryMapping(array $categoryMapping): void;
-	public function mapping(?int $externalId): WP_Term|array|false|null;
+	public function mapping(int $externalId): WP_Term|array|false|null;
 }

@@ -23,10 +23,10 @@ class CategoryMappingRepository implements CategoryMappingRepositoryInterface
 		update_option( self::CATEGORY_MAPPING_NAME, $categoryMapping);
 	}
 
-	public function mapping(?int $externalId): WP_Term|array|false|null
+	public function mapping(int $externalId): WP_Term|array|false|null
 	{
 		$categoryMapping = $this->getCategoryMapping();
-		return $externalId
+		return $externalId && $categoryMapping[$externalId]
 			? get_term_by( 'id', (int)$categoryMapping[$externalId], 'product_cat')
 			: null;
 	}
