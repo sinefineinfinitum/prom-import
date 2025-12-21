@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Application\Import;
 
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Domain\Category\Category;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Product\Product;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
@@ -33,12 +34,13 @@ class ImportService
         }
 
         // Map DTO to Domain entity
+        $category = $dto->category ? new Category($dto->category->id, $dto->category->name) : null;
         $product = new Product(
             $dto->sku,
             $dto->title,
             $dto->description,
             $dto->price,
-            $dto->category,
+            $category,
             $dto->tags,
             $dto->mediaUrls,
             $dto->link
