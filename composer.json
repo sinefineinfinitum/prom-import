@@ -17,11 +17,17 @@
   "require-dev": {
     "phpstan/extension-installer": "^1.4.3",
     "szepeviktor/phpstan-wordpress": "^2.0.3",
-    "phpstan/phpstan": "^2.1"
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^10.5"
   },
   "autoload": {
     "psr-4": {
       "SineFine\\PromImport\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SineFine\\PromImport\\Tests\\": "tests/"
     }
   },
   "config": {
@@ -34,6 +40,9 @@
   "scripts": {
     "cs": [
       "phpstan analyse --memory-limit 1G"
+    ],
+    "test": [
+      "@php vendor/bin/phpunit -c phpunit.xml.dist"
     ]
   }
 }
