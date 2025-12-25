@@ -6,27 +6,16 @@ namespace SineFine\PromImport\Presentation;
 
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
-use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
-use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
-use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
-use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
+use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
+use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 
 class AdminController extends BaseController {
-
-    private WpHttpClient $httpClient;
-    private XmlParser $xmlParser;
-    private XmlService $xmlService;
-    private ProductRepository $productRepository;
-    private CategoryMappingRepository $categoryMappingRepository;
-    private FeedRepository $feedRepository;
-
-    public function __construct() {
-        $this->httpClient        = new WpHttpClient();
-        $this->xmlParser         = new XmlParser();
-        $this->feedRepository    = new FeedRepository();
-		$this->xmlService        = new XmlService($this->httpClient, $this->feedRepository);
-        $this->productRepository = new ProductRepository();
-        $this->categoryMappingRepository = new CategoryMappingRepository();
+    public function __construct(
+		private XmlParser $xmlParser,
+		private XmlService $xmlService,
+		private ProductRepositoryInterface $productRepository,
+		private CategoryMappingRepositoryInterface $categoryMappingRepository,
+    ) {
     }
 
     public function prom_categories_importer(): void

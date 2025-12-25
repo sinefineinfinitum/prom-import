@@ -7,7 +7,7 @@
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'campo/random-user-agent' => array(
@@ -18,6 +18,48 @@
             'install_path' => __DIR__ . '/../campo/random-user-agent',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'laravel/serializable-closure' => array(
+            'pretty_version' => 'v2.0.7',
+            'version' => '2.0.7.0',
+            'reference' => 'cb291e4c998ac50637c7eeb58189c14f5de5b9dd',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../laravel/serializable-closure',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'php-di/invoker' => array(
+            'pretty_version' => '2.3.7',
+            'version' => '2.3.7.0',
+            'reference' => '3c1ddfdef181431fbc4be83378f6d036d59e81e1',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-di/invoker',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'php-di/php-di' => array(
+            'pretty_version' => '7.1.1',
+            'version' => '7.1.1.0',
+            'reference' => 'f88054cc052e40dbe7b383c8817c19442d480352',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-di/php-di',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'psr/container' => array(
+            'pretty_version' => '2.0.2',
+            'version' => '2.0.2.0',
+            'reference' => 'c71ecc56dfe541dbd90c5360474fbc405f8d5963',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/container',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'psr/container-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '^1.0',
+            ),
         ),
         'sinefineinfinitum/prom-import' => array(
             'pretty_version' => '1.0.0+no-version-set',

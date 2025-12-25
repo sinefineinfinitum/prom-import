@@ -6,16 +6,16 @@ namespace SineFine\PromImport\Presentation\Ajax;
 
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
-use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Presentation\BaseController;
 
 class ImportController extends BaseController
 {
     public function __construct(
 	    private ImportService $service,
-	    private CategoryMappingRepository $categoryMappingRepository,
+	    private CategoryMappingRepositoryInterface $categoryMappingRepository,
     ) {
     }
 

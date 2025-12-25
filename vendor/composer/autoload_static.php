@@ -6,10 +6,30 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit011ec4ef5bf808d417362e6695397c95
 {
+    public static $files = array (
+        'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'S' =>
         array (
             'SineFine\\PromImport\\' => 20,
+        ),
+        'P' =>
+        array (
+            'Psr\\Container\\' => 14,
+        ),
+        'L' =>
+        array (
+            'Laravel\\SerializableClosure\\' => 28,
+        ),
+        'I' =>
+        array (
+            'Invoker\\' => 8,
+        ),
+        'D' =>
+        array (
+            'DI\\' => 3,
         ),
         'C' =>
         array (
@@ -21,6 +41,22 @@ class ComposerStaticInit011ec4ef5bf808d417362e6695397c95
         'SineFine\\PromImport\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+        'Psr\\Container\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'Laravel\\SerializableClosure\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/laravel/serializable-closure/src',
+        ),
+        'Invoker\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/php-di/invoker/src',
+        ),
+        'DI\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/php-di/php-di/src',
         ),
         'Campo\\' =>
         array (

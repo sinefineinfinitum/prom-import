@@ -2,37 +2,29 @@
 
 namespace SineFine\PromImport;
 
+use DI\ContainerBuilder;
+use Exception;
 use SineFine\PromImport\Infrastructure\Admin\Assets;
 use SineFine\PromImport\Infrastructure\Admin\MenuPage;
+use SineFine\PromImport\Infrastructure\Container\ContainerConfig;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
-use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
-use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
-use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
-use SineFine\PromImport\Application\Import\ImportService;
-use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Presentation\Ajax\ImportController;
 
 final class Plugin
 {
-    public function boot(): void
+	/**
+	 * @throws Exception
+	 */
+	public function boot(): void
     {
-        //Infrastructure
-	    $hooks = new HookRegistrar();
+	    $builder = new ContainerBuilder();
+	    $builder->addDefinitions( ContainerConfig::getConfig() );
+		$container = $builder->build();
 
-
-		// Build services
-        $http    = new WpHttpClient();
-        $parser  = new XmlParser();
-        $productRepo = new ProductRepository();
-        $categoryMappingRepo = new CategoryMappingRepository();
-        $service = new ImportService($productRepo, $categoryMappingRepo);
-
-        // Admin pages and assets (currently self-contained)
-        $menu  = new MenuPage();
-        $assets = new Assets();
-
-        // AJAX controller uses new ImportService
-        $ajax = new ImportController($service, $categoryMappingRepo);
+	    $hooks  = $container->get( HookRegistrar::class );
+	    $menu   = $container->get( MenuPage::class );
+	    $assets = $container->get( Assets::class );
+	    $ajax   = $container->get( ImportController::class );
 
         // Register hooks
         $hooks->addAction('admin_menu', [$menu, 'register']);
@@ -41,13 +33,5 @@ final class Plugin
 	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue'], 1);
 	    $hooks->addAction('wp_ajax_ajax_import_product', [$ajax, 'importProducts']);
 	    $hooks->addAction('wp_ajax_ajax_import_categories', [$ajax, 'importCategories']);
-	    $hooks->addFilter(
-		    'upload_mimes',
-		    function ($mimes) {
-			    $mimes['xml'] = 'application/xml';
-
-			    return $mimes;
-		    }
-		);
     }
 }

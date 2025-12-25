@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Infrastructure\Admin;
 
 use SineFine\PromImport\Application\Import\XmlService;
-use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
-use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\SettingController;
 
 class MenuPage
 {
+	public function __construct(
+		private XmlService $xmlService,
+		private SettingController $settingController,
+		private AdminController $adminController
+	){}
     public function register(): void
     {
 	    if (is_admin()) {
@@ -20,7 +23,7 @@ class MenuPage
 			    esc_html(__('Prom Ua Importer', 'spss12-import-prom-woo')),
 			    'manage_options',
 			    'spss12-import-prom-woo',
-			    [new SettingController(), 'prom_settings_page_content'],
+			    [$this->settingController, 'prom_settings_page_content'],
 			    'dashicons-products',
 			    11
 		    );
@@ -31,7 +34,7 @@ class MenuPage
 			    esc_html(__('Categories Importer', 'spss12-import-prom-woo')),
 			    'manage_options',
 			    'prom-categories-importer',
-			    [new AdminController(), 'prom_categories_importer']
+			    [$this->adminController, 'prom_categories_importer']
 		    );
 
 		    add_submenu_page(
@@ -40,17 +43,18 @@ class MenuPage
 			    esc_html(__('Products Importer', 'spss12-import-prom-woo')),
 			    'manage_options',
 			    'prom-products-importer',
-			    [new AdminController(), 'prom_products_importer']
+			    [$this->adminController, 'prom_products_importer']
 		    );
 	    }
     }
 
-    public function register_setting_url(): void
-    {
+	public function register_setting_url(
+
+	): void {
 	    add_settings_section(
 		    'prom_importer_section',
 		    esc_html(__('General Settings', 'spss12-import-prom-woo')),
-		    [new SettingController(), 'importer_section_callback'],
+		    [$this->settingController, 'importer_section_callback'],
 		    'prom_importer_settings');
 
 	    register_setting(
@@ -58,17 +62,14 @@ class MenuPage
 		    'prom_domain_url_input',
 		    [
 			    'type' => 'string',
-			    'sanitize_callback' => [new XmlService(
-					new WpHttpClient(), new FeedRepository()),
-				    'sanitizeUrlAndSaveXml'
-			    ],
+			    'sanitize_callback' => [ $this->xmlService, 'sanitizeUrlAndSaveXml' ],
 			    'default' => NULL,
 		    ]);
 
 	    add_settings_field(
 		    'prom_domain_url_field',
 		    esc_html(__('Prom.ua export XML URL', 'spss12-import-prom-woo')),
-		    [new SettingController(), 'url_setting_callback' ],
+		    [$this->settingController, 'url_setting_callback' ],
 		    'prom_importer_settings',
 		    'prom_importer_section');
     }

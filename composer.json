@@ -12,7 +12,8 @@
   "require": {
     "php": ">=8.0",
     "ext-simplexml": "*",
-    "campo/random-user-agent": "*"
+    "campo/random-user-agent": "*",
+    "php-di/php-di": "^7.1"
   },
   "require-dev": {
     "phpstan/extension-installer": "^1.4.3",
