@@ -6,8 +6,22 @@ namespace SineFine\PromImport\Domain\Category;
 
 use WP_Term;
 
-interface CategoryMappingRepositoryInterface {
+interface CategoryMappingRepositoryInterface
+{
+	/**
+	 * @return array<int, string>
+	 */
 	public function getCategoryMapping(): array;
+
+	/**
+	 * @param array<int, array<string, int>> $categoryMapping
+	 */
 	public function setCategoryMapping(array $categoryMapping): void;
-	public function mapping(int $externalId): WP_Term|array|false|null;
+
+	/**
+	 * @param int $externalId
+	 *
+	 * @return WP_Term|false|null
+	 */
+	public function mapping(int $externalId): WP_Term|false|null;
 }

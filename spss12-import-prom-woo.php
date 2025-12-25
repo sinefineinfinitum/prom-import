@@ -23,6 +23,12 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
+// Check php version
+if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
+	deactivate_plugins( plugin_basename( __FILE__ ) );
+	wp_die( esc_html( __('This plugin requires PHP 8.0 or higher to function.' )));
+}
+
 // Bootstrap plugin via Plugin class
 add_action('plugins_loaded', static function () {
     if (class_exists('SineFine\\PromImport\\Plugin')) {
