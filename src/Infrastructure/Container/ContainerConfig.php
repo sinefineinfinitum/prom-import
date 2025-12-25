@@ -23,6 +23,10 @@ use function DI\create;
 use function DI\get;
 
 class ContainerConfig {
+
+	/**
+	 * @return array<string, object>
+	 */
 	public static function getConfig(): array
 	{
 		return [

@@ -36,4 +36,9 @@ class FakeProductRepository implements ProductRepositoryInterface
 	{
 		$this->galleryImages[] = [$url, $postId, $title];
 	}
+
+	public function findIdBySkuId( int $scuId ): int|false
+	{
+		// not needed yet
+	}
 }
