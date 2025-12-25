@@ -1,6 +1,4 @@
-name: Run PHPStan
-
-# Run PHPStan to annotate the code
+name: Run PHPStan & PhpUnit tests
 
 on:
   push:
@@ -48,17 +46,14 @@ jobs:
       - name: Configure MySQL
         run: |
           mysql -h 127.0.0.1 --port ${{ job.services.mysql.ports['3306'] }} -u root -ppassword -e "CREATE USER '"$TEST_DB_USER"'@'%' IDENTIFIED WITH mysql_native_password BY '"$TEST_DB_PASSWORD"';";
-#          mysql -h 127.0.0.1 --port ${{ job.services.mysql.ports['3306'] }} -u root -ppassword -e "CREATE DATABASE "$TEST_SITE_DB_NAME"; USE "$TEST_SITE_DB_NAME"; GRANT ALL PRIVILEGES ON "$TEST_SITE_DB_NAME".* TO '"$TEST_DB_USER"'@'%';";
 
       - name: Run composer install
         continue-on-error: true
         run: composer install  --no-interaction --prefer-dist --no-progress
 
-#      - name: Create wpconfig ... the composer.json creation didn't work
-#        run: |
-#          export $(grep -v '^#' .env.testing | xargs);
-#          sudo vendor/bin/wp config create --dbname=$TEST_SITE_DB_NAME --dbuser=$TEST_SITE_DB_USER --dbpass=$TEST_SITE_DB_PASSWORD --dbhost=127.0.0.1:${{ job.services.mysql.ports['3306'] }} --allow-root --extra-php="define( 'WP_DEBUG', true ); define( 'WP_DEBUG_LOG', true );"
-
       - name: Run PHPStan to add annotations to the code
         continue-on-error: true
         run: vendor/bin/phpstan analyse -c phpstan.neon --memory-limit 1G --no-progress --error-format=checkstyle | cs2pr
+
+      - name: Run PhpUnit
+        run: vendor/bin/phpunit -c phpunit.xml.dist
