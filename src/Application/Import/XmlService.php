@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport\Application\Import;
 
 use SimpleXMLElement;
@@ -15,7 +17,7 @@ class XmlService
 		private FeedRepositoryInterface $feedRepository
 	) {}
 
-	public function sanitizeUrlAndSaveXml( $url ): WP_Error|string
+	public function sanitizeUrlAndSaveXml( string $url ): WP_Error|string
 	{
 		$response   = $this->httpClient->get( $url );
 		$this->validateResponse( $response );
