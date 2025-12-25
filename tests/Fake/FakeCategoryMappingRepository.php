@@ -22,7 +22,7 @@ class FakeCategoryMappingRepository implements CategoryMappingRepositoryInterfac
 		$this->mapping = $categoryMapping;
 	}
 
-	public function mapping(int $externalId): WP_Term|array|false|null
+	public function mapping(int $externalId): WP_Term|false|null
 	{
 		return $externalId && $this->mapping[$externalId]
 			? $this->mapping[$externalId]
