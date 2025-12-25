@@ -31,9 +31,7 @@ class SettingController extends BaseController
 
 	public function prom_settings_page_content(): void
     {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html(__( 'You do not have sufficient permissions to access this page.', 'spss12-import-prom-woo' )));
-		}
+		$this->checkUserPermission();
 
 		$this->render( 'settings' );
 	}

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\Admin;
 
+use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
+use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\SettingController;
 
@@ -55,7 +58,10 @@ class MenuPage
 		    'prom_domain_url_input',
 		    [
 			    'type' => 'string',
-			    'sanitize_callback' => 'esc_url_raw',
+			    'sanitize_callback' => [new XmlService(
+					new WpHttpClient(), new FeedRepository()),
+				    'sanitizeUrlAndSaveXml'
+			    ],
 			    'default' => NULL,
 		    ]);
 
@@ -70,7 +76,7 @@ class MenuPage
 	public function register_setting_categories(): void
 	{
 		register_setting(
-			'prom_importer_group',
+			'prom_importer_group_category',
 			'prom_categories_input',
 			[
 				'type' => 'array',

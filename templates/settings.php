@@ -8,7 +8,7 @@
         <?php
         settings_fields('prom_importer_group');
         do_settings_sections('prom_importer_settings');
-        submit_button();
+        submit_button(esc_html__('Save Settings And Cache Xml', 'spss12-import-prom-woo'));
         ?>
     </form>
 </div>

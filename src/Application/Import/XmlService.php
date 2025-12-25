@@ -2,27 +2,54 @@
 
 namespace SineFine\PromImport\Application\Import;
 
-use JetBrains\PhpStorm\NoReturn;
 use SimpleXMLElement;
+use SineFine\PromImport\Domain\Feed\Feed;
+use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use WP_Error;
 
 class XmlService
 {
-	public function __construct(private WpHttpClient $httpClient)
-	{}
+	public function __construct(
+		private WpHttpClient $httpClient,
+		private FeedRepositoryInterface $feedRepository
+	) {}
+
+	public function sanitizeUrlAndSaveXml( $url ): WP_Error|string
+	{
+		$response   = $this->httpClient->get( $url );
+		$this->validateResponse( $response );
+
+		$responseBody = wp_remote_retrieve_body( $response );
+		$xml = simplexml_load_string( $responseBody );
+		$this->validateXml( $xml );
+
+		$feed = new Feed(
+			time(),
+			(string)parse_url($url, PHP_URL_HOST ),
+			$responseBody
+		);
+
+		$this->feedRepository->save($feed);
+		return esc_url_raw( $url );
+	}
 
 	public function getXml(): SimpleXMLElement|bool
 	{
-		$domain_url = self::getUrl();
-		$response   = $this->httpClient->get( $domain_url );
-
-		$this->validateResponse( $response );
-		$responseBody = wp_remote_retrieve_body( $response );
-		$xml          = simplexml_load_string( $responseBody );
-
+		$latestFeed = $this->feedRepository->getLatest();
+		$xml = simplexml_load_string( $latestFeed->content() );
 		$this->validateXml( $xml );
+
 		return $xml;
+	}
+	public static function getUrl(): mixed
+	{
+		$domain_url = get_option('prom_domain_url_input');
+		if ( empty( $domain_url ) ) {
+			self::renderInvalidResponse(__( 'Please configure the domain URL in settings first.', 'spss12-import-prom-woo' ) );
+		}
+
+		return $domain_url;
 	}
 
 	/**
@@ -42,35 +69,18 @@ class XmlService
 		}
 	}
 
-	private function renderInvalidResponse(string $responserText): void
+	public static function renderInvalidResponse(string $responseText): void
 	{
 		echo '<div class="error notice"><p>'
-		     . esc_html($responserText)
+		     . esc_html($responseText)
 		     . '</p></div>';
 		wp_die();
 	}
 
-	public static function getUrl(): mixed
-	{
-		$domain_url = get_option('prom_domain_url_input');
-		if ( empty( $domain_url ) ) {
-			echo '<div class="error notice"><p>'
-			     . esc_html( __( 'Please configure the domain URL in settings first.', 'spss12-import-prom-woo' ) )
-			     . '</p></div>';
-			wp_die();
-		}
-
-		return $domain_url;
-	}
-
-
 	private function validateXml( mixed $xml): void
 	{
 		if ( ! $xml instanceof SimpleXMLElement ) {
-			echo '<div class="error notice"><p>'
-			     . esc_html( __( 'Failed to retrieve products data', 'spss12-import-prom-woo' ) )
-			     . '</p></div>';
-			wp_die();
+			$this->renderInvalidResponse(__( 'Failed to retrieve products data', 'spss12-import-prom-woo' ) );
 		}
 	}
 }

@@ -8,6 +8,7 @@ use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
+use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 
 class AdminController extends BaseController {
@@ -17,11 +18,13 @@ class AdminController extends BaseController {
     private XmlService $xmlService;
     private ProductRepository $productRepository;
     private CategoryMappingRepository $categoryMappingRepository;
+    private FeedRepository $feedRepository;
 
     public function __construct() {
         $this->httpClient        = new WpHttpClient();
         $this->xmlParser         = new XmlParser();
-		$this->xmlService        = new XmlService($this->httpClient);
+        $this->feedRepository    = new FeedRepository();
+		$this->xmlService        = new XmlService($this->httpClient, $this->feedRepository);
         $this->productRepository = new ProductRepository();
         $this->categoryMappingRepository = new CategoryMappingRepository();
     }
