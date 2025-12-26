@@ -9,6 +9,7 @@ use SineFine\PromImport\Infrastructure\Admin\MenuPage;
 use SineFine\PromImport\Infrastructure\Container\ContainerConfig;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Presentation\Ajax\ImportController;
+use SineFine\PromImport\Application\Import\ImportBatchService;
 
 final class Plugin
 {
@@ -25,6 +26,7 @@ final class Plugin
 	    $menu   = $container->get( MenuPage::class );
 	    $assets = $container->get( Assets::class );
 	    $ajax   = $container->get( ImportController::class );
+	    $batch  = $container->get( ImportBatchService::class );
 
         // Register hooks
         $hooks->addAction('admin_menu', [$menu, 'register']);
@@ -33,5 +35,9 @@ final class Plugin
 	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue'], 1);
 	    $hooks->addAction('wp_ajax_ajax_import_product', [$ajax, 'importProducts']);
 	    $hooks->addAction('wp_ajax_ajax_import_categories', [$ajax, 'importCategories']);
+        $hooks->addAction('wp_ajax_ajax_import_products_async', [$ajax, 'importProductsAsync']);
+
+        // Background processing hook for Action Scheduler / WP-Cron
+        $hooks->addAction(ImportBatchService::HOOK_PROCESS_BATCH, [$batch, 'handleScheduledBatch']);
     }
 }

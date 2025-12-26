@@ -5,9 +5,11 @@ namespace SineFine\PromImport\Infrastructure\Container;
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Application\Import\ImportBatchService;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
+use SineFine\PromImport\Domain\Queue\TaskQueueInterface;
 use SineFine\PromImport\Infrastructure\Admin\Assets;
 use SineFine\PromImport\Infrastructure\Admin\MenuPage;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
@@ -15,6 +17,7 @@ use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
+use SineFine\PromImport\Infrastructure\Queue\ActionSchedulerTaskQueue;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\Ajax\ImportController;
 use SineFine\PromImport\Presentation\SettingController;
@@ -33,6 +36,7 @@ class ContainerConfig {
 			ProductRepositoryInterface::class         => autowire( ProductRepository::class ),
 			CategoryMappingRepositoryInterface::class => autowire( CategoryMappingRepository::class ),
 			FeedRepositoryInterface::class            => autowire( FeedRepository::class ),
+			TaskQueueInterface::class                 => autowire( ActionSchedulerTaskQueue::class ),
 
 			HookRegistrar::class => create( HookRegistrar::class ),
 			MenuPage::class      => create( MenuPage::class )
@@ -54,11 +58,17 @@ class ContainerConfig {
 					get( ProductRepositoryInterface::class ),
 					get( CategoryMappingRepositoryInterface::class )
 				),
+			ImportBatchService::class => autowire( ImportBatchService::class )
+				->constructor(
+					get( ImportService::class ),
+					get( TaskQueueInterface::class )
+				),
 
 			ImportController::class  => autowire( ImportController::class )
 				->constructor(
 					get( ImportService::class ),
-					get( CategoryMappingRepositoryInterface::class )
+					get( CategoryMappingRepositoryInterface::class ),
+					get( ImportBatchService::class ),
 				),
 			SettingController::class => autowire( SettingController::class ),
 			AdminController::class   => autowire( AdminController::class )
