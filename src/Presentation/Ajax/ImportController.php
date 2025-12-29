@@ -109,6 +109,7 @@ class ImportController extends BaseController
         $batchSize = isset($_REQUEST['batch_size']) ? max(1, (int) $_REQUEST['batch_size']) : 20;
         $delay     = isset($_REQUEST['delay']) ? max(0, (int) $_REQUEST['delay']) : 0;
         $result = $this->batchService->enqueue($dtos, $batchSize, $delay);
+
         wp_send_json_success([
             'message' => esc_html(__('Import scheduled', 'spss12-import-prom-woo')),
             'batches' => $result['batches'],

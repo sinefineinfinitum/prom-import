@@ -39,5 +39,14 @@ final class Plugin
 
         // Background processing hook for Action Scheduler / WP-Cron
         $hooks->addAction(ImportBatchService::HOOK_PROCESS_BATCH, [$batch, 'handleScheduledBatch']);
+		$hooks->addAction('init', function (){
+			as_schedule_recurring_action(
+				time(),
+				HOUR_IN_SECONDS,
+				ImportBatchService::HOOK_PROCESS_BATCH,
+				['items' => []],
+				'spss12_prom_import'
+			);
+		});
     }
 }
