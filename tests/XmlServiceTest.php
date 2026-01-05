@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Tests;
 
-use Exception;
+use Error;
 use PHPUnit\Framework\TestCase;
+use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Feed\Feed;
+use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Tests\Fake\FakeFeedRepository;
 use WP_Error;
@@ -15,15 +17,17 @@ use WP_Error;
 class XmlServiceTest extends TestCase
 {
     private $httpClient;
-    private $feedRepository;
-    private $xmlService;
+    private FakeFeedRepository $feedRepository;
+    private XmlService $xmlService;
+	private HookRegistrar $hooks;
 
-    protected function setUp(): void
+	protected function setUp(): void
     {
         $this->httpClient = $this->createMock(WpHttpClient::class);
-        $this->feedRepository = new FakeFeedRepository();
-        $this->xmlService = new XmlService($this->httpClient, $this->feedRepository);
-        
+        $this->feedRepository = new FakeFeedRepository([]);
+		$this->hooks = new HookRegistrar();
+        $this->xmlService = new XmlService($this->httpClient, $this->feedRepository, $this->hooks);
+
         global $wp_options;
         $wp_options = [];
     }
@@ -52,7 +56,6 @@ class XmlServiceTest extends TestCase
         $this->httpClient->method('get')->willReturn(new WP_Error('error', 'Something went wrong'));
 
         $this->expectOutputRegex('/Something went wrong/');
-        $this->expectException(Exception::class);
 
         $this->xmlService->sanitizeUrlAndSaveXml($url);
     }
@@ -66,7 +69,6 @@ class XmlServiceTest extends TestCase
         ]);
 
         $this->expectOutputRegex('/Failed to read xml/');
-        $this->expectException(Exception::class);
 
         $this->xmlService->sanitizeUrlAndSaveXml($url);
     }
@@ -80,7 +82,6 @@ class XmlServiceTest extends TestCase
         ]);
 
         $this->expectOutputRegex('/Failed to retrieve products data/');
-        $this->expectException(Exception::class);
 
         $this->xmlService->sanitizeUrlAndSaveXml($url);
     }
@@ -92,7 +93,7 @@ class XmlServiceTest extends TestCase
 
         $xml = $this->xmlService->getXml();
 
-        $this->assertInstanceOf(\SimpleXMLElement::class, $xml);
+        $this->assertInstanceOf( SimpleXMLElement::class, $xml);
         $this->assertSame('test', (string)$xml->item);
     }
 
@@ -105,7 +106,7 @@ class XmlServiceTest extends TestCase
         //     $latestFeed = $this->feedRepository->getLatest();
         //     $xml = simplexml_load_string( $latestFeed->content() );
         
-        $this->expectException(\Error::class); // or Exception if we fix the code, but for now it will be Error due to null member call
+        $this->expectException( Error::class); // or Exception if we fix the code, but for now it will be Error due to null member call
         $this->xmlService->getXml();
     }
 
@@ -114,7 +115,7 @@ class XmlServiceTest extends TestCase
         global $wp_options;
         $wp_options['prom_domain_url_input'] = 'https://example.com';
 
-        $this->assertSame('https://example.com', XmlService::getUrl());
+        $this->assertSame('https://example.com', $this->xmlService->getUrl());
     }
 
     public function test_getUrl_throws_exception_if_option_empty(): void
@@ -122,9 +123,8 @@ class XmlServiceTest extends TestCase
         global $wp_options;
         $wp_options['prom_domain_url_input'] = '';
 
-        $this->expectOutputRegex('/Please configure the domain URL in settings first/');
-        $this->expectException(Exception::class);
+        $this->expectOutputRegex('/Please configure the xml URL in settings first/');
 
-        XmlService::getUrl();
+        $this->xmlService->getUrl();
     }
 }

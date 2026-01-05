@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+global $wp_test_hooks;
+
+if(!is_array($wp_test_hooks)) {
+	$wp_test_hooks = [];
+}
+
 // Minimal WordPress function shims for unit testing environment
 if (!function_exists('esc_url_raw')) {
     function esc_url_raw(string $url): string
@@ -25,6 +31,20 @@ if (!function_exists('esc_html')) {
     {
         return $text;
     }
+}
+
+if (!function_exists('sanitize_title')) {
+	function sanitize_title(string $title): string
+	{
+		return $title;
+	}
+}
+
+if (!function_exists('esc_html__')) {
+	function esc_html__(string $text): string
+	{
+		return $text;
+	}
 }
 
 if (!class_exists('WP_Error')) {
@@ -61,7 +81,7 @@ if (!function_exists('is_wp_error')) {
 if (!function_exists('wp_remote_retrieve_body')) {
     function wp_remote_retrieve_body($response): string
     {
-        return $response['body'] ?? '';
+        return is_array($response) && $response['body'] ? $response['body'] : '';
     }
 }
 
@@ -93,4 +113,46 @@ if (!function_exists('term_exists')) {
     {
         return false;
     }
+}
+
+if (!function_exists('add_settings_error')) {
+	function add_settings_error(string $hoook, string $code, string $text, string $class): bool
+	{
+		return false;
+	}
+}
+
+if(!function_exists('add_filter')) {
+	function add_filter( $hook_name, $callback, $priority = 10, $accepted_args = 1 ): bool
+	{
+		global $wp_test_hooks;
+
+		$wp_test_hooks[$hook_name][] = [
+			$callback,
+			$priority,
+			$accepted_args,
+		];
+
+		return true;
+	}
+}
+
+if(!function_exists('add_action')) {
+	function add_action( $hook_name, $callback, $priority = 10, $accepted_args = 1 ): bool
+	{
+		return add_filter( $hook_name, $callback, $priority, $accepted_args );
+	}
+}
+
+if(!function_exists('do_action')){
+	function do_action( $hook_name, ...$arg ): void
+	{
+		global $wp_test_hooks;
+		if(array_key_exists($hook_name, $wp_test_hooks)){
+			foreach($wp_test_hooks[$hook_name] as $parts){
+				list($callback, $priority, $accepted_args) = $parts;
+				$callback(...$arg);
+			}
+		}
+	}
 }

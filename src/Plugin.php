@@ -33,5 +33,6 @@ final class Plugin
 	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue'], 1);
 	    $hooks->addAction('wp_ajax_ajax_import_product', [$ajax, 'importProducts']);
 	    $hooks->addAction('wp_ajax_ajax_import_categories', [$ajax, 'importCategories']);
+		$hooks->addAction( 'admin_notices', [$menu, 'settings_errors']);
     }
 }

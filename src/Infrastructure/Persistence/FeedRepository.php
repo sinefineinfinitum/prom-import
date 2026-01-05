@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\Persistence;
 
+use SineFine\PromImport\Application\Import\Dto\FeedDto;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 
@@ -32,13 +33,13 @@ class FeedRepository implements FeedRepositoryInterface
 		);
 	}
 
-	public function save(Feed $feed): void
+	public function save(FeedDto $feed): void
 	{
-		if (empty($feed->content())) {
+		if (empty($feed->content)) {
 			return;
 		}
 
-		$currentMd5 = md5($feed->content());
+		$currentMd5 = md5($feed->content);
 		$lastMd5    = $this->getLatest() && $this->getLatest()->content()
 			? md5($this->getLatest()->content())
 			: '';
@@ -48,9 +49,9 @@ class FeedRepository implements FeedRepositoryInterface
 		}
 
 		$dir      = $this->getUploadsDir();
-		$filePath = $dir . DIRECTORY_SEPARATOR . $feed->filename();
+		$filePath = $dir . DIRECTORY_SEPARATOR . $feed->domain . '_' . $feed->timestamp . '.xml';
 
-		if (file_put_contents($filePath, $feed->content()) !== false) {
+		if (file_put_contents($filePath, $feed->content) !== false) {
 			$this->clearOldFeeds();
 		}
 	}

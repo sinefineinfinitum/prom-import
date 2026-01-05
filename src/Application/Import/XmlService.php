@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Application\Import;
 
 use SimpleXMLElement;
-use SineFine\PromImport\Domain\Feed\Feed;
+use SineFine\PromImport\Application\Import\Dto\FeedDto;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
+use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use WP_Error;
 
@@ -14,25 +15,27 @@ class XmlService
 {
 	public function __construct(
 		private WpHttpClient $httpClient,
-		private FeedRepositoryInterface $feedRepository
+		private FeedRepositoryInterface $feedRepository,
+		private HookRegistrar $hooks,
 	) {}
 
 	public function sanitizeUrlAndSaveXml( string $url ): WP_Error|string
 	{
-		$response   = $this->httpClient->get( $url );
+		$response = $this->httpClient->get( $url );
 		$this->validateResponse( $response );
 
 		$responseBody = wp_remote_retrieve_body( $response );
-		$xml = simplexml_load_string( $responseBody );
+		$xml          = simplexml_load_string( $responseBody );
 		$this->validateXml( $xml );
 
-		$feed = new Feed(
+		$feedDto = new FeedDto(
 			time(),
-			(string)parse_url($url, PHP_URL_HOST ),
+			(string) parse_url( $url, PHP_URL_HOST ),
 			$responseBody
 		);
 
-		$this->feedRepository->save($feed);
+		$this->feedRepository->save( $feedDto );
+
 		return esc_url_raw( $url );
 	}
 
@@ -44,11 +47,11 @@ class XmlService
 
 		return $xml;
 	}
-	public static function getUrl(): mixed
+	public function getUrl(): mixed
 	{
 		$domain_url = get_option('prom_domain_url_input');
 		if ( empty( $domain_url ) ) {
-			self::renderInvalidResponse(__( 'Please configure the domain URL in settings first.', 'spss12-import-prom-woo' ) );
+			$this->renderInvalidResponse(__( 'Please configure the xml URL in settings first.', 'spss12-import-prom-woo' ) );
 		}
 
 		return $domain_url;
@@ -66,17 +69,21 @@ class XmlService
 				$this->renderInvalidResponse($response->get_error_message() );
 			}
 		}
-		if ( $response['response']['code'] != 200 ) {
+		else if ( $response['response']['code'] != 200 ) {
 			$this->renderInvalidResponse(__('Failed to read xml. Make sure website URL is set correctly.', 'spss12-import-prom-woo'));
 		}
 	}
 
-	public static function renderInvalidResponse(string $responseText): void
+	public function renderInvalidResponse(string $responseText): void
 	{
-		echo '<div class="error notice"><p>'
-		     . esc_html($responseText)
-		     . '</p></div>';
-		wp_die();
+		add_settings_error( 'prom_domain_url_input', sanitize_title($responseText), $responseText, 'notice-warning' );
+		$this->hooks->addAction(
+			'admin_notices',
+			function ( string $notice ) {
+				echo "<div class='notice notice-warning'><p>" . esc_html__( $notice ) . "</p></div>";
+			}
+		);
+		do_action( 'admin_notices', $responseText );
 	}
 
 	private function validateXml( mixed $xml): void

@@ -84,4 +84,9 @@ class MenuPage
 				'default' => NULL,
 			]);
 	}
+
+	public function settings_errors(): void
+	{
+		settings_errors( 'prom_domain_url_input' );
+	}
 }

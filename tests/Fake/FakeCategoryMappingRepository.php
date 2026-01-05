@@ -8,7 +8,7 @@ use WP_Term;
 
 class FakeCategoryMappingRepository implements CategoryMappingRepositoryInterface
 {
-	public function __construct(private mixed $mapping = [])
+	public function __construct(private array $mapping = [])
 	{
 	}
 
@@ -24,7 +24,7 @@ class FakeCategoryMappingRepository implements CategoryMappingRepositoryInterfac
 
 	public function mapping(int $externalId): WP_Term|false|null
 	{
-		return $externalId && $this->mapping[$externalId]
+		return $externalId && array_key_exists($externalId,$this->mapping)
 			? $this->mapping[$externalId]
 			: null;
 	}

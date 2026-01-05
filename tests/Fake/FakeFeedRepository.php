@@ -2,6 +2,7 @@
 
 namespace SineFine\PromImport\Tests\Fake;
 
+use SineFine\PromImport\Application\Import\Dto\FeedDto;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 
@@ -15,10 +16,10 @@ class FakeFeedRepository implements FeedRepositoryInterface
         return $this->latest;
     }
 
-    public function save(Feed $feed): void
+    public function save(FeedDto $feed): void
     {
-        $this->latest = $feed;
-        $this->savedFeeds[] = $feed;
+		$this->latest = new Feed($feed->timestamp, $feed->domain, $feed->content);
+        $this->savedFeeds[] = $this->latest;
     }
 
     public function setLatest(Feed $feed): void

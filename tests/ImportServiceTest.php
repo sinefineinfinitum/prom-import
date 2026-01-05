@@ -61,7 +61,7 @@ class ImportServiceTest extends TestCase
     public function test_addCategoryForProduct_returns_zero_when_no_mapping(): void
     {
         $repo = new FakeProductRepository(1);
-        $mapping = new FakeCategoryMappingRepository(null);
+        $mapping = new FakeCategoryMappingRepository([]);
         $service = new ImportService($repo, $mapping);
 
         $this->assertSame(0, $service->addCategoryForProduct(10, 999));
