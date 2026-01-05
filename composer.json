@@ -13,7 +13,8 @@
     "php": ">=8.0",
     "ext-simplexml": "*",
     "campo/random-user-agent": "*",
-    "php-di/php-di": "^7.1"
+    "php-di/php-di": "^7.1",
+    "psr/log": "*"
   },
   "require-dev": {
     "phpstan/extension-installer": "^1.4.3",

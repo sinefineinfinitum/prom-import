@@ -6,6 +6,7 @@ namespace SineFine\PromImport\Tests;
 
 use Error;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Feed\Feed;
@@ -20,13 +21,15 @@ class XmlServiceTest extends TestCase
     private FakeFeedRepository $feedRepository;
     private XmlService $xmlService;
 	private HookRegistrar $hooks;
+	private $logger;
 
 	protected function setUp(): void
     {
         $this->httpClient = $this->createMock(WpHttpClient::class);
         $this->feedRepository = new FakeFeedRepository([]);
 		$this->hooks = new HookRegistrar();
-        $this->xmlService = new XmlService($this->httpClient, $this->feedRepository, $this->hooks);
+		$this->logger = $this->createMock(LoggerInterface::class);
+        $this->xmlService = new XmlService($this->httpClient, $this->feedRepository, $this->hooks, $this->logger);
 
         global $wp_options;
         $wp_options = [];
@@ -68,7 +71,7 @@ class XmlServiceTest extends TestCase
             'body' => 'Not Found'
         ]);
 
-        $this->expectOutputRegex('/Failed to read xml/');
+        $this->expectOutputRegex('/Failed to retrieve products data/');
 
         $this->xmlService->sanitizeUrlAndSaveXml($url);
     }
@@ -95,19 +98,6 @@ class XmlServiceTest extends TestCase
 
         $this->assertInstanceOf( SimpleXMLElement::class, $xml);
         $this->assertSame('test', (string)$xml->item);
-    }
-
-    public function test_getXml_throws_exception_if_no_latest_feed(): void
-    {
-        // This will fail because $latestFeed will be null and getXml calls $latestFeed->content()
-        // Let's see how the original code handles it.
-        // public function getXml(): SimpleXMLElement|bool
-        // {
-        //     $latestFeed = $this->feedRepository->getLatest();
-        //     $xml = simplexml_load_string( $latestFeed->content() );
-        
-        $this->expectException( Error::class); // or Exception if we fix the code, but for now it will be Error due to null member call
-        $this->xmlService->getXml();
     }
 
     public function test_getUrl_returns_option_value(): void

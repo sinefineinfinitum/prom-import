@@ -20,7 +20,7 @@ class SettingController extends BaseController
 			<input type='url'
 			       class="regular-text"
 			       name="prom_domain_url_input"
-			       value="<?php echo esc_url( get_option( 'prom_domain_url_input' ) ); ?>"
+			       value="<?php echo esc_url( is_string(get_option( 'prom_domain_url_input' )) ? get_option( 'prom_domain_url_input' ) : '' ); ?>"
 			       placeholder="https://prom.ua/products_feed.xml?...">
 		</label>
 		<p class="description">

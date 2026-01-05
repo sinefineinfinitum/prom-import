@@ -17,6 +17,7 @@ class ComposerStaticInit011ec4ef5bf808d417362e6695397c95
         ),
         'P' =>
         array (
+            'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
         ),
         'L' =>
@@ -41,6 +42,10 @@ class ComposerStaticInit011ec4ef5bf808d417362e6695397c95
         'SineFine\\PromImport\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+        'Psr\\Log\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/src',
         ),
         'Psr\\Container\\' =>
         array (

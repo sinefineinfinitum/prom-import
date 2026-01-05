@@ -44,6 +44,7 @@ class FeedRepository implements FeedRepositoryInterface
 			? md5($this->getLatest()->content())
 			: '';
 
+		// save only new feed
 		if ($currentMd5 === $lastMd5) {
 			return;
 		}

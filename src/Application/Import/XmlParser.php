@@ -27,6 +27,9 @@ class XmlParser
     public function parseCategories(SimpleXMLElement $root): array
     {
         $result = [];
+		if (!$root->shop->categories) {
+			return $result;
+		}
         foreach ($root->shop->categories->category as $cat) {
             $id = isset($cat['id']) ? (int) $cat['id'] : 0;
             $name = trim((string) $cat);
@@ -43,6 +46,9 @@ class XmlParser
     public function parseProducts(SimpleXMLElement $root, array $categories = []): array
     {
         $products = [];
+	    if (!$root->shop->offers) {
+		    return $products;
+	    }
 
         foreach ($root->shop->offers->offer as $offer) {
             $dto = $this->mapOfferToProductDto($offer, $categories);
@@ -55,7 +61,7 @@ class XmlParser
 
 	public function getTotalProducts(SimpleXMLElement $xml): int
 	{
-		return $xml->shop->offers->offer->count() ? $xml->shop->offers->offer->count() : 0;
+		return $xml->shop?->offers?->offer?->count() ? $xml->shop->offers->offer->count() : 0;
 	}
 
     /**

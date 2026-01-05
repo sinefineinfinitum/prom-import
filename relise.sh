@@ -11,4 +11,4 @@ zip -r spss12-import-prom-woo.zip . -x ".*" \
  -x "tests/*" \
  -x "relise.sh" \
  -x "*/\.*"
- php composer.phar install
+ ## php composer.phar install

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Application\Import\ImportService;
@@ -16,11 +17,16 @@ use SineFine\PromImport\Tests\Fake\FakeProductRepository;
 
 class ImportServiceTest extends TestCase
 {
+	private function createService($repo, $mapping): ImportService
+	{
+		return new ImportService($repo, $mapping, $this->createMock(LoggerInterface::class));
+	}
+
     public function test_import_returns_error_when_title_is_empty(): void
     {
         $repo = new FakeProductRepository(123);
         $mapping = new FakeCategoryMappingRepository();
-        $service = new ImportService($repo, $mapping);
+        $service = $this->createService($repo, $mapping);
 
         $dto = new ProductDto(new Sku(1), '', 'desc', new Price(10));
         $res = $service->importProductFromDto($dto);
@@ -32,7 +38,7 @@ class ImportServiceTest extends TestCase
     {
         $repo = new FakeProductRepository(42);
         $mapping = new FakeCategoryMappingRepository();
-        $service = new ImportService($repo, $mapping);
+        $service = $this->createService($repo, $mapping);
 
         $dto = new ProductDto(
             new Sku(10),
@@ -62,7 +68,7 @@ class ImportServiceTest extends TestCase
     {
         $repo = new FakeProductRepository(1);
         $mapping = new FakeCategoryMappingRepository([]);
-        $service = new ImportService($repo, $mapping);
+        $service = $this->createService($repo, $mapping);
 
         $this->assertSame(0, $service->addCategoryForProduct(10, 999));
     }
@@ -71,7 +77,7 @@ class ImportServiceTest extends TestCase
     {
         $repo = new FakeProductRepository(1);
         $mapping = new FakeCategoryMappingRepository([777 => 777]);
-        $service = new ImportService($repo, $mapping);
+        $service = $this->createService($repo, $mapping);
 
         $res = $service->addCategoryForProduct(10, 2);
         $this->assertTrue($res === 0);

@@ -8,7 +8,6 @@ use WP_Error;
 
 class WpHttpClient
 {
-	private const CACHE_PROM_RESPONSE = "prom_response_v1_";
 	private const CACHE_TIMEOUT_SEC = 60;
     /**
      * @param array<string, mixed> $args
@@ -16,17 +15,13 @@ class WpHttpClient
      */
     public function get(string $url, array $args = []): array|WP_Error
     {
-	    $cacheKey = self::CACHE_PROM_RESPONSE . md5($url);
 		$args = array_merge($args,[
 		    'timeout' => self::CACHE_TIMEOUT_SEC,
 		    'user-agent' => $this->getRandomUserAgent(),
 		    'headers' => $this->getHeader(),
 	    ]);
 
-	    $response = wp_cache_get($cacheKey);
-	    if ($response === false) {
-		    $response = wp_remote_get($url, $args);
-	    }
+		$response = wp_remote_get($url, $args);
 
 	    if (is_wp_error($response)) {
 		    if (str_contains($response->get_error_message(), 'cURL error 28')) {
@@ -35,10 +30,7 @@ class WpHttpClient
 	                esc_html(__('Request timeout. Server respond is too long.', 'spss12-import-prom-woo'))
                 );
             }
-            return $response;
         }
-
-	    wp_cache_set($cacheKey, $response, '', 3600);
 
 	    return $response;
     }
