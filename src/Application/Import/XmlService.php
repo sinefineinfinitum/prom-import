@@ -8,8 +8,8 @@ use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\FeedDto;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
-use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
+use SineFine\PromImport\Presentation\AdminNotificationService;
 use WP_Error;
 
 class XmlService
@@ -17,7 +17,7 @@ class XmlService
 	public function __construct(
 		private WpHttpClient $httpClient,
 		private FeedRepositoryInterface $feedRepository,
-		private HookRegistrar $hooks,
+		private AdminNotificationService $notificationService,
 		private LoggerInterface $logger,
 	) {}
 
@@ -44,7 +44,7 @@ class XmlService
 
 			$this->feedRepository->save( $feedDto );
 		} else {
-			$this->renderNoticeResponse( 'Failed to retrieve products data' );
+			$this->notificationService->renderNoticeResponse( 'Failed to retrieve products data' );
 		}
 
 		return esc_url_raw( $url );
@@ -54,21 +54,18 @@ class XmlService
 	{
 		$latestFeed = $this->feedRepository->getLatest();
 		if ( ! $latestFeed ) {
-			$this->renderNoticeResponse( 'Last file with feed not found' );
+			$this->notificationService->renderNoticeResponse( 'Last file with feed not found' );
 
 			return new SimpleXMLElement('<item></item>');
 		} else {
-			$xml = simplexml_load_string( $latestFeed->content() );
-
-			return $xml;
+			return simplexml_load_string( $latestFeed->content() );
 		}
-;
 	}
 	public function getUrl(): mixed
 	{
 		$domain_url = get_option('prom_domain_url_input');
 		if ( empty( $domain_url ) ) {
-			$this->renderNoticeResponse( 'Please configure the xml URL in settings first.');
+			$this->notificationService->renderNoticeResponse( 'Please configure the xml URL in settings first.');
 		}
 
 		return $domain_url;
@@ -81,26 +78,13 @@ class XmlService
 	{
 		if ( is_wp_error( $response ) ) {
 			if ( $response->get_error_code() === 'timeout' ) {
-				$this->renderNoticeResponse('Request timeout. The remote server is taking too long to respond.');
+				$this->notificationService->renderNoticeResponse('Request timeout. The remote server is taking too long to respond.');
 			} else {
-				$this->renderNoticeResponse($response->get_error_message() );
+				$this->notificationService->renderNoticeResponse($response->get_error_message() );
 			}
 		}
 		else if ( $response['response']['code'] != 200 ) {
-			$this->renderNoticeResponse('Failed to read xml. Make sure website URL is set correctly.');
+			$this->notificationService->renderNoticeResponse('Failed to read xml. Make sure website URL is set correctly.');
 		}
-	}
-
-	public function renderNoticeResponse(string $responseText): void
-	{
-		add_settings_error( 'prom_domain_url_input', sanitize_title($responseText), $responseText, 'notice-warning' );
-		$this->hooks->addAction(
-			'spss12_admin_notices',
-			function ( string $notice ) {
-				echo "<div class='notice notice-warning'><p>" . esc_html__( $notice, 'spss12-import-prom-woo' ) . "</p></div>";
-			}
-		);
-		do_action( 'spss12_admin_notices', $responseText );
-		$this->logger->error( $responseText );
 	}
 }

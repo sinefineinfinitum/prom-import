@@ -5,6 +5,7 @@ namespace SineFine\PromImport\Infrastructure\Container;
 use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\XmlParser;
+use SineFine\PromImport\Application\Import\XmlParserInterface;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
@@ -44,6 +45,7 @@ class ContainerConfig {
 			LoggerInterface::class                    => autowire( WpLogger::class ),
 			HandlerInterface::class                   => autowire( FileHandler::class )
 			->constructor( get( 'logger.file' ) ),
+			XmlParserInterface::class => autowire( XmlParser::class ),
 
 			HookRegistrar::class => create( HookRegistrar::class ),
 			MenuPage::class      => create( MenuPage::class )
@@ -53,7 +55,6 @@ class ContainerConfig {
 					get( AdminController::class ),
 				),
 			Assets::class        => create( Assets::class ),
-			XmlParser::class     => create( XmlParser::class ),
 			WpHttpClient::class  => create( WpHttpClient::class ),
 			XmlService::class    => autowire( XmlService::class )
 				->constructor(

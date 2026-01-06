@@ -12,6 +12,7 @@ use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
+use SineFine\PromImport\Presentation\AdminNotificationService;
 use SineFine\PromImport\Tests\Fake\FakeFeedRepository;
 use WP_Error;
 
@@ -21,7 +22,8 @@ class XmlServiceTest extends TestCase
     private FakeFeedRepository $feedRepository;
     private XmlService $xmlService;
 	private HookRegistrar $hooks;
-	private $logger;
+	private LoggerInterface $logger;
+	private AdminNotificationService $notificationService;
 
 	protected function setUp(): void
     {
@@ -29,7 +31,16 @@ class XmlServiceTest extends TestCase
         $this->feedRepository = new FakeFeedRepository([]);
 		$this->hooks = new HookRegistrar();
 		$this->logger = $this->createMock(LoggerInterface::class);
-        $this->xmlService = new XmlService($this->httpClient, $this->feedRepository, $this->hooks, $this->logger);
+		$this->notificationService = new AdminNotificationService(
+			$this->hooks,
+			$this->logger,
+		);
+        $this->xmlService = new XmlService(
+			$this->httpClient,
+			$this->feedRepository,
+			$this->notificationService,
+			$this->logger
+        );
 
         global $wp_options;
         $wp_options = [];

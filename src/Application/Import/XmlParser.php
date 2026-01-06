@@ -10,7 +10,7 @@ use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SimpleXMLElement;
 
-class XmlParser
+class XmlParser implements XmlParserInterface
 {
     /**
      * Load XML string into SimpleXMLElement.
