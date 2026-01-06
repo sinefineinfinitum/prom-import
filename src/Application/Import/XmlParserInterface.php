@@ -7,9 +7,17 @@ namespace SineFine\PromImport\Application\Import;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 
 interface XmlParserInterface
 {
+    /**
+     * @param string $content
+     * @return void
+     * @throws InvalidXmlException
+     */
+    public function validateFormat(string $content): void;
+
     /**
      * @param SimpleXMLElement $root
      * @return array<int, CategoryDto>

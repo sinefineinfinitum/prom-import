@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Tests;
 
-use Error;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
+use SineFine\PromImport\Application\Import\XmlParserInterface;
 use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Exception\DownloadException;
+use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
@@ -19,6 +21,7 @@ use WP_Error;
 class XmlServiceTest extends TestCase
 {
     private $httpClient;
+    private $xmlParser;
     private FakeFeedRepository $feedRepository;
     private XmlService $xmlService;
 	private HookRegistrar $hooks;
@@ -28,6 +31,7 @@ class XmlServiceTest extends TestCase
 	protected function setUp(): void
     {
         $this->httpClient = $this->createMock(WpHttpClient::class);
+        $this->xmlParser = $this->createMock(XmlParserInterface::class);
         $this->feedRepository = new FakeFeedRepository([]);
 		$this->hooks = new HookRegistrar();
 		$this->logger = $this->createMock(LoggerInterface::class);
@@ -38,6 +42,7 @@ class XmlServiceTest extends TestCase
         $this->xmlService = new XmlService(
 			$this->httpClient,
 			$this->feedRepository,
+			$this->xmlParser,
 			$this->notificationService,
 			$this->logger
         );
@@ -56,6 +61,10 @@ class XmlServiceTest extends TestCase
             'body' => $xmlContent
         ]);
 
+        $this->xmlParser->expects($this->once())
+            ->method('validateFormat')
+            ->with($xmlContent);
+
         $result = $this->xmlService->sanitizeUrlAndSaveXml($url);
 
         $this->assertSame($url, $result);
@@ -64,40 +73,32 @@ class XmlServiceTest extends TestCase
         $this->assertSame('example.com', $this->feedRepository->getLatest()->domain());
     }
 
-    public function test_sanitizeUrlAndSaveXml_throws_exception_on_wp_error(): void
+    public function test_sanitizeUrlAndSaveXml_handles_download_exception(): void
     {
         $url = 'https://example.com/feed.xml';
-        $this->httpClient->method('get')->willReturn(new WP_Error('error', 'Something went wrong'));
+        $this->httpClient->method('get')->willReturn(new WP_Error('error', 'Network error'));
 
-        $this->expectOutputRegex('/Something went wrong/');
+        $result = $this->xmlService->sanitizeUrlAndSaveXml($url);
 
-        $this->xmlService->sanitizeUrlAndSaveXml($url);
+        $this->assertSame('', $result);
+        $this->assertCount(0, $this->feedRepository->savedFeeds);
     }
 
-    public function test_sanitizeUrlAndSaveXml_throws_exception_on_non_200_response(): void
-    {
-        $url = 'https://example.com/feed.xml';
-        $this->httpClient->method('get')->willReturn([
-            'response' => ['code' => 404],
-            'body' => 'Not Found'
-        ]);
-
-        $this->expectOutputRegex('/Failed to retrieve products data/');
-
-        $this->xmlService->sanitizeUrlAndSaveXml($url);
-    }
-
-    public function test_sanitizeUrlAndSaveXml_throws_exception_on_invalid_xml(): void
+    public function test_sanitizeUrlAndSaveXml_handles_invalid_xml_exception(): void
     {
         $url = 'https://example.com/feed.xml';
         $this->httpClient->method('get')->willReturn([
             'response' => ['code' => 200],
-            'body' => 'invalid xml'
+            'body' => 'invalid'
         ]);
 
-        $this->expectOutputRegex('/Failed to retrieve products data/');
+        $this->xmlParser->method('validateFormat')
+            ->willThrowException(new InvalidXmlException('Invalid XML'));
 
-        $this->xmlService->sanitizeUrlAndSaveXml($url);
+        $result = $this->xmlService->sanitizeUrlAndSaveXml($url);
+
+        $this->assertSame('', $result);
+        $this->assertCount(0, $this->feedRepository->savedFeeds);
     }
 
     public function test_getXml_returns_simplexmlelement_on_success(): void
@@ -124,7 +125,8 @@ class XmlServiceTest extends TestCase
         global $wp_options;
         $wp_options['prom_domain_url_input'] = '';
 
-        $this->expectOutputRegex('/Please configure the xml URL in settings first/');
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('XML URL is not configured');
 
         $this->xmlService->getUrl();
     }

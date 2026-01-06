@@ -12,7 +12,7 @@ class FileHandler implements HandlerInterface
 		$dir = wp_upload_dir()['basedir'] . DIRECTORY_SEPARATOR . dirname($filename);
 		if (!file_exists($dir)) {
 			$status = mkdir($dir, 0777, true);
-			if ($status === false && !is_dir($dir)) {
+				if ($status === false && !is_dir($dir)) {
 				throw new UnexpectedValueException(sprintf('There is no existing directory at "%s"', $dir));
 			}
 		}
@@ -22,6 +22,10 @@ class FileHandler implements HandlerInterface
 		                  . '.'
 		                  . pathinfo($filename, PATHINFO_EXTENSION);
 	}
+
+	/**
+	 * @param array<string, string> $vars
+	 */
 
 	public function handle(array $vars): void
 	{

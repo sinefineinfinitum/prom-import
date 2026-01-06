@@ -17,7 +17,9 @@ class BaseController {
 
 	protected function checkNonce(string $actionName): void
 	{
-		$nonce = isset($_REQUEST['nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['nonce'])) : '';
+		$nonce = isset($_REQUEST['nonce']) && is_string($_REQUEST['nonce'])
+			? sanitize_text_field(wp_unslash($_REQUEST['nonce']))
+			: '';
 		if (! wp_verify_nonce($nonce, $actionName)) {
 			wp_send_json_error(['message' => esc_html(__('Security check failed', 'spss12-import-prom-woo'))]);
 		}

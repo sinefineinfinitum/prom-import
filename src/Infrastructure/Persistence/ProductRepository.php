@@ -41,7 +41,9 @@ class ProductRepository implements ProductRepositoryInterface
             'update_post_term_cache' => false,
         ]);
 
-        $postId = $query->have_posts() ? (int) $query->posts[0] : 0;
+        $postId = $query->have_posts()
+	        ? (is_int($query->posts[0]) ? $query->posts[0] : $query->posts[0]->ID)
+	        : 0;
         wp_reset_postdata();
 
         return $postId > 0 ? $postId : false;

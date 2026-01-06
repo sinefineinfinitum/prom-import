@@ -23,6 +23,7 @@ use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\Ajax\ImportController;
 use SineFine\PromImport\Presentation\SettingController;
+use SineFine\PromImport\Presentation\AdminNotificationService;
 use function DI\autowire;
 use function DI\create;
 use function DI\get;
@@ -60,7 +61,8 @@ class ContainerConfig {
 				->constructor(
 					get( WpHttpClient::class ),
 					get( FeedRepositoryInterface::class ),
-					get( HookRegistrar::class ),
+					get( XmlParserInterface::class ),
+					get( AdminNotificationService::class ),
 					get( LoggerInterface::class )
 				),
 			ImportService::class => autowire( ImportService::class )

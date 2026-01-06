@@ -1,4 +1,4 @@
- [![PHPStan ](https://img.shields.io/badge/PHPStan-Level%206%20-2a5ea7.svg)](https://github.com/szepeviktor/phpstan-wordpress)
+ [![PHPStan ](https://img.shields.io/badge/PHPStan-Level%208%20-2a5ea7.svg)](https://github.com/szepeviktor/phpstan-wordpress)
 
 
 ## Description
@@ -33,29 +33,36 @@ Next tasks and improvements (public plan):
 - SKU uniqueness validation and conflict strategy.
 
 ### Static analyzers and code quality
-- PHPStan (phpstan.neon config already added) — increase strictness level, cover exceptions.
+- [x] PHPStan (phpstan.neon config already added) — increase strictness level, cover exceptions.
 - Psalm — add and integrate into CI.
 - PHP_CodeSniffer/PHPCS + WordPress Coding Standards.
 
 ### Testing and CI
-- Unit tests (Prom.ua API mocks).
+- [x] Unit tests.
 - WooCommerce integration tests (using a test database).
-- GitHub Actions: running tests, PHPStan/Psalm/PHPCS, collecting release artifacts.
+- [x] GitHub Actions: running tests, PHPStan/Psalm/PHPCS, collecting release artifacts.
 
 ### Performance and stability
 - Streaming processing of large responses (minimal memory usage).
-- Caching of immutable reference books/categories.
+- [x] Caching of immutable reference categories.
 - Timeout control, limiting simultaneous requests.
 
 ### UX and management
 - Interrupt/resume imports.
-- Detailed logs and report export (CSV/JSON).
+- [x] Detailed logs and report export (CSV/JSON).
 - Filters for selective imports (categories, price ranges, availability).
 
 ### Localization
 
 
 ## Changelog
+
+= 0.0.5 (2026-01-06): =
+- PHPStan strictness level increased to 8 and warnings fixed
+- Unit tests added
+- GitHub Actions added
+- DI Container added
+- Logging added
 
 = 0.0.3 (2025-12-19): =
 

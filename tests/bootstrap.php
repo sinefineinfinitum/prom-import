@@ -85,6 +85,15 @@ if (!function_exists('wp_remote_retrieve_body')) {
     }
 }
 
+if (!function_exists('wp_remote_retrieve_response_code')) {
+	function wp_remote_retrieve_response_code($response): int
+	{
+		return is_array($response) && $response['response']['code']
+			? (int) $response['response']['code']
+			: 200;
+	}
+}
+
 if (!function_exists('get_option')) {
     function get_option(string $option, $default = false)
     {

@@ -4,87 +4,103 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Application\Import;
 
+use Exception;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\FeedDto;
+use SineFine\PromImport\Domain\Exception\DownloadException;
+use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Presentation\AdminNotificationService;
-use WP_Error;
 
 class XmlService
 {
 	public function __construct(
 		private WpHttpClient $httpClient,
 		private FeedRepositoryInterface $feedRepository,
+		private XmlParserInterface $xmlParser,
 		private AdminNotificationService $notificationService,
 		private LoggerInterface $logger,
 	) {}
 
-	public function sanitizeUrlAndSaveXml( string $url ): WP_Error|string
+	public function sanitizeUrlAndSaveXml( string $url ): string
 	{
-		$response = $this->httpClient->get( $url );
-		if ( is_wp_error( $response ) ) {
-			$this->logger->error( 'Failed to fetch XML from {url}: {error}', [
-				'url' => $url,
-				'error' => $response->get_error_message()
-			] );
-			$this->validateResponse( $response );
-			return $response;
-		}
+		$oldValue = get_option( 'prom_domain_url_input' );
 
-		$responseBody = wp_remote_retrieve_body( $response );
-		$xml          = simplexml_load_string( $responseBody );
-		if ( $xml instanceof SimpleXMLElement ) {
-			$feedDto = new FeedDto(
-				time(),
-				(string) parse_url( $url, PHP_URL_HOST ),
-				$responseBody
-			);
+		try {
+			if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+				throw new InvalidArgumentException( 'Invalid URL provided' );
+			}
 
+			$responseBody = $this->downloadXmlContent( $url );
+			$this->xmlParser->validateFormat( $responseBody );
+
+			$feedDto = FeedDto::create( $url, $responseBody );
 			$this->feedRepository->save( $feedDto );
-		} else {
-			$this->notificationService->renderNoticeResponse( 'Failed to retrieve products data' );
+
+			return esc_url_raw( $url );
+
+		} catch ( Exception $e ) {
+			$this->notificationService->renderNoticeResponse( $e->getMessage(), 'notice-error' );
+			return is_string( $oldValue ) ? $oldValue : '';
 		}
-
-		return esc_url_raw( $url );
-	}
-
-	public function getXml(): SimpleXMLElement|bool
-	{
-		$latestFeed = $this->feedRepository->getLatest();
-		if ( ! $latestFeed ) {
-			$this->notificationService->renderNoticeResponse( 'Last file with feed not found' );
-
-			return new SimpleXMLElement('<item></item>');
-		} else {
-			return simplexml_load_string( $latestFeed->content() );
-		}
-	}
-	public function getUrl(): mixed
-	{
-		$domain_url = get_option('prom_domain_url_input');
-		if ( empty( $domain_url ) ) {
-			$this->notificationService->renderNoticeResponse( 'Please configure the xml URL in settings first.');
-		}
-
-		return $domain_url;
 	}
 
 	/**
-	 * @param array<string, object>|WP_Error $response
+	 * @throws DownloadException
 	 */
-	private function validateResponse(array|WP_Error $response): void
+	private function downloadXmlContent( string $url ): string
 	{
+		$response = $this->httpClient->get( $url );
+
 		if ( is_wp_error( $response ) ) {
-			if ( $response->get_error_code() === 'timeout' ) {
-				$this->notificationService->renderNoticeResponse('Request timeout. The remote server is taking too long to respond.');
-			} else {
-				$this->notificationService->renderNoticeResponse($response->get_error_message() );
-			}
+			$message = $response->get_error_message();
+			$this->logger->error( 'Failed to fetch XML from {url}: {error}', [
+				'url' => $url,
+				'error' => $message
+			] );
+			throw new DownloadException( $message );
 		}
-		else if ( $response['response']['code'] != 200 ) {
-			$this->notificationService->renderNoticeResponse('Failed to read xml. Make sure website URL is set correctly.');
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( $code !== 200 ) {
+			throw new DownloadException( sprintf( 'Failed to fetch XML. HTTP Code: %d', $code ) );
 		}
+
+		return wp_remote_retrieve_body( $response );
+	}
+
+	/**
+	 * @throws InvalidXmlException
+	 */
+	public function getXml(): SimpleXMLElement
+	{
+		$latestFeed = $this->feedRepository->getLatest();
+		if ( ! $latestFeed ) {
+			throw new RuntimeException( 'Feed not found' );
+		}
+
+		$xml = simplexml_load_string( $latestFeed->content() );
+		if ( ! $xml instanceof SimpleXMLElement ) {
+			throw new InvalidXmlException( 'Invalid XML' );
+		}
+
+		return $xml;
+	}
+
+	public function getUrl(): string
+	{
+		$url = get_option( 'prom_domain_url_input' );
+		if ( empty( $url ) ) {
+			throw new RuntimeException( 'XML URL is not configured' );
+		}
+		if ( ! is_string($url) || ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+			throw new InvalidArgumentException( 'Invalid XML URL provided' );
+		}
+
+		return $url;
 	}
 }

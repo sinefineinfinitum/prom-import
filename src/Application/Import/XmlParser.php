@@ -6,12 +6,45 @@ namespace SineFine\PromImport\Application\Import;
 
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SimpleXMLElement;
+use XMLReader;
 
 class XmlParser implements XmlParserInterface
 {
+    /**
+     * @inheritDoc
+     */
+    public function validateFormat(string $content): void
+    {
+        if (empty($content)) {
+            throw new InvalidXmlException('XML content is empty');
+        }
+
+        $reader = new XMLReader();
+        libxml_use_internal_errors(true);
+        if (!$reader->XML($content)) {
+            libxml_clear_errors();
+            throw new InvalidXmlException('Failed to load XML content');
+        }
+
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::ELEMENT) {
+                // Check for a basic root element or something familiar
+                // For Prom/Rozetka it's usually yml_catalog
+                if ($reader->name === 'yml_catalog' || $reader->name === 'shop') {
+                    $reader->close();
+                    return;
+                }
+            }
+        }
+
+        $reader->close();
+        throw new InvalidXmlException('Invalid XML structure: missing root element');
+    }
+
     /**
      * Load XML string into SimpleXMLElement.
      */
@@ -68,6 +101,7 @@ class XmlParser implements XmlParserInterface
      * Map a single <offer> item to ProductDto
      * @param SimpleXMLElement $offer
      * @param array<int, CategoryDto> $categories
+     * @return ProductDto|null
      */
     private function mapOfferToProductDto(SimpleXMLElement $offer, array $categories = []): ?ProductDto
     {
