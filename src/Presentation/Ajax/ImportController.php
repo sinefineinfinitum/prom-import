@@ -39,8 +39,8 @@ class ImportController extends BaseController
         $externalCategoryId = isset($_POST['product_category'])
 	        ? sanitize_text_field(wp_unslash($_POST['product_category']))
 	        : '';
-        $media       = isset($_POST['product_featured_media']) && json_decode(sanitize_text_field(wp_unslash($_POST['product_featured_media'])), true)
-            ? (array) json_decode(sanitize_text_field(wp_unslash(($_POST['product_featured_media']))), true)
+        $media       = isset($_POST['product_featured_media']) && json_decode(wp_unslash($_POST['product_featured_media']), true)
+            ? (array) json_decode(wp_unslash(($_POST['product_featured_media'])), true)
             : [];
 
         $dto = new ProductDto(
@@ -75,7 +75,7 @@ class ImportController extends BaseController
 		$this->checkUserPermission();
 		$this->checkNonce('prom_importer_nonce');
 		if (empty($_REQUEST['categories'])) {
-			wp_send_json_error(['message' => esc_html(__('"сategories" is missing', 'spss12-import-prom-woo'))]);
+			wp_send_json_error(['message' => esc_html(__('"categories" is missing', 'spss12-import-prom-woo'))]);
 		}
 
 		$categories = json_decode(sanitize_text_field(wp_unslash($_REQUEST['categories'])), true);
@@ -85,8 +85,11 @@ class ImportController extends BaseController
 		}
 
 		foreach ($categories as $category) {
-			if (! ctype_digit($category['id']) || !ctype_digit($category['selected']) ) {
-				wp_send_json_error(['message' => esc_html(__('Validation error', 'spss12-import-prom-woo'))]);
+			if (!isset($category['id'], $category['selected'])) {
+				wp_send_json_error(['message' => esc_html(__('Validation error: missing required fields', 'spss12-import-prom-woo'))]);
+			}
+			if (!ctype_digit((string)$category['id']) || !ctype_digit((string)$category['selected'])) {
+				wp_send_json_error(['message' => esc_html(__('Validation error: invalid numeric values', 'spss12-import-prom-woo'))]);
 			}
 		}
 		$this->categoryMappingRepository->setCategoryMapping($categories);

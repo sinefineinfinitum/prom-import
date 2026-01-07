@@ -45,7 +45,7 @@ class ContainerConfig {
 			FeedRepositoryInterface::class            => autowire( FeedRepository::class ),
 			LoggerInterface::class                    => autowire( WpLogger::class ),
 			HandlerInterface::class                   => autowire( FileHandler::class )
-			->constructor( get( 'logger.file' ) ),
+				->constructor( get( 'logger.file' ) ),
 			XmlParserInterface::class => autowire( XmlParser::class ),
 
 			HookRegistrar::class => create( HookRegistrar::class ),
@@ -71,6 +71,11 @@ class ContainerConfig {
 					get( CategoryMappingRepositoryInterface::class ),
 					get( LoggerInterface::class )
 				),
+			AdminNotificationService::class => autowire( AdminNotificationService::class )
+				->constructor(
+					get( HookRegistrar::class ),
+					get( LoggerInterface::class )
+				),
 
 			ImportController::class  => autowire( ImportController::class )
 				->constructor(
@@ -86,7 +91,7 @@ class ContainerConfig {
 					get( CategoryMappingRepositoryInterface::class ),
 				),
 
-			'logger.filepath'     => '/spss12-log',
+			'logger.filepath'     => WP_CONTENT_DIR . '/uploads/spss12-log',
 			'logger.file'     => string('{logger.filepath}/import-plugin.log'),
 		];
 	}

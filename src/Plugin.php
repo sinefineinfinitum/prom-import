@@ -19,6 +19,7 @@ final class Plugin
     {
 	    $builder = new ContainerBuilder();
 	    $builder->addDefinitions( ContainerConfig::getConfig() );
+	    $builder->enableCompilation(__DIR__ . '/../cache');
 		$container = $builder->build();
 
 	    $hooks  = $container->get( HookRegistrar::class );
