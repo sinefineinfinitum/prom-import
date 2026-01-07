@@ -37,16 +37,7 @@ class ImportService
 
         // Map DTO to Domain entity
         $category = $dto->category ? new Category($dto->category->id, $dto->category->name) : null;
-        $product = new Product(
-            $dto->sku,
-            $dto->title,
-            $dto->description,
-            $dto->price,
-            $category,
-            $dto->tags,
-            $dto->mediaUrls,
-            $dto->link
-        );
+	    $product = Product::createFromDto($dto, $category);
 
         $postId = $this->repository->save($product);
         if (is_wp_error($postId)) {

@@ -4,25 +4,34 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Presentation;
 
-use SimpleXMLElement;
-use WP_Error;
+use SineFine\PromImport\Presentation\Ajax\Middleware\MiddlewareInterface;
 
-class BaseController {
-	protected function checkUserPermission(): void
+class BaseController
+{
+	/** @var MiddlewareInterface[] */
+	private array $middlewares = [];
+
+	/**
+	 * Run all registered middlewares before executing controller action
+	 */
+	private function runMiddlewares(): void
 	{
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html( __( 'You do not have sufficient permissions to access this page.', 'spss12-import-prom-woo' ) ) );
+		foreach ($this->middlewares as $middleware) {
+			$middleware->handle();
 		}
 	}
 
-	protected function checkNonce(string $actionName): void
+	/**
+	 * @param MiddlewareInterface[] $middlewares
+	 */
+	public function setMiddlewares(array $middlewares): void
 	{
-		$nonce = isset($_REQUEST['nonce']) && is_string($_REQUEST['nonce'])
-			? sanitize_text_field(wp_unslash($_REQUEST['nonce']))
-			: '';
-		if (! wp_verify_nonce($nonce, $actionName)) {
-			wp_send_json_error(['message' => esc_html(__('Security check failed', 'spss12-import-prom-woo'))]);
-		}
+		$this->middlewares = $middlewares;
+	}
+
+	public function __invoke(): void
+	{
+		$this->runMiddlewares();
 	}
 
 	/**

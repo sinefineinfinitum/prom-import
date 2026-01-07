@@ -22,6 +22,8 @@ use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\Ajax\ImportController;
+use SineFine\PromImport\Presentation\Ajax\Middleware\AuthMiddleware;
+use SineFine\PromImport\Presentation\Ajax\Middleware\NonceMiddleware;
 use SineFine\PromImport\Presentation\SettingController;
 use SineFine\PromImport\Presentation\AdminNotificationService;
 use function DI\autowire;
@@ -31,12 +33,14 @@ use function DI\string;
 
 class ContainerConfig {
 
+	public const SPSS12_PLUGIN_DIRECTORY = 'spss12-import-prom-woo';
 	/**
 	 * @return array<string, mixed>
 	 */
 	public static function getConfig(): array
 	{
 		return [
+			//Interfaces
 			ProductRepositoryInterface::class         => autowire( ProductRepository::class )
 				->constructor(
 					get( LoggerInterface::class )
@@ -48,6 +52,7 @@ class ContainerConfig {
 				->constructor( get( 'logger.file' ) ),
 			XmlParserInterface::class => autowire( XmlParser::class ),
 
+			//Services
 			HookRegistrar::class => create( HookRegistrar::class ),
 			MenuPage::class      => create( MenuPage::class )
 				->constructor(
@@ -77,22 +82,41 @@ class ContainerConfig {
 					get( LoggerInterface::class )
 				),
 
+			// Middlewares
+			AuthMiddleware::class => create( AuthMiddleware::class ),
+			NonceMiddleware::class => create( NonceMiddleware::class )
+				->constructor( get('nonce.action' ) ),
+
+			// Controllers
 			ImportController::class  => autowire( ImportController::class )
 				->constructor(
 					get( ImportService::class ),
-					get( CategoryMappingRepositoryInterface::class )
+					get( CategoryMappingRepositoryInterface::class ),
+				)
+				->method( 'setMiddlewares',
+					[
+						get( AuthMiddleware::class ),
+						get( NonceMiddleware::class )
+					]
 				),
-			SettingController::class => autowire( SettingController::class ),
+			SettingController::class => autowire( SettingController::class )
+				->method( 'setMiddlewares',
+					[ get(AuthMiddleware::class),]
+				),
 			AdminController::class   => autowire( AdminController::class )
 				->constructor(
 					get( XmlParser::class ),
 					get( XmlService::class ),
 					get( ProductRepositoryInterface::class ),
 					get( CategoryMappingRepositoryInterface::class ),
+				)
+				->method( 'setMiddlewares',
+					[get(AuthMiddleware::class),]
 				),
 
 			'logger.filepath'     => WP_CONTENT_DIR . '/uploads/spss12-log',
 			'logger.file'     => string('{logger.filepath}/import-plugin.log'),
+			'nonce.action' => 'prom_importer_nonce',
 		];
 	}
 }

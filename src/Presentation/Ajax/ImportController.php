@@ -21,9 +21,6 @@ class ImportController extends BaseController
 
     public function importProducts(): void
     {
-	    $this->checkUserPermission();
-		$this->checkNonce('prom_importer_nonce');
-
         // Collect and sanitize input
         $sku_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
         if ($sku_id <= 0) {
@@ -72,8 +69,6 @@ class ImportController extends BaseController
 
 	public function importCategories(): void
 	{
-		$this->checkUserPermission();
-		$this->checkNonce('prom_importer_nonce');
 		if (empty($_REQUEST['categories'])) {
 			wp_send_json_error(['message' => esc_html(__('"categories" is missing', 'spss12-import-prom-woo'))]);
 		}

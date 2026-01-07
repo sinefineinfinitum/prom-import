@@ -20,8 +20,6 @@ class AdminController extends BaseController {
 
     public function prom_categories_importer(): void
     {
-	    $this->checkUserPermission();
-
 		$xml = $this->xmlService->getXml();
         $spssCategories = $this->xmlParser->parseCategories( $xml );
 
@@ -41,8 +39,6 @@ class AdminController extends BaseController {
 
     public function prom_products_importer(): void
     {
-        $this->checkUserPermission();
-
 	    $xml = $this->xmlService->getXml();
         $totalPages     = 1;
         $totalProducts  = $this->xmlParser->getTotalProducts( $xml );

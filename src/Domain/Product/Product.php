@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Domain\Product;
 
+use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Category\Category;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
@@ -37,4 +38,17 @@ class Product
     /** @return string[] */
     public function mediaUrls(): array { return $this->mediaUrls; }
     public function link(): string { return $this->link; }
+
+	public static function createFromDto(ProductDto $dto, ?Category $category = null): self
+	{
+		return new self(
+			$dto->sku,
+			$dto->title,
+			$dto->description,
+			$dto->price,
+			$category,
+			$dto->tags,
+			$dto->mediaUrls,
+			$dto->link);
+	}
 }
