@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SineFine\PromImport\Presentation\Ajax\Middleware;
+namespace SineFine\PromImport\Presentation\Middleware;
 
 class NonceMiddleware implements MiddlewareInterface
 {

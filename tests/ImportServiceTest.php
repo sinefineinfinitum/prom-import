@@ -46,7 +46,6 @@ class ImportServiceTest extends TestCase
             'Desc',
             new Price(9.99, 'USD'),
             new CategoryDto(5, 'Cat'),
-            ['t1'],
             ['https://img/1.jpg', 'https://img/2.jpg', 'https://img/3.jpg'],
             'https://example/item/10'
         );

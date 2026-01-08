@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Presentation;
 
-use SineFine\PromImport\Presentation\Ajax\Middleware\MiddlewareInterface;
+use SineFine\PromImport\Presentation\Middleware\MiddlewareInterface;
 
 class BaseController
 {

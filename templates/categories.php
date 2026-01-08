@@ -46,10 +46,13 @@
                     <td>
                         <select name="cat" id="category-<?php echo esc_html($spssKey); ?>" class="postform" tabindex="1">
                             <option value="0">None category</option>
-                            <?php foreach ( $spssExistingCategories as $existingCategory ) {
-                                $spssIsSaved     = $existingCategory->cat_ID == ( $spssSavedCategories[$spssCategory->id] ?? false);
-                                $spssIsEqualName = sanitize_title(sanitize_title($spssCategory->name), '', 'query')
-                                                   === $existingCategory->slug && !$spssIsSaved; ?>
+                            <?php
+                                $spssIsAlreadySelected = false;
+                                foreach ( $spssExistingCategories as $existingCategory ) {
+                                    $spssIsSaved     = $existingCategory->cat_ID == ( $spssSavedCategories[$spssCategory->id] ?? false);
+                                    if ($spssIsSaved) $spssIsAlreadySelected = true;
+                                    $spssIsEqualName = (sanitize_title(sanitize_title($spssCategory->name), '', 'query')
+                                                   === $existingCategory->slug) && !$spssIsSaved && !$spssIsAlreadySelected; ?>
                             <option class="level-<?php echo count( get_ancestors($existingCategory->id, 'spssCategory') ) ?>"
                                     <?php if ( $spssIsSaved OR $spssIsEqualName ): ?>selected="selected"<?php endif; ?>
                                     value="<?php echo esc_html($existingCategory->cat_ID); ?>"><?php echo esc_html($existingCategory->name); ?></option>

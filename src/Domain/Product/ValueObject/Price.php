@@ -24,4 +24,9 @@ class Price
     {
         return $this->currency;
     }
+
+	public static function create(float $amount, string $currency = 'UAH'): self
+	{
+		return new self($amount, $currency);
+	}
 }

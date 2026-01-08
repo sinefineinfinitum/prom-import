@@ -57,6 +57,9 @@ Next tasks and improvements (public plan):
 
 ## Changelog
 
+= 0.0.6 (2026-01-08): =
+- From Ajax to Rest API controller
+
 = 0.0.5 (2026-01-06): =
 - PHPStan strictness level increased to 8 and warnings fixed
 - Unit tests added

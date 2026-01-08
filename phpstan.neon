@@ -4,3 +4,6 @@ parameters:
     - src
   inferPrivatePropertyTypeFromConstructor: true
   reportUnmatchedIgnoredErrors: true
+  ignoreErrors:
+    -
+      identifier: constant.notFound

@@ -89,7 +89,6 @@ XML;
         $this->assertSame('USD', $p1->price->currency());
         $this->assertNotNull($p1->category);
         $this->assertSame(1, $p1->category->id);
-        $this->assertSame(['phone', 'android', '5g'], $p1->tags);
         $this->assertSame([
             'https://img.example/a.jpg',
             'https://img.example/b.jpg',

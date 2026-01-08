@@ -12,7 +12,6 @@ use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 class Product
 {
     /**
-     * @param string[] $tags
      * @param string[] $mediaUrls
      */
     public function __construct(
@@ -21,7 +20,6 @@ class Product
         private string $description,
         private Price $price,
         private ?Category $category = null,
-        private array $tags = [],
         private array $mediaUrls = [],
         private string $link = ''
     ) {
@@ -34,8 +32,6 @@ class Product
     public function price(): Price { return $this->price; }
     public function category(): ?Category { return $this->category; }
     /** @return string[] */
-    public function tags(): array { return $this->tags; }
-    /** @return string[] */
     public function mediaUrls(): array { return $this->mediaUrls; }
     public function link(): string { return $this->link; }
 
@@ -47,7 +43,6 @@ class Product
 			$dto->description,
 			$dto->price,
 			$category,
-			$dto->tags,
 			$dto->mediaUrls,
 			$dto->link);
 	}

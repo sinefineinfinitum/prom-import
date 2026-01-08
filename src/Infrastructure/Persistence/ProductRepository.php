@@ -179,7 +179,10 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function assignFeatureImageToProduct(string $url, int $postId, string $title = ''): void
     {
-        $attachmentId = media_sideload_image($url, $postId, $title, 'id');
+        include_once ABSPATH . 'wp-admin/includes/media.php';
+        include_once ABSPATH . 'wp-admin/includes/file.php';
+        include_once ABSPATH . 'wp-admin/includes/image.php';
+		$attachmentId = media_sideload_image($url, $postId, $title, 'id');
         if (! is_wp_error($attachmentId) && is_numeric($attachmentId)) {
             set_post_thumbnail($postId, (int) $attachmentId);
         } elseif (is_wp_error($attachmentId)) {
@@ -193,6 +196,9 @@ class ProductRepository implements ProductRepositoryInterface
 
 	public function addImageToProductGallery(string $url, int $postId, string $title = ''): void
 	{
+		include_once ABSPATH . 'wp-admin/includes/media.php';
+		include_once ABSPATH . 'wp-admin/includes/file.php';
+		include_once ABSPATH . 'wp-admin/includes/image.php';
 		$attachmentId = media_sideload_image($url, $postId, $title, 'id');
 		if (is_wp_error($attachmentId)) {
 			$this->logger->error('Failed to sideload gallery image from {url} for product {post_id}: {error}', [

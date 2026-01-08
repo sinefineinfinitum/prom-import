@@ -21,11 +21,11 @@ use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Presentation\AdminController;
-use SineFine\PromImport\Presentation\Ajax\ImportController;
-use SineFine\PromImport\Presentation\Ajax\Middleware\AuthMiddleware;
-use SineFine\PromImport\Presentation\Ajax\Middleware\NonceMiddleware;
-use SineFine\PromImport\Presentation\SettingController;
 use SineFine\PromImport\Presentation\AdminNotificationService;
+use SineFine\PromImport\Presentation\Middleware\AuthMiddleware;
+use SineFine\PromImport\Presentation\Middleware\NonceMiddleware;
+use SineFine\PromImport\Presentation\Rest\ImportRestController;
+use SineFine\PromImport\Presentation\SettingController;
 use function DI\autowire;
 use function DI\create;
 use function DI\get;
@@ -88,17 +88,6 @@ class ContainerConfig {
 				->constructor( get('nonce.action' ) ),
 
 			// Controllers
-			ImportController::class  => autowire( ImportController::class )
-				->constructor(
-					get( ImportService::class ),
-					get( CategoryMappingRepositoryInterface::class ),
-				)
-				->method( 'setMiddlewares',
-					[
-						get( AuthMiddleware::class ),
-						get( NonceMiddleware::class )
-					]
-				),
 			SettingController::class => autowire( SettingController::class )
 				->method( 'setMiddlewares',
 					[ get(AuthMiddleware::class),]
@@ -113,8 +102,14 @@ class ContainerConfig {
 				->method( 'setMiddlewares',
 					[get(AuthMiddleware::class),]
 				),
+			ImportRestController::class => autowire( ImportRestController::class )
+				->constructor(
+					get( ImportService::class ),
+					get( CategoryMappingRepositoryInterface::class ),
+					get( LoggerInterface::class )
+				),
 
-			'logger.filepath'     => WP_CONTENT_DIR . '/uploads/spss12-log',
+			'logger.filepath'     => '/spss12-log',
 			'logger.file'     => string('{logger.filepath}/import-plugin.log'),
 			'nonce.action' => 'prom_importer_nonce',
 		];

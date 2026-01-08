@@ -39,7 +39,7 @@ class WpLogger extends AbstractLogger
 	{
 		$replace = [];
 		foreach ($context as $key => $val) {
-			if (is_string($val) || method_exists($val, '__toString')) {
+			if (is_string($val)) {
 				$replace['{' . $key . '}'] = $val;
 			}
 		}

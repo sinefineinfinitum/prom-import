@@ -9,10 +9,6 @@ use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 
 class ProductDto
 {
-    /**
-     * @param string[] $tags
-     * @param string[] $mediaUrls
-     */
     public Sku $sku;
     public ?int $existedId = null;
     public string $title;
@@ -20,15 +16,12 @@ class ProductDto
     public Price $price;
     public ?CategoryDto $category;
     public ?string $categoryName = null;
-    /** @var string[] */
-    public array $tags;
-    /** @var string[] */
+	/** @var array<int, string> $mediaUrls */
     public array $mediaUrls;
     public string $link;
 
     /**
-     * @param string[] $tags
-     * @param string[] $mediaUrls
+     * @param array<int, string> $mediaUrls
      */
     public function __construct(
         Sku $sku,
@@ -36,7 +29,6 @@ class ProductDto
         string $description,
         Price $price,
         ?CategoryDto $category = null,
-        array $tags = [],
         array $mediaUrls = [],
         string $link = ''
     ) {
@@ -45,8 +37,15 @@ class ProductDto
         $this->description = $description;
         $this->price = $price;
         $this->category = $category;
-        $this->tags = $tags;
         $this->mediaUrls = $mediaUrls;
         $this->link = $link;
     }
+
+	/**
+	 * @param array<int, string> $mediaUrls
+	 */
+	public static function create(Sku $sku, string $title, string $description, Price $price, ?CategoryDto $category = null, array $mediaUrls = [], string $link = ''): self
+	{
+		return new self($sku, $title, $description, $price, $category, $mediaUrls, $link);
+	}
 }

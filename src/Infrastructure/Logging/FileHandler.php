@@ -9,7 +9,7 @@ class FileHandler implements HandlerInterface
 
 	public function __construct(string $filename)
 	{
-		$dir = wp_upload_dir()['basedir'] . DIRECTORY_SEPARATOR . dirname($filename);
+		$dir = wp_upload_dir()['basedir'] . dirname($filename);
 		if (!file_exists($dir)) {
 			$status = mkdir($dir, 0755, true);
 			if ($status === false && !is_dir($dir)) {

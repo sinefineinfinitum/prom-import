@@ -115,7 +115,7 @@ class XmlParser implements XmlParserInterface
         $description = $this->sanitizeDescription($descriptionRaw);
         $priceVal = (float) ($offer->price ?? 0);
         $currency = (string) ($offer->currencyId ?? 'UAH');
-        $price = new Price($priceVal, $currency);
+        $price = Price::create($priceVal, $currency);
 
         $categoryDto = null;
         $catId = isset($offer->categoryId) ? (int) $offer->categoryId : 0;
@@ -133,23 +133,12 @@ class XmlParser implements XmlParserInterface
             }
         }
 
-        $tags = [];
-        if (isset($offer->param)) {
-            foreach ($offer->param as $param) {
-                $paramName = (string) $param['name'];
-                if (mb_strtolower($paramName) === 'tags') {
-                    $tags = array_filter(array_map('trim', explode(',', (string) $param)));
-                }
-            }
-        }
-
-        return new ProductDto(
-            new Sku($id),
+        return  ProductDto::create(
+            Sku::create($id),
             $name,
             $description,
             $price,
             $categoryDto,
-            $tags,
             $media,
             $url
         );
