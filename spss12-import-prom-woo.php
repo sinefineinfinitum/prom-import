@@ -26,8 +26,14 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 // Check php version
 if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
 	deactivate_plugins( plugin_basename( __FILE__ ) );
-	wp_die( esc_html( __('This plugin requires PHP 8.0 or higher to function.' )));
+	wp_die( esc_html( __('This plugin requires PHP 8.0 or higher to function.', 'spss12-import-prom-woo' )));
 }
+
+// Deactivate plugin on uninstall
+function spss_uninstall() {
+	\SineFine\PromImport\Infrastructure\WP\Uninstall::uninstall();
+}
+register_uninstall_hook( __FILE__, 'spss_uninstall' );
 
 // Bootstrap plugin via Plugin class
 add_action('plugins_loaded', static function () {

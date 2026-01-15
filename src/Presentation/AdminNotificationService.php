@@ -19,7 +19,9 @@ class AdminNotificationService
 		$this->hooks->addAction(
 			'spss12_admin_notices',
 			function ( string $notice ) use ( $type ) {
-				echo "<div class='notice {$type}'><p>" . esc_html(__( $notice, 'spss12-import-prom-woo' )) . "</p></div>";
+				echo "<div class='notice $type'><p>"
+				     . esc_html(printf(__( "Error %s", 'spss12-import-prom-woo' ), $notice))
+				     . "</p></div>";
 			}
 		);
 		do_action( 'spss12_admin_notices', $responseText );

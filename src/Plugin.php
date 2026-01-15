@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SineFine\PromImport;
 
 use DI\ContainerBuilder;
@@ -12,7 +14,10 @@ use SineFine\PromImport\Presentation\Rest\ImportRestController;
 
 final class Plugin
 {
-public const VERSION = '0.0.6';
+	public const VERSION = '0.0.6';
+	public const CACHE_DIR = PLUGINDIR
+	                         . DIRECTORY_SEPARATOR . ContainerConfig::SPSS12_PLUGIN_DIRECTORY
+	                         . DIRECTORY_SEPARATOR . 'cache';
 	/**
 	 * @throws Exception
 	 */
@@ -21,9 +26,7 @@ public const VERSION = '0.0.6';
 	    $builder = new ContainerBuilder();
 	    $builder->addDefinitions( ContainerConfig::getConfig() );
 	    $builder->enableCompilation(
-		    PLUGINDIR
-		    . DIRECTORY_SEPARATOR . ContainerConfig::SPSS12_PLUGIN_DIRECTORY
-		    . DIRECTORY_SEPARATOR . 'cache',
+		    self::CACHE_DIR,
 		    'CompiledContainer' . filter_var( self::VERSION, FILTER_SANITIZE_NUMBER_INT )
 	    );
 		$container = $builder->build();
