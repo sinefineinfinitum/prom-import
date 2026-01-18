@@ -42,7 +42,7 @@ class CategoryMappingRepository implements CategoryMappingRepositoryInterface
 	public function mapping(int $externalId): WP_Term|false|null
 	{
 		$categoryMapping = $this->getCategoryMapping();
-		return $externalId && $categoryMapping[$externalId]
+		return $externalId && array_key_exists($externalId, $categoryMapping)
 			? get_term_by( 'id', (int)$categoryMapping[$externalId], 'product_cat')
 			: null;
 	}

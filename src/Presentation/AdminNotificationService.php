@@ -20,7 +20,7 @@ class AdminNotificationService
 			'spss12_admin_notices',
 			function ( string $notice ) use ( $type ) {
 				echo "<div class='notice $type'><p>"
-				     . esc_html(printf(__( "Error %s", 'spss12-import-prom-woo' ), $notice))
+				     . esc_html(sprintf(__( "Error %s", 'spss12-import-prom-woo' ), $notice))
 				     . "</p></div>";
 			}
 		);

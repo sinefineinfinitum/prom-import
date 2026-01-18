@@ -4,12 +4,12 @@ on:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 
-permissions: write-all
-
 jobs:
   test:
     name: Tests and Static Analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     services:
       mysql:
@@ -54,11 +54,17 @@ jobs:
         run: composer install  --no-interaction --prefer-dist --no-progress
 
       - name: Run PHPStan to add annotations to the code
-        continue-on-error: true
         run: vendor/bin/phpstan analyse -c phpstan.neon --memory-limit 1G --no-progress --error-format=checkstyle | cs2pr
 
       - name: Run PhpUnit
         run: vendor/bin/phpunit -c phpunit.xml.dist
+
+      - name: Remove vendor
+        run: rm -r vendor
+
+      - name: Run composer install without dev
+        continue-on-error: true
+        run: composer install --no-dev --no-interaction --prefer-dist --no-progress
 
       - name: Build and zip plugin
         run: |
@@ -70,17 +76,29 @@ jobs:
             | zip build/spss12-import-prom-woo.zip -@
 
       - name: Upload Plugin artifact
+        id: upload_artifact_step
         uses: actions/upload-artifact@v6
         with:
           name: spss12-import-prom-woo
           path: build/spss12-import-prom-woo.zip
 
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: test
+    steps:
       - name: Generate Changelog
         id: changelog
-        uses: metcalfc/changelog-generator@v0.4.0
+        uses: metcalfc/changelog-generator@v4
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
-          base-ref: 'v0'
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: spss12-import-prom-woo
+          path: build
 
       - name: Creating Release
         uses: ncipollo/release-action@v1
@@ -88,7 +106,8 @@ jobs:
           body: |
             Changes in this Release: 
             ${{ steps.changelog.outputs.changelog }}
-            Plugin can be downloaded [here](https://api.github.com{{ github.repository }}/actions/artifacts/${{ steps.upload_artifact_step.outputs.artifact-id }}/zip")
           token: ${{ secrets.GITHUB_TOKEN }}
           name: Release ${{ env.GITHUB_REF_SLUG }}
           allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "build/spss12-import-prom-woo.zip"

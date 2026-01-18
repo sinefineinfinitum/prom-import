@@ -27,8 +27,10 @@ class Uninstall
 
 		$files = glob($dir . '*', GLOB_MARK);
 
-		foreach ($files as $file) {
-			unlink($file);
+		if ($files) {
+			foreach ($files as $file) {
+				unlink($file);
+			}
 		}
 	}
 }
