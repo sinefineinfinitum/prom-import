@@ -15,7 +15,7 @@ use SineFine\PromImport\Presentation\Rest\ImportRestController;
 final class Plugin
 {
 	public const VERSION = '0.0.6';
-	public const CACHE_DIR = PLUGINDIR
+	public const CACHE_DIR = WP_PLUGIN_DIR
 	                         . DIRECTORY_SEPARATOR . ContainerConfig::SPSS12_PLUGIN_DIRECTORY
 	                         . DIRECTORY_SEPARATOR . 'cache';
 	/**

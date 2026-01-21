@@ -1,9 +1,5 @@
 parameters:
-  level: 8
-  paths:
-    - src
-  inferPrivatePropertyTypeFromConstructor: true
-  reportUnmatchedIgnoredErrors: true
-  ignoreErrors:
-    -
-      identifier: constant.notFound
+	level: 8
+	paths:
+		- src
+	inferPrivatePropertyTypeFromConstructor: true
