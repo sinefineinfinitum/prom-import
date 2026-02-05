@@ -66,6 +66,16 @@ jobs:
         continue-on-error: true
         run: composer install --no-dev --no-interaction --prefer-dist --no-progress
 
+      - name: Update tag version in all files
+        run: |
+          NEW_VER=${{ github.ref_name }}
+          sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VER\"/" package.json
+          sed -i "s/Stable tag: [^ ]*/Stable tag: $NEW_VER/" readme.txt
+          sed -i "s/public const VERSION = '[^']*';/public const VERSION = '$NEW_VER';/" src/Plugin.php
+          sed -i "s/\* @version[[:space:]]\{1,\}[^ ]*/\* @version           $NEW_VER/" spss12-import-prom-woo.php
+          sed -i "s/Version:[[:space:]]\{1,\}[^ ]*/Version:           $NEW_VER/" spss12-import-prom-woo.php
+          echo "Version updated to $NEW_VER in all files."
+
       - name: Build and zip plugin
         run: |
           mkdir -p build/
