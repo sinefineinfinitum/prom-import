@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\Admin;
 
+use SineFine\PromImport\Domain\Common\FileServiceInterface;
 use SineFine\PromImport\Plugin;
 
 class Assets
 {
     public function __construct(
+        private FileServiceInterface $fileService,
     ) {
     }
 
 	public function enqueue(): void {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || ! in_array( $screen->id, [
+        if ( ! $screen || ! in_array( $screen->id, [
+                'toplevel_page_spss12-import-prom-woo',
 				'prom-ua-importer_page_prom-products-importer',
 				'prom-ua-importer_page_prom-categories-importer',
 			] ) ) {
@@ -27,17 +30,13 @@ class Assets
 
 		// Use minified version in production, source in development
 		$script_file = 'dist/plugin.min.js';
-		$script_path = $assets_dir . $script_file;
+        $version     = Plugin::VERSION;
 
 		// Fallback to source if built file doesn't exist
-		if ( ! file_exists( $script_path ) ) {
+		if ( ! file_exists( $assets_dir . $script_file ) ) {
 			$script_file = 'src/plugin.js';
+            $version = (string) filemtime( $assets_dir . $script_file );
 		}
-
-		// Get file modification time for cache busting
-		$version = file_exists( $assets_dir . $script_file )
-			? (string) filemtime( $assets_dir . $script_file )
-			: Plugin::VERSION;
 
 		wp_enqueue_script(
 			'spss12-import-prom-woo-plugin',

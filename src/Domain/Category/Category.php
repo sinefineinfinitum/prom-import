@@ -6,6 +6,7 @@ namespace SineFine\PromImport\Domain\Category;
 
 class Category
 {
+    public const CATEGORY_MAPPING_OPTION = 'prom_categories_input';
     public function __construct(
         private int $id,
         private string $name

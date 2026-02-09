@@ -15,9 +15,7 @@ use SineFine\PromImport\Presentation\Rest\ImportRestController;
 final class Plugin
 {
 	public const VERSION = '0.0.6';
-	public const CACHE_DIR = WP_PLUGIN_DIR
-	                         . DIRECTORY_SEPARATOR . ContainerConfig::SPSS12_PLUGIN_DIRECTORY
-	                         . DIRECTORY_SEPARATOR . 'cache';
+
 	/**
 	 * @throws Exception
 	 */
@@ -26,7 +24,7 @@ final class Plugin
 	    $builder = new ContainerBuilder();
 	    $builder->addDefinitions( ContainerConfig::getConfig() );
 	    $builder->enableCompilation(
-		    self::CACHE_DIR,
+		    ContainerConfig::getCacheDir(),
 		    'CompiledContainer' . filter_var( self::VERSION, FILTER_SANITIZE_NUMBER_INT )
 	    );
 		$container = $builder->build();
@@ -38,8 +36,6 @@ final class Plugin
 
         // Register hooks
         $hooks->addAction('admin_menu', [$menu, 'register']);
-	    $hooks->addAction('admin_init', [$menu, 'register_setting_url']);
-	    $hooks->addAction('admin_init', [$menu, 'register_setting_categories']);
 	    $hooks->addAction('admin_enqueue_scripts', [$assets, 'enqueue'], 1);
 	    $hooks->addAction('admin_notices', [$menu, 'settings_errors']);
 		$hooks->addAction('rest_api_init', [$rest, 'register_routes']);

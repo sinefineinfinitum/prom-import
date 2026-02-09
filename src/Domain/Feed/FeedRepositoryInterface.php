@@ -6,5 +6,5 @@ use SineFine\PromImport\Application\Import\Dto\FeedDto;
 
 interface FeedRepositoryInterface {
 	public function getLatest(): Feed|null;
-	public function save(FeedDto $feed): void;
+	public function save(FeedDto $feedDto): void;
 }

@@ -9,6 +9,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 nvm install 24.12
+pnpm install
+pnpm run dev
 php composer.phar self-update
 php composer.phar clear-cache
 php composer.phar install --no-dev

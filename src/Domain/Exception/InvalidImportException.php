@@ -8,7 +8,6 @@ class InvalidImportException extends DomainException
 {
 	public static function importFromDto( string $message): self
 	{
-		$exception = new self(sprintf(__('Invalid product data: %s', 'spss12-import-prom-woo'), $message ));
-		return $exception;
+		return new self(esc_html(__('Invalid product data: ', 'spss12-import-prom-woo')) . esc_html($message));
 	}
 }

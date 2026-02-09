@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\Persistence;
 
+use SineFine\PromImport\Domain\Category\Category;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
+use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use WP_Term;
 
 class CategoryMappingRepository implements CategoryMappingRepositoryInterface
 {
-	private const CATEGORY_MAPPING_NAME = 'prom_categories_input';
+    public function __construct(
+      private OptionRepositoryInterface $optionRepository,
+    ){
+    }
 
 	/**
 	 * @return array<int, string>
 	 */
 	public function getCategoryMapping(): array
 	{
-		$categoryMapping = get_option( self::CATEGORY_MAPPING_NAME, [] );
+		$categoryMapping = $this->optionRepository->getOption( Category::CATEGORY_MAPPING_OPTION, [] );
 		return is_array($categoryMapping)
 				? array_combine(
 				array_map('intval', array_column($categoryMapping, 'id' )),
@@ -31,7 +36,7 @@ class CategoryMappingRepository implements CategoryMappingRepositoryInterface
 
 	public function setCategoryMapping( array $categoryMapping ): void
 	{
-		update_option( self::CATEGORY_MAPPING_NAME, $categoryMapping);
+        $this->optionRepository->updateOption( Category::CATEGORY_MAPPING_OPTION, $categoryMapping);
 	}
 
 	/**

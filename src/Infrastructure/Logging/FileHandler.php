@@ -1,24 +1,15 @@
 <?php
 
 namespace SineFine\PromImport\Infrastructure\Logging;
-use UnexpectedValueException;
 
 class FileHandler implements HandlerInterface
 {
 	private string $filename;
 
-	public function __construct(string $filename)
-	{
+	public function __construct(
+        string $filename,
+    ) {
 		$dir = wp_upload_dir()['basedir'] . dirname($filename);
-		if (!file_exists($dir)) {
-			$status = mkdir($dir, 0755, true);
-			if ($status === false && !is_dir($dir)) {
-				throw new UnexpectedValueException(sprintf('There is no existing directory at "%s" and cannot create it', $dir));
-			}
-		}
-		if (!is_writable($dir)) {
-			throw new UnexpectedValueException(sprintf('Directory "%s" is not writable', $dir));
-		}
 		$this->filename = $dir
 		                  . DIRECTORY_SEPARATOR
 		                  . pathinfo($filename, PATHINFO_FILENAME)

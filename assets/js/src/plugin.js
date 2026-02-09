@@ -8,7 +8,8 @@
         namespace: 'spss12-prom-import/v1',
         endpoints: {
             product: '/import/product',
-            categories: '/import/categories'
+            categories: '/import/categories',
+            config: '/import/config'
         },
 
         /**
@@ -26,7 +27,7 @@
         },
 
         /**
-         * Make REST API request
+         * Make a REST API request
          */
         async request(endpoint, data = {}, method = 'POST') {
             try {
@@ -107,7 +108,7 @@
         try {
             const mappings = [];
 
-            // Iterate each row in categories table
+            // Iterate each row in the categories table
             $('#categories-table tbody tr').each(function(index, row) {
                 const $row = $(row);
                 // Column 1 contains XML category id inside span
@@ -152,6 +153,30 @@
         } catch (error) {
             alert(error.message || promImporterAjaxObj.error_text || 'An error occurred');
             console.error('Categories import error:', error);
+            throw error;
+        }
+    }
+
+    async function import_config(
+        nonce,
+        url
+    ) {
+        try {
+            const data = {
+                url: url || '',
+            };
+
+            const response = await RestAPI.request(RestAPI.endpoints.config, data);
+
+            if (response.success && response.data?.edit_url) {
+                window.open(response.data.edit_url, '_blank');
+                return response;
+            } else {
+                throw new Error(response.message || 'Config save failed');
+            }
+        } catch (error) {
+            alert(error.message || promImporterAjaxObj.error_text || 'An error occurred');
+            console.error('Config save error:', error);
             throw error;
         }
     }
@@ -226,13 +251,32 @@
         }
     });
 
+    // Import config
+    $('#import-config').on('click', async function(event) {
+        event.preventDefault();
+
+        const $btn = $(this);
+        const originalText = $btn.text();
+        const url = $("#url").val();
+
+        // Disable button and show loading state
+        $btn.prop('disabled', true).text(promImporterAjaxObj.loading_text || 'Saving...');
+
+        try {
+            await import_config($btn.attr('data-nonce'), url);
+        } catch (error) {
+            // Error: restore button
+            $btn.prop('disabled', false).text(originalText);
+        }
+    });
     /**
      * Expose API for external usage (optional)
      */
     window.PromImporter = {
         RestAPI,
         importProduct: import_product,
-        importCategories: import_categories
+        importCategories: import_categories,
+        importConfig: import_config,
     };
 
     console.log('Prom Importer REST API initialized');

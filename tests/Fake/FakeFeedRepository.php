@@ -16,9 +16,9 @@ class FakeFeedRepository implements FeedRepositoryInterface
         return $this->latest;
     }
 
-    public function save(FeedDto $feed): void
+    public function save(FeedDto $feedDto): void
     {
-		$this->latest = new Feed($feed->timestamp, $feed->domain, $feed->content);
+		$this->latest = new Feed($feedDto->timestamp, $feedDto->domain, $feedDto->content);
         $this->savedFeeds[] = $this->latest;
     }
 

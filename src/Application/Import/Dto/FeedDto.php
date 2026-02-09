@@ -2,6 +2,8 @@
 
 namespace SineFine\PromImport\Application\Import\Dto;
 
+use SineFine\PromImport\Infrastructure\WP\Functions;
+
 class FeedDto
 {
 	public function __construct(
@@ -14,7 +16,7 @@ class FeedDto
 	{
 		return new self(
 			time(),
-			(string) parse_url($url, PHP_URL_HOST),
+			(string) Functions::parseUrl($url, PHP_URL_HOST),
 			$content
 		);
 	}

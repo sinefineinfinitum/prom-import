@@ -3,6 +3,7 @@
 namespace SineFine\PromImport\Presentation;
 
 use Psr\Log\LoggerInterface;
+use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 
 class AdminNotificationService
@@ -15,12 +16,12 @@ class AdminNotificationService
 
 	public function renderNoticeResponse(string $responseText, string $type = 'notice-warning'): void
 	{
-		add_settings_error( 'prom_domain_url_input', sanitize_title($responseText), $responseText, $type );
+		add_settings_error( XmlService::URL_SETTING_OPTION, sanitize_title($responseText), $responseText, $type );
 		$this->hooks->addAction(
 			'spss12_admin_notices',
 			function ( string $notice ) use ( $type ) {
-				echo "<div class='notice $type'><p>"
-				     . esc_html(sprintf(__( "Error %s", 'spss12-import-prom-woo' ), $notice))
+				echo "<div class='notice" . esc_attr($type) . "'><p>"
+				     . esc_html(__( "Error: ", 'spss12-import-prom-woo' )) . esc_html($notice)
 				     . "</p></div>";
 			}
 		);

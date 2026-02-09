@@ -7,10 +7,12 @@ namespace SineFine\PromImport\Presentation\Rest;
 use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Category\Category;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
+use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Exception\DomainException;
 use SineFine\PromImport\Domain\Exception\InvalidImportException;
-use SineFine\PromImport\Domain\Exception\InvalidProductDataException;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use Throwable;
@@ -27,6 +29,8 @@ class ImportRestController extends WP_REST_Controller
 	public function __construct(
 		private ImportService $service,
 		private CategoryMappingRepositoryInterface $categoryMappingRepository,
+        private XmlService $xmlService,
+        private OptionRepositoryInterface $optionRepository,
 		private LoggerInterface $logger,
 	) {}
 
@@ -54,6 +58,16 @@ class ImportRestController extends WP_REST_Controller
 				'args'                => $this->get_categories_import_args(),
 			],
 		]);
+
+        // POST /wp-json/spss12-prom-import/v1/import/config
+        register_rest_route($this->namespace, '/' . $this->rest_base . '/config', [
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'import_config'],
+                'permission_callback' => [$this, 'check_permission'],
+                'args'                => $this->get_config_import_args(),
+            ],
+        ]);
 	}
 
 	/**
@@ -148,12 +162,41 @@ class ImportRestController extends WP_REST_Controller
 			return new WP_REST_Response([
 				'success' => true,
 				'message' => esc_html(__('Successfully imported', 'spss12-import-prom-woo')),
-				'data'    => get_option('prom_categories_input'),
+				'data'    => $this->optionRepository->getOption( Category::CATEGORY_MAPPING_OPTION),
 			], 200);
 		} catch ( Throwable $e) {
 			return $this->handle_exception($e);
 		}
 	}
+
+    /**
+     * Import config
+     *
+     * @template T of WP_REST_Request
+     * @param T $request
+     **/
+    public function import_config(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        try {
+            $url = $request->get_param('url');
+
+            if (empty($url)) {
+                return new WP_Error(
+                    'invalid_config',
+                    __('Invalid or missing config url', 'spss12-import-prom-woo')
+                );
+            }
+            $url = $this->xmlService->validateUrlAndSaveXml($url);
+
+            return new WP_REST_Response([
+                'success' => true,
+                'message' => esc_html(__('Successfully saved config', 'spss12-import-prom-woo')),
+                'data'    => $url,
+            ], 200);
+        } catch ( Throwable $e) {
+            return $this->handle_exception($e);
+        }
+    }
 
 	/**
 	 * Check if user has permission
@@ -233,6 +276,20 @@ class ImportRestController extends WP_REST_Controller
 			],
 		];
 	}
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function get_config_import_args(): array
+    {
+        return [
+            'url' => [
+                'required' => true,
+                'type' => 'string',
+                'sanitize_callback' => 'sanitize_url',
+            ],
+        ];
+    }
 
 	/**
 	 * Handle exception and return appropriate REST response

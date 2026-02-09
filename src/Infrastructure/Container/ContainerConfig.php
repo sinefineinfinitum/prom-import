@@ -8,10 +8,14 @@ use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlParserInterface;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
+use SineFine\PromImport\Domain\Common\FileServiceInterface;
+use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
+use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Admin\Assets;
 use SineFine\PromImport\Infrastructure\Admin\MenuPage;
+use SineFine\PromImport\Infrastructure\File\FileService;
 use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Infrastructure\Logging\FileHandler;
@@ -19,6 +23,7 @@ use SineFine\PromImport\Infrastructure\Logging\HandlerInterface;
 use SineFine\PromImport\Infrastructure\Logging\WpLogger;
 use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
+use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\AdminNotificationService;
@@ -33,7 +38,8 @@ use function DI\string;
 
 class ContainerConfig {
 
-	public const SPSS12_PLUGIN_DIRECTORY = 'spss12-import-prom-woo';
+	private const CACHE_DIRECTORY = 'cache';
+	private const LOG_DIRECTORY = 'log';
 	/**
 	 * @return array<string, mixed>
 	 */
@@ -46,21 +52,28 @@ class ContainerConfig {
 					get( LoggerInterface::class )
 				),
 			CategoryMappingRepositoryInterface::class => autowire( CategoryMappingRepository::class ),
-			FeedRepositoryInterface::class            => autowire( FeedRepository::class ),
+			FeedRepositoryInterface::class            => autowire( FeedRepository::class )
+                ->constructor(
+                    get(FileServiceInterface::class),
+                ),
+            OptionRepositoryInterface::class          => autowire( OptionRepository::class ),
 			LoggerInterface::class                    => autowire( WpLogger::class ),
 			HandlerInterface::class                   => autowire( FileHandler::class )
-				->constructor( get( 'logger.file' ) ),
+				->constructor(
+                    get( 'logger.file' ),
+                    get(FileServiceInterface::class ),
+                ),
 			XmlParserInterface::class => autowire( XmlParser::class ),
 
 			//Services
 			HookRegistrar::class => create( HookRegistrar::class ),
 			MenuPage::class      => create( MenuPage::class )
 				->constructor(
-					get( XmlService::class ),
 					get( SettingController::class ),
 					get( AdminController::class ),
 				),
-			Assets::class        => create( Assets::class ),
+			Assets::class        => create( Assets::class )
+                ->constructor(get(FileServiceInterface::class )),
 			WpHttpClient::class  => create( WpHttpClient::class ),
 			XmlService::class    => autowire( XmlService::class )
 				->constructor(
@@ -68,6 +81,7 @@ class ContainerConfig {
 					get( FeedRepositoryInterface::class ),
 					get( XmlParserInterface::class ),
 					get( AdminNotificationService::class ),
+                    get(OptionRepositoryInterface::class ),
 					get( LoggerInterface::class )
 				),
 			ImportService::class => autowire( ImportService::class )
@@ -81,6 +95,7 @@ class ContainerConfig {
 					get( HookRegistrar::class ),
 					get( LoggerInterface::class )
 				),
+            FileServiceInterface::class => autowire( FileService::class ),
 
 			// Middlewares
 			AuthMiddleware::class => create( AuthMiddleware::class ),
@@ -89,6 +104,9 @@ class ContainerConfig {
 
 			// Controllers
 			SettingController::class => autowire( SettingController::class )
+                ->constructor(
+                    get(OptionRepositoryInterface::class )
+                )
 				->method( 'setMiddlewares',
 					[ get(AuthMiddleware::class),]
 				),
@@ -106,12 +124,34 @@ class ContainerConfig {
 				->constructor(
 					get( ImportService::class ),
 					get( CategoryMappingRepositoryInterface::class ),
-					get( LoggerInterface::class )
+                    get(XmlService::class ),
+                    get(OptionRepositoryInterface::class ),
+                    get( LoggerInterface::class )
 				),
 
-			'logger.filepath'     => '/spss12-log',
+			'logger.filepath'     => DIRECTORY_SEPARATOR . SPSSIMPORT_PLUGIN_DIR . DIRECTORY_SEPARATOR . self::LOG_DIRECTORY,
 			'logger.file'     => string('{logger.filepath}/import-plugin.log'),
 			'nonce.action' => 'prom_importer_nonce',
 		];
 	}
+
+    public static function getCommonDir(): string
+    {
+        return wp_upload_dir()['basedir'] . DIRECTORY_SEPARATOR . SPSSIMPORT_PLUGIN_DIR;
+    }
+
+    public static function getCacheDir(): string
+    {
+        return self::getCommonDir() . DIRECTORY_SEPARATOR . self::CACHE_DIRECTORY;
+    }
+
+    public static function getLogDir(): string
+    {
+        return self::getCommonDir() . DIRECTORY_SEPARATOR . self::LOG_DIRECTORY;
+    }
+
+    public static function getFeedDir(): string
+    {
+        return self::getCommonDir() . DIRECTORY_SEPARATOR . Feed::XML_FEEDS_DIRECTORY;
+    }
 }

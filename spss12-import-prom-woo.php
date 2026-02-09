@@ -4,7 +4,7 @@
  * @version           0.0.3
  *
  * @wordpress-plugin
- * Plugin Name:       spss12 Importer from Prom.ua to Woo
+ * Plugin Name:       spss12 Importer from Prom.ua to WooCoommerce
  * Plugin Uri:        https://github.com/sinefineinfinitum/prom-import
  * Description:       Import products from prom.ua to woo
  * Version:           0.0.3
@@ -16,7 +16,12 @@
  * Requires Plugins:  woocommerce
  */
 
+use SineFine\PromImport\Infrastructure\WP\Install;
+use SineFine\PromImport\Infrastructure\WP\Uninstall;
+
 defined('ABSPATH') or die();
+
+define( 'SPSSIMPORT_PLUGIN_DIR', basename(plugin_dir_path( __FILE__ )));
 
 // Composer autoload
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
@@ -29,11 +34,17 @@ if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
 	wp_die( esc_html( __('This plugin requires PHP 8.0 or higher to function.', 'spss12-import-prom-woo' )));
 }
 
-// Deactivate plugin on uninstall
-function spss_uninstall() {
-	\SineFine\PromImport\Infrastructure\WP\Uninstall::uninstall();
+// Activate plugin
+function spss12_import_activate(): void {
+    (new Install())->run();
 }
-register_uninstall_hook( __FILE__, 'spss_uninstall' );
+register_activation_hook( __FILE__, 'spss12_import_activate' );
+
+// Deactivate plugin on uninstall
+function spss12_import_uninstall(): void {
+    (new Uninstall())->run();
+}
+register_uninstall_hook( __FILE__, 'spss12_import_uninstall' );
 
 // Bootstrap plugin via Plugin class
 add_action('plugins_loaded', static function () {

@@ -4,33 +4,18 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Presentation;
 
+use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
+
 class SettingController extends BaseController
 {
-	public function importer_section_callback(): void
-	{
-		echo '<p>'
-		     . esc_html(__( 'Please enter valid Prom.ua export URL you want to import from.', 'spss12-import-prom-woo' ))
-		     . '</p>';
-	}
-
-	public function url_setting_callback(): void
-	{
-		?>
-		<label>
-			<input type='url'
-			       class="regular-text"
-			       name="prom_domain_url_input"
-			       value="<?php echo esc_url( is_string(get_option( 'prom_domain_url_input' )) ? get_option( 'prom_domain_url_input' ) : '' ); ?>"
-			       placeholder="https://prom.ua/products_feed.xml?...">
-		</label>
-		<p class="description">
-			<?php echo esc_html(__( 'Enter Prom.ua export URL you want to import from', 'spss12-import-prom-woo' )); ?>
-		</p>
-		<?php
-	}
-
+    public function __construct(
+        public OptionRepositoryInterface $optionRepository,
+    ){
+    }
 	public function prom_settings_page_content(): void
     {
-		$this->render( 'settings' );
+		$spssUrl = $this->optionRepository->getOption( XmlService::URL_SETTING_OPTION, '');
+        $this->render( 'settings', ['spssUrl' => $spssUrl] );
 	}
 }

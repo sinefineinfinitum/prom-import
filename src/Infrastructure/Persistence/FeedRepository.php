@@ -5,17 +5,25 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Infrastructure\Persistence;
 
 use SineFine\PromImport\Application\Import\Dto\FeedDto;
+use SineFine\PromImport\Domain\Common\FileServiceInterface;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
+use SineFine\PromImport\Infrastructure\Container\ContainerConfig;
 
 class FeedRepository implements FeedRepositoryInterface
 {
-	private const UPLOADS_DIR = 'spss12';
+    private string $dir;
+
+    public function __construct(
+        private FileServiceInterface $fileService,
+    ) {
+        $this->dir = ContainerConfig::getFeedDir();
+    }
 
 	public function getLatest(): ?Feed
 	{
-		$dir = $this->getUploadsDir();
-		$files = glob($dir . DIRECTORY_SEPARATOR . '*.xml');
+		
+		$files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
 		if (!$files) return null;
 
 		usort($files, function($a, $b) {
@@ -33,34 +41,25 @@ class FeedRepository implements FeedRepositoryInterface
 		);
 	}
 
-	public function save(FeedDto $feed): void
+	public function save(FeedDto $feedDto): void
 	{
-		if (empty($feed->content)) {
+		$feed = Feed::fromDto($feedDto);
+        $latestFeed = $this->getLatest();
+        if (
+            empty($feed->content())
+            || (!empty($latestFeed) && !$this->isNewFeed($feed, $latestFeed))
+        ) {
 			return;
 		}
 
-		$currentMd5 = md5($feed->content);
-		$lastMd5    = $this->getLatest() && $this->getLatest()->content()
-			? md5($this->getLatest()->content())
-			: '';
-
-		// save only new feed
-		if ($currentMd5 === $lastMd5) {
-			return;
-		}
-
-		$dir      = $this->getUploadsDir();
-		$filePath = $dir . DIRECTORY_SEPARATOR . $feed->domain . '_' . $feed->timestamp . '.xml';
-
-		if (file_put_contents($filePath, $feed->content) !== false) {
-			$this->clearOldFeeds();
-		}
+		$filePath = $this->dir . DIRECTORY_SEPARATOR . $feed->filename();
+        $this->fileService->writeFile($filePath, $feed->content());
+        $this->clearOldFeeds();
 	}
 
 	public function clearOldFeeds(int $keepCount = 5): void
 	{
-		$dir = $this->getUploadsDir();
-		$files = glob($dir . DIRECTORY_SEPARATOR . '*.xml');
+		$files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
 		if (!$files) return;
 
 		usort($files, function($a, $b) {
@@ -69,17 +68,12 @@ class FeedRepository implements FeedRepositoryInterface
 
 		$toDelete = array_slice($files, $keepCount);
 		foreach ($toDelete as $file) {
-			@unlink($file);
+			$this->fileService->unlink($file);
 		}
 	}
 
-	private function getUploadsDir(): string
-	{
-		$baseUploadsDir = wp_upload_dir();
-		$dir            = $baseUploadsDir['basedir'] . DIRECTORY_SEPARATOR . self::UPLOADS_DIR;
-		if (!is_dir($dir)) {
-			wp_mkdir_p($dir);
-		}
-		return $dir;
-	}
+    private function isNewFeed(Feed $feed, Feed $lastFeed): bool
+    {
+        return md5($feed->content()) !== md5($lastFeed->content());
+    }
 }

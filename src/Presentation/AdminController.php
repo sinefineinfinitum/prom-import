@@ -20,7 +20,13 @@ class AdminController extends BaseController {
 
     public function prom_categories_importer(): void
     {
-		$xml = $this->xmlService->getXml();
+		try {
+            $xml = $this->xmlService->getXml();
+        } catch ( \Exception $exception ) {
+            $message = $exception->getMessage();
+            $this->render('notification', compact(['message']));
+            return;
+        }
         $spssCategories = $this->xmlParser->parseCategories( $xml );
 
         $spssSavedCategories = $this->categoryMappingRepository->getCategoryMapping();
@@ -29,6 +35,7 @@ class AdminController extends BaseController {
                 'show_count'   => 1,
                 'pad_counts'   => 0,
                 'hierarchical' => 1,
+                'hide_empty' => false,
         ] );
 
         $this->render(
@@ -39,7 +46,13 @@ class AdminController extends BaseController {
 
     public function prom_products_importer(): void
     {
-	    $xml = $this->xmlService->getXml();
+        try {
+            $xml = $this->xmlService->getXml();
+        } catch ( \Exception $exception ) {
+            $message = $exception->getMessage();
+            $this->render('notification', compact(['message']));
+            return;
+        }
         $totalPages     = 1;
         $totalProducts  = $this->xmlParser->getTotalProducts( $xml );
         $categories     = $this->xmlParser->parseCategories( $xml );

@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\FeedDto;
+use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
@@ -18,17 +19,19 @@ use SineFine\PromImport\Presentation\AdminNotificationService;
 
 class XmlService
 {
-	public function __construct(
+	public const URL_SETTING_OPTION = 'prom_domain_url_input';
+    public function __construct(
 		private WpHttpClient $httpClient,
 		private FeedRepositoryInterface $feedRepository,
 		private XmlParserInterface $xmlParser,
 		private AdminNotificationService $notificationService,
+        private OptionRepositoryInterface $optionRepository,
 		private LoggerInterface $logger,
 	) {}
 
-	public function sanitizeUrlAndSaveXml( string $url ): string
+	public function validateUrlAndSaveXml( string $url ): string
 	{
-		$oldValue = get_option( 'prom_domain_url_input' );
+		$oldValue = $this->optionRepository->getOption( self::URL_SETTING_OPTION );
 
 		try {
 			if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
@@ -40,6 +43,7 @@ class XmlService
 
 			$feedDto = FeedDto::create( $url, $responseBody );
 			$this->feedRepository->save( $feedDto );
+            $this->optionRepository->updateOption(self::URL_SETTING_OPTION, $url);
 
 			return esc_url_raw( $url );
 
@@ -52,7 +56,7 @@ class XmlService
 	/**
 	 * @throws DownloadException
 	 */
-	private function downloadXmlContent( string $url ): string
+	public function downloadXmlContent( string $url ): string
 	{
 		$response = $this->httpClient->get( $url );
 
@@ -62,19 +66,19 @@ class XmlService
 				'url' => $url,
 				'error' => $message
 			] );
-			throw new DownloadException( $message );
+			throw new DownloadException( esc_html(__('Failed to fetch XML from ', 'spss12-import-prom-woo' )) . esc_html($url) . " : " .  esc_html($message));
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code !== 200 ) {
-			throw new DownloadException( sprintf( 'Failed to fetch XML. HTTP Code: %d', $code ) );
+			throw new DownloadException( esc_html(__('Failed to fetch XML. HTTP Code:', 'spss12-import-prom-woo')) . esc_html((string)$code) );
 		}
 
 		return wp_remote_retrieve_body( $response );
 	}
 
 	/**
-	 * @throws InvalidXmlException
+	 * @throws InvalidXmlException | RuntimeException
 	 */
 	public function getXml(): SimpleXMLElement
 	{
@@ -91,9 +95,12 @@ class XmlService
 		return $xml;
 	}
 
+    /**
+     * @throws InvalidArgumentException | RuntimeException
+     */
 	public function getUrl(): string
 	{
-		$url = get_option( 'prom_domain_url_input' );
+		$url =  $this->optionRepository->getOption(self::URL_SETTING_OPTION);
 		if ( empty( $url ) ) {
 			throw new RuntimeException( 'XML URL is not configured' );
 		}

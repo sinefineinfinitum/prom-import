@@ -4,33 +4,34 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\WP;
 
-use SineFine\PromImport\Plugin;
+use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Category\Category;
+
+use SineFine\PromImport\Domain\Common\FileServiceInterface;
+use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
+use SineFine\PromImport\Infrastructure\Container\ContainerConfig;
+use SineFine\PromImport\Infrastructure\File\FileService;
+use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 
 class Uninstall
 {
-	public static function uninstall(): void
-	{
-		delete_option('prom_domain_url_input');
-		delete_option('prom_categories_input');
+    public function __construct(
+        private ?FileServiceInterface $fileService = null,
+        private ?OptionRepositoryInterface $optionRepository = null,
+    ){
+    }
+	public function run(): void
+    {
+        // Lazy instantiate to avoid loading DI container on uninstall
+        $this->fileService = $this->fileService ?? new FileService();
+        $this->optionRepository = $this->optionRepository ?? new OptionRepository();
 
-		if (is_dir(Plugin::CACHE_DIR)) {
-			self::deleteFiles(Plugin::CACHE_DIR);
-			rmdir(Plugin::CACHE_DIR);
-		}
-	}
+        $this->optionRepository->deleteOption(XmlService::URL_SETTING_OPTION);
+        $this->optionRepository->deleteOption(Category::CATEGORY_MAPPING_OPTION);
 
-	private static function deleteFiles(string $dir): void
-	{
-		if ( ! str_ends_with( $dir, '/' ) ) {
-			$dir .= '/';
-		}
-
-		$files = glob($dir . '*', GLOB_MARK);
-
-		if ($files) {
-			foreach ($files as $file) {
-				unlink($file);
-			}
-		}
-	}
+        $dir = ContainerConfig::getCommonDir();
+        if ($this->fileService->isExist($dir)) {
+            $this->fileService->rmdir($dir);
+        }
+    }
 }
