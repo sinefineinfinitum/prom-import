@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Presentation;
 
-use SineFine\PromImport\Application\Import\XmlParserInterface;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
+use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 
 class AdminController extends BaseController {

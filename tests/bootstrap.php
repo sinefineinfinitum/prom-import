@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-if ( ! defined( 'ABSPATH' ) ) exit;
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
 global $wp_test_hooks;
@@ -108,6 +106,22 @@ if (!function_exists('wp_die')) {
     function wp_die(string $message = '', string $title = '', $args = [])
     {
         throw new Exception($message ?: 'wp_die called');
+    }
+}
+
+if (!function_exists('wp_parse_url')) {
+	function wp_parse_url(string $url, int $component = -1): mixed
+	{
+		return parse_url($url, $component);
+	}
+}
+
+if(!function_exists('update_option')) {
+    function update_option(string $option, mixed $value, mixed $autoload = null): bool
+    {
+        global $wp_options;
+        $wp_options[$option] = $value;
+        return true;
     }
 }
 

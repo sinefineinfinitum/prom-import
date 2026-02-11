@@ -11,6 +11,7 @@ use RuntimeException;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\FeedDto;
 use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
+use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;

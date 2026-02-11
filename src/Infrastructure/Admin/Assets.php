@@ -33,7 +33,7 @@ class Assets
         $version     = Plugin::VERSION;
 
 		// Fallback to source if built file doesn't exist
-		if ( ! file_exists( $assets_dir . $script_file ) ) {
+		if ( ! $this->fileService->isExist( $assets_dir . $script_file ) ) {
 			$script_file = 'src/plugin.js';
             $version = (string) filemtime( $assets_dir . $script_file );
 		}
