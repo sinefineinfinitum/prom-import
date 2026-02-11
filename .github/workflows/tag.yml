@@ -68,7 +68,8 @@ jobs:
 
       - name: Update tag version in all files
         run: |
-          NEW_VER=${{ github.ref_name }}
+          TAG=${{ github.ref_name }}
+          NEW_VER=${TAG:1}
           sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VER\"/" package.json
           sed -i "s/Stable tag: [^ ]*/Stable tag: $NEW_VER/" readme.txt
           sed -i "s/public const VERSION = '[^']*';/public const VERSION = '$NEW_VER';/" src/Plugin.php
