@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SineFine\PromImport\Application\Import;
+namespace SineFine\PromImport\Domain\Common;
 
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Application\Import;
 
+use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
-use SimpleXMLElement;
 use XMLReader;
 
 class XmlParser implements XmlParserInterface
