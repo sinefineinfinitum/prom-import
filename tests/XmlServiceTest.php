@@ -6,12 +6,10 @@ namespace SineFine\PromImport\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use RuntimeException;
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
-use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\Feed;

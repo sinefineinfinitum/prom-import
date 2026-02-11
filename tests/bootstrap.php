@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../vendor/autoload.php';
 
 global $wp_test_hooks;
+define( 'ABSPATH', '/');
 
 if(!is_array($wp_test_hooks)) {
 	$wp_test_hooks = [];
