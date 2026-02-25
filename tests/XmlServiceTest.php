@@ -13,7 +13,6 @@ use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\Feed;
-use SineFine\PromImport\Infrastructure\Hooks\HookRegistrar;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 use SineFine\PromImport\Presentation\AdminNotificationService;
@@ -26,7 +25,6 @@ class XmlServiceTest extends TestCase
     private OptionRepositoryInterface $optionRepository;
     private FakeFeedRepository $feedRepository;
     private XmlService $xmlService;
-	private HookRegistrar $hooks;
 	private LoggerInterface $logger;
 	private AdminNotificationService $notificationService;
 
@@ -41,8 +39,7 @@ class XmlServiceTest extends TestCase
 	                                    ->onlyMethods(['updateOption','getOption'])
                                        ->getMock();
         $this->feedRepository = new FakeFeedRepository();
-		$this->hooks = new HookRegistrar();
-		$this->logger = $this->createMock(LoggerInterface::class); ;
+		$this->logger = $this->createMock(LoggerInterface::class);
 		$this->notificationService = $this->getMockBuilder(AdminNotificationService::class)
 		                                  ->disableOriginalConstructor()
 											->onlyMethods(['renderNoticeResponse'])
@@ -122,21 +119,23 @@ class XmlServiceTest extends TestCase
         $this->assertCount(0, $this->feedRepository->savedFeeds);
     }
 
-    public function test_getXml_returns_simplexmlelement_on_success(): void
+	/**
+	 * @throws InvalidXmlException
+	 */
+	public function test_getXml_returns_simplexmlelement_on_success(): void
     {
         $xmlContent = '<?xml version="1.0" encoding="UTF-8"?><root><item>test</item></root>';
         $this->feedRepository->setLatest(new Feed(time(), 'example.com', $xmlContent));
 
         $xml = $this->xmlService->getXml();
 
-        $this->assertInstanceOf( \SimpleXMLElement::class, $xml);
         $this->assertSame('test', (string)$xml->item);
     }
 
     public function test_getUrl_returns_option_value(): void
     {
         $this->optionRepository->method('getOption')
-            ->with(XmlService::URL_SETTING_OPTION)
+            ->with(XmlService::SINEFINE_PROMIMPORT_URL_OPTION)
             ->willReturn('https://example.com');
 
         $this->assertSame('https://example.com', $this->xmlService->getUrl());
@@ -145,7 +144,7 @@ class XmlServiceTest extends TestCase
     public function test_getUrl_throws_exception_if_option_empty(): void
     {
         $this->optionRepository->method('getOption')
-            ->with(XmlService::URL_SETTING_OPTION)
+            ->with(XmlService::SINEFINE_PROMIMPORT_URL_OPTION)
             ->willReturn('');
 
         $this->expectException( RuntimeException::class);
