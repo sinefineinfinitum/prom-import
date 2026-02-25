@@ -162,7 +162,7 @@ class ImportRestController extends WP_REST_Controller
 			return new WP_REST_Response([
 				'success' => true,
 				'message' => esc_html(__('Successfully imported', 'spss12-import-prom-woo')),
-				'data'    => $this->optionRepository->getOption( Category::CATEGORY_MAPPING_OPTION),
+				'data'    => $this->optionRepository->getOption( Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION),
 			], 200);
 		} catch ( Throwable $e) {
 			return $this->handle_exception($e);
@@ -199,9 +199,9 @@ class ImportRestController extends WP_REST_Controller
     }
 
 	/**
-	 * Check if user has permission
+	 * Check if the user has permission
 	 */
-	public function check_permission(): bool
+	public function check_permission(WP_REST_Request $request): bool
 	{
 		return current_user_can('manage_options');
 	}

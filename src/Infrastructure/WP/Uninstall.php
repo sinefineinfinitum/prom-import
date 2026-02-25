@@ -26,8 +26,8 @@ class Uninstall
         $this->fileService = $this->fileService ?? new FileService();
         $this->optionRepository = $this->optionRepository ?? new OptionRepository();
 
-        $this->optionRepository->deleteOption(XmlService::URL_SETTING_OPTION);
-        $this->optionRepository->deleteOption(Category::CATEGORY_MAPPING_OPTION);
+        $this->optionRepository->deleteOption(XmlService::SINEFINE_PROMIMPORT_URL_OPTION);
+        $this->optionRepository->deleteOption(Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION);
 
         $dir = ContainerConfig::getCommonDir();
         if ($this->fileService->isExist($dir)) {

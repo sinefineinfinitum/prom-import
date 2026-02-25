@@ -7,7 +7,7 @@ namespace SineFine\PromImport\Presentation\Middleware;
 class NonceMiddleware implements MiddlewareInterface
 {
 	public function __construct(
-		private string $action = 'prom_importer_nonce'
+		private string $action = 'sinefine_promimport_nonce'
 	) {}
 
 	public function handle(): void

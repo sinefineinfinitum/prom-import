@@ -21,7 +21,7 @@ class CategoryMappingRepository implements CategoryMappingRepositoryInterface
 	 */
 	public function getCategoryMapping(): array
 	{
-		$categoryMapping = $this->optionRepository->getOption( Category::CATEGORY_MAPPING_OPTION, [] );
+		$categoryMapping = $this->optionRepository->getOption( Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION, [] );
 		return is_array($categoryMapping)
 				? array_combine(
 				array_map('intval', array_column($categoryMapping, 'id' )),
@@ -36,7 +36,7 @@ class CategoryMappingRepository implements CategoryMappingRepositoryInterface
 
 	public function setCategoryMapping( array $categoryMapping ): void
 	{
-        $this->optionRepository->updateOption( Category::CATEGORY_MAPPING_OPTION, $categoryMapping);
+        $this->optionRepository->updateOption( Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION, $categoryMapping);
 	}
 
 	/**

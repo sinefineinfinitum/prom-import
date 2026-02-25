@@ -129,15 +129,15 @@ class ContainerConfig {
                     get( LoggerInterface::class )
 				),
 
-			'logger.filepath'     => DIRECTORY_SEPARATOR . SPSSIMPORT_PLUGIN_DIR . DIRECTORY_SEPARATOR . self::LOG_DIRECTORY,
+			'logger.filepath'     => DIRECTORY_SEPARATOR . SINEFINE_PROMIMPORT_PLUGIN_DIR . DIRECTORY_SEPARATOR . self::LOG_DIRECTORY,
 			'logger.file'     => string('{logger.filepath}/import-plugin.log'),
-			'nonce.action' => 'prom_importer_nonce',
+			'nonce.action' => 'sinefine_promimport_nonce',
 		];
 	}
 
     public static function getCommonDir(): string
     {
-        return wp_upload_dir()['basedir'] . DIRECTORY_SEPARATOR . SPSSIMPORT_PLUGIN_DIR;
+        return wp_upload_dir()['basedir'] . DIRECTORY_SEPARATOR . SINEFINE_PROMIMPORT_PLUGIN_DIR;
     }
 
     public static function getCacheDir(): string

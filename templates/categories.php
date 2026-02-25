@@ -14,7 +14,7 @@
             <li>
                 <a href="#"
                    id="import-categories"
-                   data-nonce="<?php echo esc_attr(wp_create_nonce('prom_importer_nonce')); ?>"
+                   data-nonce="<?php echo esc_attr(wp_create_nonce('sinefine_promimport_nonce')); ?>"
                    class="import-category button-primary">
                     <?php echo esc_html(__('Save category mapping settings', 'spss12-import-prom-woo')) ?>
                 </a>

@@ -22,7 +22,7 @@ class MenuPage
 			    esc_html(__('Prom Ua Importer', 'spss12-import-prom-woo')),
 			    'manage_options',
 			    'spss12-import-prom-woo',
-			    [$this->settingController, 'prom_settings_page_content'],
+			    [$this->settingController, 'settings_page_content'],
 			    'dashicons-products',
 			    11
 		    );
@@ -33,7 +33,7 @@ class MenuPage
 			    esc_html(__('Categories Importer', 'spss12-import-prom-woo')),
 			    'manage_options',
 			    'prom-categories-importer',
-			    [$this->adminController, 'prom_categories_importer']
+			    [$this->adminController, 'categories_importer']
 		    );
 
 		    add_submenu_page(
@@ -42,13 +42,13 @@ class MenuPage
 			    esc_html(__('Products Importer', 'spss12-import-prom-woo')),
 			    'manage_options',
 			    'prom-products-importer',
-			    [$this->adminController, 'prom_products_importer']
+			    [$this->adminController, 'products_importer']
 		    );
 	    }
     }
 
 	public function settings_errors(): void
 	{
-		settings_errors( XmlService::URL_SETTING_OPTION);
+		settings_errors( XmlService::SINEFINE_PROMIMPORT_URL_OPTION);
 	}
 }

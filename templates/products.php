@@ -98,7 +98,7 @@
                                data-price="<?php echo esc_attr($spssProduct->price->amount()); ?>"
                                data-category="<?php echo esc_attr($spssProduct->category ? $spssProduct->category->id : 0); ?>"
                                data-featured-media="<?php echo esc_attr(json_encode($spssProduct->mediaUrls)); ?>"
-                               data-nonce="<?php echo esc_attr(wp_create_nonce('prom_importer_nonce')); ?>"
+                               data-nonce="<?php echo esc_attr(wp_create_nonce('sinefine_promimport_nonce')); ?>"
                                class="import-product button-primary">
                                 <?php echo esc_html(__('Import', 'spss12-import-prom-woo')) ?>
                             </a>

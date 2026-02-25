@@ -24,8 +24,8 @@ class Install
         $this->fileService = $this->fileService ?? new FileService();
         $this->optionRepository = $this->optionRepository ?? new OptionRepository();
 
-        $this->optionRepository->addOption(XmlService::URL_SETTING_OPTION);
-        $this->optionRepository->addOption(Category::CATEGORY_MAPPING_OPTION);
+        $this->optionRepository->addOption(XmlService::SINEFINE_PROMIMPORT_URL_OPTION);
+        $this->optionRepository->addOption(Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION);
 
         $dirs = [
             ContainerConfig::getCommonDir(),

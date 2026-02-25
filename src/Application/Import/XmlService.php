@@ -20,7 +20,7 @@ use SineFine\PromImport\Presentation\AdminNotificationService;
 
 class XmlService
 {
-	public const URL_SETTING_OPTION = 'prom_domain_url_input';
+	public const SINEFINE_PROMIMPORT_URL_OPTION = 'sinefine_promimport_url';
     public function __construct(
 		private WpHttpClient $httpClient,
 		private FeedRepositoryInterface $feedRepository,
@@ -32,7 +32,7 @@ class XmlService
 
 	public function validateUrlAndSaveXml( string $url ): string
 	{
-		$oldValue = $this->optionRepository->getOption( self::URL_SETTING_OPTION );
+		$oldValue = $this->optionRepository->getOption( self::SINEFINE_PROMIMPORT_URL_OPTION );
 
 		try {
 			if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
@@ -44,7 +44,7 @@ class XmlService
 
 			$feedDto = FeedDto::create( $url, $responseBody );
 			$this->feedRepository->save( $feedDto );
-            $this->optionRepository->updateOption(self::URL_SETTING_OPTION, $url);
+            $this->optionRepository->updateOption(self::SINEFINE_PROMIMPORT_URL_OPTION, $url);
 
 			return esc_url_raw( $url );
 
@@ -101,7 +101,7 @@ class XmlService
      */
 	public function getUrl(): string
 	{
-		$url =  $this->optionRepository->getOption(self::URL_SETTING_OPTION);
+		$url =  $this->optionRepository->getOption(self::SINEFINE_PROMIMPORT_URL_OPTION);
 		if ( empty( $url ) ) {
 			throw new RuntimeException( 'XML URL is not configured' );
 		}

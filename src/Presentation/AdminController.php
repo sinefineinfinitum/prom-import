@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Presentation;
 
+use Exception;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Common\XmlParserInterface;
@@ -18,11 +19,11 @@ class AdminController extends BaseController {
     ) {
     }
 
-    public function prom_categories_importer(): void
+    public function categories_importer(): void
     {
 		try {
             $xml = $this->xmlService->getXml();
-        } catch ( \Exception $exception ) {
+        } catch ( Exception $exception ) {
             $message = $exception->getMessage();
             $this->render('notification', compact(['message']));
             return;
@@ -44,11 +45,11 @@ class AdminController extends BaseController {
         );
     }
 
-    public function prom_products_importer(): void
+    public function products_importer(): void
     {
         try {
             $xml = $this->xmlService->getXml();
-        } catch ( \Exception $exception ) {
+        } catch ( Exception $exception ) {
             $message = $exception->getMessage();
             $this->render('notification', compact(['message']));
             return;

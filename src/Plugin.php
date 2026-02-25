@@ -14,7 +14,7 @@ use SineFine\PromImport\Presentation\Rest\ImportRestController;
 
 final class Plugin
 {
-	public const VERSION = '0.0.6';
+	public const SINEFINE_PROMIMPORT_VERSION = '0.0.6';
 
 	/**
 	 * @throws Exception
@@ -25,7 +25,7 @@ final class Plugin
 	    $builder->addDefinitions( ContainerConfig::getConfig() );
 	    $builder->enableCompilation(
 		    ContainerConfig::getCacheDir(),
-		    'CompiledContainer' . filter_var( self::VERSION, FILTER_SANITIZE_NUMBER_INT )
+		    'CompiledContainer' . filter_var(self::SINEFINE_PROMIMPORT_VERSION, FILTER_SANITIZE_NUMBER_INT)
 	    );
 		$container = $builder->build();
 

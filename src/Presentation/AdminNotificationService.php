@@ -16,16 +16,16 @@ class AdminNotificationService
 
 	public function renderNoticeResponse(string $responseText, string $type = 'notice-warning'): void
 	{
-		add_settings_error( XmlService::URL_SETTING_OPTION, sanitize_title($responseText), $responseText, $type );
+		add_settings_error( XmlService::SINEFINE_PROMIMPORT_URL_OPTION, sanitize_title($responseText), $responseText, $type );
 		$this->hooks->addAction(
-			'spss12_admin_notices',
+			'sinefine_promimport_notices',
 			function ( string $notice ) use ( $type ) {
 				echo "<div class='notice" . esc_attr($type) . "'><p>"
 				     . esc_html(__( "Error: ", 'spss12-import-prom-woo' )) . esc_html($notice)
 				     . "</p></div>";
 			}
 		);
-		do_action( 'spss12_admin_notices', $responseText );
+		do_action( 'sinefine_promimport_notices', $responseText );
 		if ( str_contains($type, 'error') || str_contains($type, 'warning') ) {
 			$this->logger->error( $responseText );
 		}

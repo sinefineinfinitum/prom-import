@@ -21,7 +21,7 @@ use SineFine\PromImport\Infrastructure\WP\Uninstall;
 
 defined('ABSPATH') or die();
 
-define( 'SPSSIMPORT_PLUGIN_DIR', basename(plugin_dir_path( __FILE__ )));
+define( 'SINEFINE_PROMIMPORT_PLUGIN_DIR', basename(plugin_dir_path( __FILE__ )));
 
 // Composer autoload
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
@@ -35,16 +35,16 @@ if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
 }
 
 // Activate plugin
-function spss12_import_activate(): void {
+function sinefine_promimport_activate(): void {
     (new Install())->run();
 }
-register_activation_hook( __FILE__, 'spss12_import_activate' );
+register_activation_hook( __FILE__, 'sinefine_promimport_activate' );
 
 // Deactivate plugin on uninstall
-function spss12_import_uninstall(): void {
+function sinefine_promimport_uninstall(): void {
     (new Uninstall())->run();
 }
-register_uninstall_hook( __FILE__, 'spss12_import_uninstall' );
+register_uninstall_hook( __FILE__, 'sinefine_promimport_uninstall' );
 
 // Bootstrap plugin via Plugin class
 add_action('plugins_loaded', static function () {

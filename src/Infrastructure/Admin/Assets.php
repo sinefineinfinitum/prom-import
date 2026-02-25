@@ -30,7 +30,7 @@ class Assets
 
 		// Use minified version in production, source in development
 		$script_file = 'dist/plugin.min.js';
-        $version     = Plugin::VERSION;
+        $version     = Plugin::SINEFINE_PROMIMPORT_VERSION;
 
 		// Fallback to source if built file doesn't exist
 		if ( ! $this->fileService->isExist( $assets_dir . $script_file ) ) {
@@ -46,14 +46,14 @@ class Assets
 			[ 'in_footer' => true ]
 		);
 
-		wp_localize_script( 'spss12-import-prom-woo-plugin', 'promImporterAjaxObj', [
+		wp_localize_script( 'spss12-import-prom-woo-plugin', 'sinefinePromimportAjax', [
 			// REST API
 			'rest_url'           => esc_url_raw( rest_url() ),
 			'rest_nonce'         => wp_create_nonce( 'wp_rest' ),
 
 			// Legacy AJAX (for backward compatibility)
 			'ajaxurl'            => admin_url( 'admin-ajax.php' ),
-			'nonce'              => wp_create_nonce( 'prom_importer_nonce' ),
+			'nonce'              => wp_create_nonce( 'sinefine_promimport_nonce' ),
 
 			// Localized strings
 			'loading_text'       => esc_html( __( 'Loading...', 'spss12-import-prom-woo' ) ),

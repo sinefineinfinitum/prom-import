@@ -13,9 +13,9 @@ class SettingController extends BaseController
         public OptionRepositoryInterface $optionRepository,
     ){
     }
-	public function prom_settings_page_content(): void
+	public function settings_page_content(): void
     {
-		$spssUrl = $this->optionRepository->getOption( XmlService::URL_SETTING_OPTION, '');
+		$spssUrl = $this->optionRepository->getOption( XmlService::SINEFINE_PROMIMPORT_URL_OPTION, '');
         $this->render( 'settings', ['spssUrl' => $spssUrl] );
 	}
 }

@@ -13,7 +13,7 @@
                    name="url">
             <a href="#"
                id="import-config"
-               data-nonce="<?php echo esc_attr(wp_create_nonce('prom_importer_nonce')); ?>"
+               data-nonce="<?php echo esc_attr(wp_create_nonce('sinefine_promimport_nonce')); ?>"
                class="import-config button-primary">
                 <?php echo esc_html(__('Save xml url and update cache', 'spss12-import-prom-woo')) ?>
             </a>

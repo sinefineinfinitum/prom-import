@@ -16,14 +16,14 @@
          * Get full REST API URL
          */
         getUrl(endpoint) {
-            return `${promImporterAjaxObj.rest_url}${this.namespace}${endpoint}`;
+            return `${sinefinePromimportAjax.rest_url}${this.namespace}${endpoint}`;
         },
 
         /**
          * Get nonce for REST API requests
          */
         getNonce() {
-            return promImporterAjaxObj.rest_nonce || wp.apiFetch?.nonceMiddleware?.nonce;
+            return sinefinePromimportAjax.rest_nonce || wp.apiFetch?.nonceMiddleware?.nonce;
         },
 
         /**
@@ -95,7 +95,7 @@
                 throw new Error(response.message || 'Import failed');
             }
         } catch (error) {
-            alert(error.message || promImporterAjaxObj.error_text || 'An error occurred');
+            alert(error.message || sinefinePromimportAjax.error_text || 'An error occurred');
             console.error('Product import error:', error);
             throw error;
         }
@@ -127,7 +127,7 @@
 
 
             if (mappings.length === 0) {
-                alert(promImporterAjaxObj.no_categories_text || 'No categories selected');
+                alert(sinefinePromimportAjax.no_categories_text || 'No categories selected');
                 return;
             }
 
@@ -137,7 +137,7 @@
 
             if (response.success) {
                 btn
-                    .text(promImporterAjaxObj.saved_text || 'Saved')
+                    .text(sinefinePromimportAjax.saved_text || 'Saved')
                     .removeClass('import-category')
                     .attr('data-nonce', '')
                     .prop('disabled', true)
@@ -151,7 +151,7 @@
 
             return response;
         } catch (error) {
-            alert(error.message || promImporterAjaxObj.error_text || 'An error occurred');
+            alert(error.message || sinefinePromimportAjax.error_text || 'An error occurred');
             console.error('Categories import error:', error);
             throw error;
         }
@@ -175,7 +175,7 @@
                 throw new Error(response.message || 'Config save failed');
             }
         } catch (error) {
-            alert(error.message || promImporterAjaxObj.error_text || 'An error occurred');
+            alert(error.message || sinefinePromimportAjax.error_text || 'An error occurred');
             console.error('Config save error:', error);
             throw error;
         }
@@ -208,7 +208,7 @@
         const originalText = $btn.text();
 
         // Disable button and show loading state
-        $btn.prop('disabled', true).text(promImporterAjaxObj.loading_text || 'Importing...');
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.loading_text || 'Importing...');
 
         try {
             await import_product(
@@ -223,7 +223,7 @@
 
             // Success: update button state
             $btn
-                .text(promImporterAjaxObj.imported_text || 'Imported')
+                .text(sinefinePromimportAjax.imported_text || 'Imported')
                 .removeClass('import-product')
                 .addClass('button-disabled')
                 .attr('data-nonce', '');
@@ -241,7 +241,7 @@
         const originalText = $btn.text();
 
         // Disable button and show loading state
-        $btn.prop('disabled', true).text(promImporterAjaxObj.loading_text || 'Saving...');
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.loading_text || 'Saving...');
 
         try {
             await import_categories($btn.attr('data-nonce'), $btn);
@@ -260,7 +260,7 @@
         const url = $("#url").val();
 
         // Disable button and show loading state
-        $btn.prop('disabled', true).text(promImporterAjaxObj.loading_text || 'Saving...');
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.loading_text || 'Saving...');
 
         try {
             await import_config($btn.attr('data-nonce'), url);
@@ -272,7 +272,7 @@
     /**
      * Expose API for external usage (optional)
      */
-    window.PromImporter = {
+    window.sinefinePromimporter = {
         RestAPI,
         importProduct: import_product,
         importCategories: import_categories,

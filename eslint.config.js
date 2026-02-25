@@ -11,7 +11,7 @@ export default [
 				$: 'readonly',
 				wp: 'readonly',
 				console: 'readonly',
-				promImporterAjaxObj: 'readonly',
+				sinefinePromimportAjax: 'readonly',
 				fetch: 'readonly',
 				alert: 'readonly'
 			}
