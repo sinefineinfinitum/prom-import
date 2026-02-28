@@ -200,6 +200,8 @@ class ImportRestController extends WP_REST_Controller
 
 	/**
 	 * Check if the user has permission
+	 * @template T of WP_REST_Request
+	 * @param T $request
 	 */
 	public function check_permission(WP_REST_Request $request): bool
 	{

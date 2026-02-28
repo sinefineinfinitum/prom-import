@@ -114,11 +114,10 @@ jobs:
       - name: Creating Release
         uses: ncipollo/release-action@v1
         with:
-          body: |
-            Changes in this Release: 
-            ${{ steps.changelog.outputs.changelog }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
           name: Release ${{ env.GITHUB_REF_SLUG }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "build/spss12-import-prom-woo.zip"
