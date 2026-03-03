@@ -1,4 +1,9 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+use SineFine\PromImport\Application\Import\Dto\CategoryDto;
+
+?>
 <div class="wrap">
 	<h1>
 		<?php echo esc_html(__('Categories Importer', 'spss12-import-prom-woo')) ?>
@@ -8,7 +13,7 @@
 			<li>
 				<?php
 				/* translators: %s: Total number of categories */
-				printf(esc_html(__('Total Categories: %s', 'spss12-import-prom-woo')), esc_html(count($spssCategories)));
+				printf(esc_html(__('Total Categories: %s', 'spss12-import-prom-woo')), esc_html(count($sinefine_promimport_categories)));
 				?>
 			</li>
             <li>
@@ -30,33 +35,37 @@
 			</thead>
 			<tbody id="append-result">
 			<?php
-			/** @var \SineFine\PromImport\Application\Import\Dto\CategoryDto $spssCategory */
-			foreach ($spssCategories as $spssKey => $spssCategory):?>
+			/** @var CategoryDto $sinefine_promimport_category */
+			foreach ($sinefine_promimport_categories as $sinefine_promimport_key => $sinefine_promimport_category):?>
 				<tr>
                     <td>
                         <span>
-                            <?php echo esc_html($spssCategory->id) ?>
+                            <?php echo esc_html($sinefine_promimport_category->id) ?>
                         </span>
                     </td>
 					<td>
-						<a href="<?php echo esc_url($spssCategory->id) ?>" target="_blank">
-							<h3><?php echo esc_html($spssCategory->name) ?></h3>
+						<a href="<?php echo esc_url($sinefine_promimport_category->id) ?>" target="_blank">
+							<h3><?php echo esc_html($sinefine_promimport_category->name) ?></h3>
 						</a>
 					</td>
                     <td>
-                        <select name="cat" id="category-<?php echo esc_html($spssKey); ?>" class="postform" tabindex="1">
+                        <select name="cat"
+                                id="category-<?php echo esc_html($sinefine_promimport_key); ?>"
+                                class="postform" tabindex="1">
                             <option value="0">None category</option>
                             <?php
-                                $spssIsAlreadySelected = false;
-                                foreach ( $spssExistingCategories as $existingCategory ) {
-                                    $spssIsSaved     = $existingCategory->cat_ID == ( $spssSavedCategories[$spssCategory->id] ?? false);
-                                    if ($spssIsSaved) $spssIsAlreadySelected = true;
-                                    $spssIsEqualName = (sanitize_title(sanitize_title($spssCategory->name), '', 'query')
-                                                   === $existingCategory->slug) && !$spssIsSaved && !$spssIsAlreadySelected; ?>
-                            <option class="level-<?php echo count( get_ancestors($existingCategory->id, 'spssCategory') ) ?>"
-                                    <?php if ( $spssIsSaved OR $spssIsEqualName ): ?>selected="selected"<?php endif; ?>
-                                    value="<?php echo esc_html($existingCategory->cat_ID); ?>"><?php echo esc_html($existingCategory->name); ?></option>
-                            <?php }; ?>
+                                $sinefine_promimport_is_already_selected = false;
+                                foreach ( $sinefine_promimport_existing_categories as $sinefine_promimport_existing_category ) {
+                                    $sinefine_promimport_is_saved = $sinefine_promimport_existing_category->cat_ID == ( $sinefine_promimport_saved_categories[$sinefine_promimport_category->id] ?? false);
+                                    if ($sinefine_promimport_is_saved) {
+                                        $sinefine_promimport_is_already_selected = true;
+                                    }
+                                    $spssIsEqualName = (sanitize_title(sanitize_title($sinefine_promimport_category->name), '', 'query')
+                                                   === $sinefine_promimport_existing_category->slug) && !$sinefine_promimport_is_saved && !$sinefine_promimport_is_already_selected; ?>
+                            <option class="level-<?php echo count( get_ancestors($sinefine_promimport_existing_category->id, 'sinefine_promimport_category') ) ?>"
+                                    <?php if ( $sinefine_promimport_is_saved OR $spssIsEqualName ): ?>selected="selected"<?php endif; ?>
+                                    value="<?php echo esc_html($sinefine_promimport_existing_category->cat_ID); ?>"><?php echo esc_html($sinefine_promimport_existing_category->name); ?></option>
+                            <?php } ?>
                         </select>
                     </td>
 				</tr>
