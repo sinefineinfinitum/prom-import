@@ -141,13 +141,6 @@ if (!function_exists('term_exists')) {
     }
 }
 
-if (!function_exists('add_settings_error')) {
-	function add_settings_error(string $hoook, string $code, string $text, string $class): bool
-	{
-		return false;
-	}
-}
-
 if(!function_exists('add_filter')) {
 	function add_filter( $hook_name, $callback, $priority = 10, $accepted_args = 1 ): bool
 	{

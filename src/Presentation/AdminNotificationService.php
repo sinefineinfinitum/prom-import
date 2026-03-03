@@ -16,7 +16,6 @@ class AdminNotificationService
 
 	public function renderNoticeResponse(string $responseText, string $type = 'notice-warning'): void
 	{
-		add_settings_error( XmlService::SINEFINE_PROMIMPORT_URL_OPTION, sanitize_title($responseText), $responseText, $type );
 		$this->hooks->addAction(
 			'sinefine_promimport_notices',
 			function ( string $notice ) use ( $type ) {

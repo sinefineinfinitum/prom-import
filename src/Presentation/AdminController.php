@@ -28,10 +28,10 @@ class AdminController extends BaseController {
             $this->render('notification', compact(['message']));
             return;
         }
-        $spssCategories = $this->xmlParser->parseCategories( $xml );
+        $sinefine_promimport_categories = $this->xmlParser->parseCategories( $xml );
 
-        $spssSavedCategories = $this->categoryMappingRepository->getCategoryMapping();
-        $spssExistingCategories = get_categories( [
+        $sinefine_promimport_saved_categories = $this->categoryMappingRepository->getCategoryMapping();
+        $sinefine_promimport_existing_categories = get_categories( [
                 'taxonomy'     => 'product_cat',
                 'show_count'   => 1,
                 'pad_counts'   => 0,
@@ -41,7 +41,7 @@ class AdminController extends BaseController {
 
         $this->render(
 			'categories',
-	        compact( 'spssCategories', 'spssExistingCategories', 'spssSavedCategories' )
+	        compact( 'sinefine_promimport_categories', 'sinefine_promimport_existing_categories', 'sinefine_promimport_saved_categories' )
         );
     }
 
@@ -54,12 +54,12 @@ class AdminController extends BaseController {
             $this->render('notification', compact(['message']));
             return;
         }
-        $totalPages     = 1;
-        $totalProducts  = $this->xmlParser->getTotalProducts( $xml );
+        $sinefine_promimport_total_pages     = 1;
+        $sinefine_promimport_total_products  = $this->xmlParser->getTotalProducts( $xml );
         $categories     = $this->xmlParser->parseCategories( $xml );
-        $spssProducts   = $this->xmlParser->parseProducts( $xml, $categories );
+        $sinefine_promimport_products   = $this->xmlParser->parseProducts( $xml, $categories );
 
-        foreach ( $spssProducts as $product ) {
+        foreach ( $sinefine_promimport_products as $product ) {
             $existedId = $this->productRepository->findIdBySkuId( $product->sku->value() );
             $product->existedId = $existedId ?: null;
 	        $product->categoryName = $product->category
@@ -71,7 +71,7 @@ class AdminController extends BaseController {
 
         $this->render(
             'products',
-            compact( 'spssProducts', 'totalPages', 'totalProducts' )
+            compact( 'sinefine_promimport_products', 'sinefine_promimport_total_pages', 'sinefine_promimport_total_products' )
         );
     }
 }
