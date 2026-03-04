@@ -16,17 +16,19 @@
  * Requires Plugins:  woocommerce
  */
 
-use SineFine\PromImport\Infrastructure\WP\Install;
-use SineFine\PromImport\Infrastructure\WP\Uninstall;
-
 defined('ABSPATH') or die();
-
-define( 'SINEFINE_PROMIMPORT_PLUGIN_DIR', basename(plugin_dir_path( __FILE__ )));
 
 // Composer autoload
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
+} else {
+    wp_die( esc_html( __('Composer autoload not found. Please run `composer install`.', 'spss12-import-prom-woo' )));
 }
+
+use SineFine\PromImport\Infrastructure\WP\Install;
+use SineFine\PromImport\Infrastructure\WP\Uninstall;
+
+define( 'SINEFINE_PROMIMPORT_PLUGIN_DIR', basename(plugin_dir_path( __FILE__ )));
 
 // Check php version
 if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
