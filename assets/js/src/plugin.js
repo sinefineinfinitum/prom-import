@@ -29,7 +29,7 @@
         /**
          * Make a REST API request
          */
-        async request(endpoint, data = {}, method = 'POST') {
+        async request(endpoint, data = {}, method = 'POST', isJsonResponse = true ) {
             try {
                 const response = await fetch(this.getUrl(endpoint), {
                     method: method,
@@ -40,13 +40,13 @@
                     body: JSON.stringify(data)
                 });
 
-                const json = await response.json();
+                const responseBody = isJsonResponse ? await response.json() : await response.text();
 
                 if (!response.ok) {
-                    throw new Error(json.message || 'Request failed');
+                    throw new Error(response.message || 'Request failed');
                 }
 
-                return json;
+                return responseBody;
             } catch (error) {
                 console.error('REST API Error:', error);
                 throw error;
