@@ -27,16 +27,50 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: composer, cs2pr
+          tools: composer, cs2pr, wp-cli
           extensions: zip, simplexml
 
-      - name: Update environment config for GitHub Actions
-        env:
-          PLUGIN_SLUG: ${{ github.event.repository.name }}
+      - name: Setup WordPress, install plugin and run server
         run: |
-          find . -depth \( -name '.env.testing' \) -exec sed -i "s/TEST_SITE_DB_HOST=\"127.0.0.1\"/TEST_SITE_DB_HOST=\"127.0.0.1:${{ job.services.mysql.ports['3306'] }}\"/g" {} +
-          find . -depth \( -name '.env.testing' -o -name '*.cest' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
-          find . -depth \( -name 'dump.sql' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
+          wp core download
+          wp config create --dbname=wordpress --dbuser=root --dbpass=password --dbhost=127.0.0.1:${{ job.services.mysql.ports['3306'] }}
+          wp core install --url="http://127.0.0.1:8080" --title="Test" --admin_user="admin" --admin_password="password" --admin_email="test@test.com" --skip-email
+          # install required WooCommerce plugin
+          wp plugin install woocommerce --activate
+          # place plugin into wp-content/plugins 
+          mkdir -p wp-content/plugins/spss12-import-prom-woo
+          cp -R spss12-import-prom-woo.php src assets templates languages readme.txt README.md wp-content/plugins/spss12-import-prom-woo/
+          # create application password for REST auth
+          echo "APP_PWD=$(wp user application-password create admin 'CI' --porcelain)" >> $GITHUB_ENV
+          # run the server with a router to handle WordPress front controller routing
+          php -S 127.0.0.1:8080 .github/router.php &
+          # wait for server
+          for i in {1..30}; do curl -sSf http://127.0.0.1:8080 >/dev/null && break || sleep 1; done
+
+      - name: Verify WordPress
+        run: |
+          curl -sSfI http://127.0.0.1:8080 || (echo "WP not responding" && exit 1)
+          echo "--- /wp-json ---"
+          curl -sSfi http://127.0.0.1:8080/wp-json | head -n 20 || true
+
+      - name: Authenticate admin and obtain REST nonce
+        run: |
+          # Login to WP Admin and store cookies
+          curl -sS -c .github/cookies.txt -b .github/cookies.txt \
+            -d "log=admin&pwd=password&wp-submit=Log In&redirect_to=/wp-admin/&testcookie=1" \
+            -X POST http://127.0.0.1:8080/wp-login.php
+          # Verify auth (should get 200 on /wp-admin/)
+          curl -sS -I -b .github/cookies.txt http://127.0.0.1:8080/wp-admin/ | head -n 1 || true
+          # Obtain REST nonce for the logged-in session
+          echo "NONCE=$(curl -sS -b .github/cookies.txt http://127.0.0.1:8080/.github/rest-nonce.php)" >> $GITHUB_ENV
+
+#      - name: Update environment config for GitHub Actions
+#        env:
+#          PLUGIN_SLUG: ${{ github.event.repository.name }}
+#        run: |
+#          find . -depth \( -name '.env.testing' \) -exec sed -i "s/TEST_SITE_DB_HOST=\"127.0.0.1\"/TEST_SITE_DB_HOST=\"127.0.0.1:${{ job.services.mysql.ports['3306'] }}\"/g" {} +
+#          find . -depth \( -name '.env.testing' -o -name '*.cest' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
+#          find . -depth \( -name 'dump.sql' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
 
       - name: Read .env.testing
         uses: c-py/action-dotenv-to-setenv@v2
@@ -51,9 +85,55 @@ jobs:
         continue-on-error: true
         run: composer install  --no-interaction --prefer-dist --no-progress
 
+      - name: Activate plugin
+        continue-on-error: true
+        run: |
+          cp -R vendor wp-content/plugins/spss12-import-prom-woo/
+          wp plugin activate spss12-import-prom-woo    
+
       - name: Run PHPStan to add annotations to the code
         continue-on-error: true
         run: vendor/bin/phpstan analyse -c phpstan.neon --memory-limit 1G --no-progress --error-format=checkstyle | cs2pr
 
       - name: Run PhpUnit
         run: vendor/bin/phpunit -c phpunit.xml.dist
+
+      - name: Verify REST API config endpoint
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/config' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json" \
+               -d '{"url": "https://prom.ua"}'
+
+      - name: Verify REST API categories endpoint
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/categories' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json" \
+               -d '{"categories": [{"id": 1, "selected": 2}]}'
+
+      - name: Verify REST API products endpoint
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/product' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json" \
+               -d '{
+                 "product_id": 123,
+                 "product_title": "Test Product",
+                 "product_description": "Description here",
+                 "product_price": 99.99,
+                 "product_category": 1,
+                 "product_featured_media": []
+               }'
