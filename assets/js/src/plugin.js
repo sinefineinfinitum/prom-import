@@ -166,7 +166,7 @@
                 url: url || '',
             };
 
-            const response = await RestAPI.request(RestAPI.endpoints.config, data);
+            const response = await RestAPI.request(RestAPI.endpoints.config, data, true);
 
             if (response.success && response.data?.edit_url) {
                 window.open(response.data.edit_url, '_blank');
