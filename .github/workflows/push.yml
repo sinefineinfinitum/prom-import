@@ -40,7 +40,7 @@ jobs:
           sleep 5
 
       - name: Verify WordPress
-        run: curl -f http://127.0.0.1
+        run: curl -f http://127.0.0.1:8080
 
       - name: Update environment config for GitHub Actions
         env:
