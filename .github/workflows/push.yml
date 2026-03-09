@@ -70,10 +70,30 @@ jobs:
       - name: Run PhpUnit
         run: vendor/bin/phpunit -c phpunit.xml.dist
 
-      - name: Verify REST API config
+      - name: Verify REST API config endpoint
         run: |
-          curl -f -X POST http://127.0.0.1 \
+          curl -f -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/config \
             -H "Content-Type: application/json" \
             -H "X-WP-Nonce: ${{ env.REST_NONCE }}" \
             -d '{"url": "https://prom.ua"}'
 
+      - name: Verify REST API categories endpoint
+        run: |
+          curl -f -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/categories \
+            -H "Content-Type: application/json" \
+            -H "X-WP-Nonce: ${{ env.REST_NONCE }}" \
+            -d '{"url": "https://prom.ua"}'
+
+      - name: Verify REST API products endpoint
+        run: |
+          curl -f -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/product \
+            -H "Content-Type: application/json" \
+            -H "X-WP-Nonce: ${{ env.REST_NONCE }}" \
+            -d '{
+            "product_id": 123,
+            "product_title": "Test Product",
+            "product_description": "Description here",
+            "product_price": 99.99,
+            "product_category": 1,
+            "product_featured_media": []
+          }'
