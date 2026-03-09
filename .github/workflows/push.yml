@@ -61,5 +61,5 @@ jobs:
       - name: Verify WordPress is running and REST API is accessible
         run: |
           # Use curl to check the default posts endpoint
-          curl -f http://127.0.0.1:8080/wp-json/wp/v2/posts 
+          curl -f http://127.0.0.1:80/wp-json/wp/v2/posts 
           # The -f flag makes curl fail if the HTTP request is not successful (e.g., 404 or 500 errors)
