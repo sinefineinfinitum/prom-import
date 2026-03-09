@@ -35,9 +35,16 @@ jobs:
           wp core download
           wp config create --dbname=wordpress --dbuser=root --dbpass=password --dbhost=127.0.0.1:${{ job.services.mysql.ports['3306'] }}
           wp core install --url="http://127.0.0.1:8080" --title="Test" --admin_user="admin" --admin_password="password" --admin_email="test@test.com" --skip-email
-          # run the server
-          php -S 127.0.0.1:8080 &
-          sleep 5
+          # place plugin into wp-content/plugins and activate it
+          mkdir -p wp-content/plugins/spss12-import-prom-woo
+          cp -R spss12-import-prom-woo.php src assets templates vendor languages readme.txt README.md wp-content/plugins/spss12-import-prom-woo/
+          wp plugin activate spss12-import-prom-woo
+          # create application password for REST auth
+          echo "APP_PWD=$(wp user application-password create admin 'CI' --porcelain)" >> $GITHUB_ENV
+          # run the server with a router to handle WordPress front controller routing
+          php -S 127.0.0.1:8080 .github/router.php &
+          # wait for server
+          for i in {1..30}; do curl -sSf http://127.0.0.1:8080 >/dev/null && break || sleep 1; done
 
       - name: Verify WordPress
         run: curl -f http://127.0.0.1:8080
@@ -71,32 +78,35 @@ jobs:
         run: vendor/bin/phpunit -c phpunit.xml.dist
 
       - name: Verify REST API config endpoint
+        env:
+          APP_PWD: ${{ env.APP_PWD }}
         run: >
-          curl  -f \
-                -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/config \
-                -H "Content-Type: application/json" \
-                -H "X-WP-Nonce: ${{ env.REST_NONCE }}" \
-                -d '{"url": "https://prom.ua"}'
+          curl -f -u admin:${APP_PWD} \
+               -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/config \
+               -H "Content-Type: application/json" \
+               -d '{"url": "https://prom.ua"}'
 
       - name: Verify REST API categories endpoint
+        env:
+          APP_PWD: ${{ env.APP_PWD }}
         run: >
-          curl  -f \
-                -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/categories \
-                -H "Content-Type: application/json" \
-                -H "X-WP-Nonce: ${{ env.REST_NONCE }}" \
-                -d '{"categories": [{"id": "xml_1", "selected": "woo_category_slug"},]}'
+          curl -f -u admin:${APP_PWD} \
+               -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/categories \
+               -H "Content-Type: application/json" \
+               -d '{"categories": [{"id": 1, "selected": 2}]}'
 
       - name: Verify REST API products endpoint
+        env:
+          APP_PWD: ${{ env.APP_PWD }}
         run: >
-          curl  -f \
-                -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/product \
-                -H "Content-Type: application/json" \
-                -H "X-WP-Nonce: ${{ env.REST_NONCE }}" \
-                -d '{ \
-                  "product_id": 123, \
-                  "product_title": "Test Product", \
-                  "product_description": "Description here", \
-                  "product_price": 99.99, \
-                  "product_category": 1, \
-                  "product_featured_media": [] \
-                }'
+          curl -f -u admin:${APP_PWD} \
+               -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/product \
+               -H "Content-Type: application/json" \
+               -d '{
+                 "product_id": 123,
+                 "product_title": "Test Product",
+                 "product_description": "Description here",
+                 "product_price": 99.99,
+                 "product_category": 1,
+                 "product_featured_media": []
+               }'
