@@ -30,15 +30,14 @@ jobs:
           tools: composer, cs2pr, wp-cli
           extensions: zip, simplexml
 
-      - name: Setup WordPress
+      - name: Setup WordPress, install plugin and run server
         run: |
           wp core download
           wp config create --dbname=wordpress --dbuser=root --dbpass=password --dbhost=127.0.0.1:${{ job.services.mysql.ports['3306'] }}
           wp core install --url="http://127.0.0.1:8080" --title="Test" --admin_user="admin" --admin_password="password" --admin_email="test@test.com" --skip-email
-          # place plugin into wp-content/plugins and activate it
+          # place plugin into wp-content/plugins 
           mkdir -p wp-content/plugins/spss12-import-prom-woo
-          cp -R spss12-import-prom-woo.php src assets templates vendor languages readme.txt README.md wp-content/plugins/spss12-import-prom-woo/
-          wp plugin activate spss12-import-prom-woo
+          cp -R spss12-import-prom-woo.php src assets templates languages readme.txt README.md wp-content/plugins/spss12-import-prom-woo/
           # create application password for REST auth
           echo "APP_PWD=$(wp user application-password create admin 'CI' --porcelain)" >> $GITHUB_ENV
           # run the server with a router to handle WordPress front controller routing
@@ -49,13 +48,13 @@ jobs:
       - name: Verify WordPress
         run: curl -f http://127.0.0.1:8080
 
-      - name: Update environment config for GitHub Actions
-        env:
-          PLUGIN_SLUG: ${{ github.event.repository.name }}
-        run: |
-          find . -depth \( -name '.env.testing' \) -exec sed -i "s/TEST_SITE_DB_HOST=\"127.0.0.1\"/TEST_SITE_DB_HOST=\"127.0.0.1:${{ job.services.mysql.ports['3306'] }}\"/g" {} +
-          find . -depth \( -name '.env.testing' -o -name '*.cest' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
-          find . -depth \( -name 'dump.sql' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
+#      - name: Update environment config for GitHub Actions
+#        env:
+#          PLUGIN_SLUG: ${{ github.event.repository.name }}
+#        run: |
+#          find . -depth \( -name '.env.testing' \) -exec sed -i "s/TEST_SITE_DB_HOST=\"127.0.0.1\"/TEST_SITE_DB_HOST=\"127.0.0.1:${{ job.services.mysql.ports['3306'] }}\"/g" {} +
+#          find . -depth \( -name '.env.testing' -o -name '*.cest' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
+#          find . -depth \( -name 'dump.sql' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
 
       - name: Read .env.testing
         uses: c-py/action-dotenv-to-setenv@v2
@@ -69,6 +68,12 @@ jobs:
       - name: Run composer install
         continue-on-error: true
         run: composer install  --no-interaction --prefer-dist --no-progress
+
+      - name: Activate plugin
+        continue-on-error: true
+        run: |
+          cp -R vendor wp-content/plugins/spss12-import-prom-woo/
+          wp plugin activate spss12-import-prom-woo    
 
       - name: Run PHPStan to add annotations to the code
         continue-on-error: true
