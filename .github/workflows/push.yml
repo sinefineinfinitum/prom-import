@@ -35,6 +35,8 @@ jobs:
           wp core download
           wp config create --dbname=wordpress --dbuser=root --dbpass=password --dbhost=127.0.0.1:${{ job.services.mysql.ports['3306'] }}
           wp core install --url="http://127.0.0.1:8080" --title="Test" --admin_user="admin" --admin_password="password" --admin_email="test@test.com" --skip-email
+          # install required WooCommerce plugin
+          wp plugin install woocommerce --activate
           # place plugin into wp-content/plugins 
           mkdir -p wp-content/plugins/spss12-import-prom-woo
           cp -R spss12-import-prom-woo.php src assets templates languages readme.txt README.md wp-content/plugins/spss12-import-prom-woo/
@@ -46,7 +48,10 @@ jobs:
           for i in {1..30}; do curl -sSf http://127.0.0.1:8080 >/dev/null && break || sleep 1; done
 
       - name: Verify WordPress
-        run: curl -f http://127.0.0.1:8080
+        run: |
+          curl -sSfI http://127.0.0.1:8080 || (echo "WP not responding" && exit 1)
+          echo "--- /wp-json ---"
+          curl -sSfi http://127.0.0.1:8080/wp-json | head -n 20 || true
 
 #      - name: Update environment config for GitHub Actions
 #        env:
@@ -87,7 +92,8 @@ jobs:
           APP_PWD: ${{ env.APP_PWD }}
         run: >
           curl -f -u admin:${APP_PWD} \
-               -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/config \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/config' \
+               -H "Accept: application/json" \
                -H "Content-Type: application/json" \
                -d '{"url": "https://prom.ua"}'
 
@@ -96,7 +102,8 @@ jobs:
           APP_PWD: ${{ env.APP_PWD }}
         run: >
           curl -f -u admin:${APP_PWD} \
-               -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/categories \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/categories' \
+               -H "Accept: application/json" \
                -H "Content-Type: application/json" \
                -d '{"categories": [{"id": 1, "selected": 2}]}'
 
@@ -105,7 +112,8 @@ jobs:
           APP_PWD: ${{ env.APP_PWD }}
         run: >
           curl -f -u admin:${APP_PWD} \
-               -X POST http://127.0.0.1:8080/wp-json/spss12-prom-import/v1/import/product \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/product' \
+               -H "Accept: application/json" \
                -H "Content-Type: application/json" \
                -d '{
                  "product_id": 123,
