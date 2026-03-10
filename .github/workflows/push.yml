@@ -91,7 +91,7 @@ jobs:
         env:
           APP_PWD: ${{ env.APP_PWD }}
         run: >
-          curl -f -u admin:${APP_PWD} \
+          curl -f --user "admin:${APP_PWD}" \
                -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/config' \
                -H "Accept: application/json" \
                -H "Content-Type: application/json" \
@@ -101,7 +101,7 @@ jobs:
         env:
           APP_PWD: ${{ env.APP_PWD }}
         run: >
-          curl -f -u admin:${APP_PWD} \
+          curl -f --user "admin:${APP_PWD}" \
                -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/categories' \
                -H "Accept: application/json" \
                -H "Content-Type: application/json" \
@@ -111,7 +111,7 @@ jobs:
         env:
           APP_PWD: ${{ env.APP_PWD }}
         run: >
-          curl -f -u admin:${APP_PWD} \
+          curl -f --user "admin:${APP_PWD}" \
                -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/product' \
                -H "Accept: application/json" \
                -H "Content-Type: application/json" \
