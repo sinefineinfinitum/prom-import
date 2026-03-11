@@ -80,7 +80,6 @@ class ContainerConfig {
 					get( WpHttpClient::class ),
 					get( FeedRepositoryInterface::class ),
 					get( XmlParserInterface::class ),
-					get( AdminNotificationService::class ),
                     get(OptionRepositoryInterface::class ),
 					get( LoggerInterface::class )
 				),

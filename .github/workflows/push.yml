@@ -64,14 +64,6 @@ jobs:
           # Obtain REST nonce for the logged-in session
           echo "NONCE=$(curl -sS -b .github/cookies.txt http://127.0.0.1:8080/.github/rest-nonce.php)" >> $GITHUB_ENV
 
-#      - name: Update environment config for GitHub Actions
-#        env:
-#          PLUGIN_SLUG: ${{ github.event.repository.name }}
-#        run: |
-#          find . -depth \( -name '.env.testing' \) -exec sed -i "s/TEST_SITE_DB_HOST=\"127.0.0.1\"/TEST_SITE_DB_HOST=\"127.0.0.1:${{ job.services.mysql.ports['3306'] }}\"/g" {} +
-#          find . -depth \( -name '.env.testing' -o -name '*.cest' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
-#          find . -depth \( -name 'dump.sql' \) -exec sed -i "s/localhost:8080\/${{ env.PLUGIN_SLUG }}/localhost:8080/g" {} +
-
       - name: Read .env.testing
         uses: c-py/action-dotenv-to-setenv@v2
         with:
@@ -97,17 +89,6 @@ jobs:
 
       - name: Run PhpUnit
         run: vendor/bin/phpunit -c phpunit.xml.dist
-
-      - name: Verify REST API config endpoint
-        env:
-          NONCE: ${{ env.NONCE }}
-        run: >
-          curl -f -b .github/cookies.txt \
-               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/config' \
-               -H "Accept: application/json" \
-               -H "X-WP-Nonce: ${NONCE}" \
-               -H "Content-Type: application/json" \
-               -d '{"url": "https://prom.ua"}'
 
       - name: Verify REST API categories endpoint
         env:
@@ -137,3 +118,14 @@ jobs:
                  "product_category": 1,
                  "product_featured_media": []
                }'
+
+      - name: Verify REST API config endpoint
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/config' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json" \
+               -d '{"url": "https://prom.ua"}'
