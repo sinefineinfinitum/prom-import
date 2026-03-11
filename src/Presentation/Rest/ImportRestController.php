@@ -186,7 +186,8 @@ class ImportRestController extends WP_REST_Controller
                     __('Invalid or missing config url', 'spss12-import-prom-woo')
                 );
             }
-            $url = $this->xmlService->validateUrlAndSaveXml($url);
+            $url = $this->xmlService->validateUrl($url);
+            $url = $this->xmlService->validateDownloadAndSaveXml($url);
 
             return new WP_REST_Response([
                 'success' => true,
@@ -294,7 +295,7 @@ class ImportRestController extends WP_REST_Controller
     }
 
 	/**
-	 * Handle exception and return appropriate REST response
+	 * Handle exception and return the appropriate REST response
 	 */
 	private function handle_exception( Throwable $e): WP_Error
 	{
