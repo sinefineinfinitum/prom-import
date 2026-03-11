@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Application\Import;
 
-use Exception;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -16,7 +15,6 @@ use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
-use SineFine\PromImport\Presentation\AdminNotificationService;
 
 class XmlService
 {
@@ -25,33 +23,45 @@ class XmlService
 		private WpHttpClient $httpClient,
 		private FeedRepositoryInterface $feedRepository,
 		private XmlParserInterface $xmlParser,
-		private AdminNotificationService $notificationService,
         private OptionRepositoryInterface $optionRepository,
 		private LoggerInterface $logger,
 	) {}
 
-	public function validateUrlAndSaveXml( string $url ): string
+    /**
+     * @throws DownloadException
+     * @throws InvalidXmlException
+     * @throws InvalidArgumentException
+     */
+    public function validateDownloadAndSaveXml(string $url ): string
 	{
-		$oldValue = $this->optionRepository->getOption( self::SINEFINE_PROMIMPORT_URL_OPTION );
+        $responseBody = $this->downloadXmlContent( $url );
+        $this->xmlParser->validateFormat( $responseBody );
+        $this->saveXml($url, $responseBody);
 
-		try {
-			if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
-				throw new InvalidArgumentException( 'Invalid URL provided' );
-			}
+        return $url;
+	}
 
-			$responseBody = $this->downloadXmlContent( $url );
-			$this->xmlParser->validateFormat( $responseBody );
-
-			$feedDto = FeedDto::create( $url, $responseBody );
-			$this->feedRepository->save( $feedDto );
-            $this->optionRepository->updateOption(self::SINEFINE_PROMIMPORT_URL_OPTION, $url);
-
-			return esc_url_raw( $url );
-
-		} catch ( Exception $e ) {
-			$this->notificationService->renderNoticeResponse( $e->getMessage(), 'notice-error' );
-			return is_string( $oldValue ) ? $oldValue : '';
+	/**
+	 * Validate URL format.
+	 * @throws InvalidArgumentException
+	 */
+	public function validateUrl(string $url): string
+	{
+		if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+			throw new InvalidArgumentException( 'Invalid URL provided' );
 		}
+
+		return esc_url_raw( $url );
+	}
+    
+	/**
+	 * Persist an XML and update plugin option with source URL.
+	 */
+	public function saveXml(string $url, string $responseBody): void
+	{
+		$feedDto = FeedDto::create( $url, $responseBody );
+		$this->feedRepository->save( $feedDto );
+		$this->optionRepository->updateOption(self::SINEFINE_PROMIMPORT_URL_OPTION, $url);
 	}
 
 	/**

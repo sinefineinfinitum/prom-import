@@ -4,135 +4,151 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Tests;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
-use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
+use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
-use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
-use SineFine\PromImport\Presentation\AdminNotificationService;
 use SineFine\PromImport\Tests\Fake\FakeFeedRepository;
+use WP_Error;
 
 class XmlServiceTest extends TestCase
 {
-    private $httpClient;
-    private $xmlParser;
+    private WpHttpClient $httpClient;
+    private XmlParserInterface $xmlParser;
     private OptionRepositoryInterface $optionRepository;
     private FakeFeedRepository $feedRepository;
     private XmlService $xmlService;
-	private LoggerInterface $logger;
-	private AdminNotificationService $notificationService;
 
-	protected function setUp(): void
+    protected function setUp(): void
     {
-		$this->httpClient = $this->createMock(WpHttpClient::class);
-        $this->xmlParser = $this->getMockBuilder(XmlParser::class)
-	        ->onlyMethods([ 'validateFormat'])
-	        ->getMock();
-
-        $this->optionRepository = $this->getMockBuilder(OptionRepository::class)
-	                                    ->onlyMethods(['updateOption','getOption'])
-                                       ->getMock();
+        $this->httpClient = $this->createMock(WpHttpClient::class);
+        $this->xmlParser = $this->createMock(XmlParserInterface::class);
+        $this->optionRepository = $this->createMock(OptionRepositoryInterface::class);
         $this->feedRepository = new FakeFeedRepository();
-		$this->logger = $this->createMock(LoggerInterface::class);
-		$this->notificationService = $this->getMockBuilder(AdminNotificationService::class)
-		                                  ->disableOriginalConstructor()
-											->onlyMethods(['renderNoticeResponse'])
-		                                  ->getMock();
+        $logger = $this->createMock(LoggerInterface::class);
 
-        $this->xmlService = $this->getMockBuilder(XmlService::class)
-                                 ->setConstructorArgs(
-									 [
-										 'httpClient' => $this->httpClient,
-										 'xmlParser' => $this->xmlParser,
-										 'feedRepository' => $this->feedRepository,
-										 'optionRepository' => $this->optionRepository,
-										 'notificationService' => $this->notificationService,
-										 'logger' => $this->logger,
-									 ]
-                                 )
-                                 ->onlyMethods([ 'downloadXmlContent',])
-                                 ->getMock();
+        $this->xmlService = new XmlService(
+            httpClient: $this->httpClient,
+            feedRepository: $this->feedRepository,
+            xmlParser: $this->xmlParser,
+            optionRepository: $this->optionRepository,
+            logger: $logger,
+        );
     }
 
-    public function test_validateUrlAndSaveXml_saves_feed_on_success(): void
+    public function test_validateUrl_returns_sanitized_on_valid_url(): void
+    {
+        $input = 'https://example.com/path';
+        $result = $this->xmlService->validateUrl($input);
+
+        $this->assertSame('https://example.com/path', $result);
+    }
+
+    public function test_validateUrl_throws_on_invalid_url(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid URL provided');
+        $this->xmlService->validateUrl('not-a-url');
+    }
+
+    /**
+     * @throws DownloadException
+     * @throws InvalidXmlException
+     */
+    public function test_downloadValidateAndSaveXml_saves_feed_and_updates_option_on_success(): void
     {
         $url = 'https://example.com/feed.xml';
-        $xmlContent = '<root><item>test</item></root>';
-	    //$this->httpClient->expects(self::once());
+        $xmlContent = '<shop></shop>';
 
-
-        $this->httpClient->method('get')->willReturn([
+        $this->httpClient->method('get')->with($url)->willReturn([
             'response' => ['code' => 200],
-            'body' => $xmlContent
+            'body' => $xmlContent,
         ]);
+
         $this->xmlParser->expects($this->once())
             ->method('validateFormat')
             ->with($xmlContent);
 
-	    $this->xmlService->method('downloadXmlContent')
-		    ->with($url)
-		    ->willReturn($xmlContent);
+        $this->optionRepository->expects($this->once())
+            ->method('updateOption')
+            ->with(XmlService::SINEFINE_PROMIMPORT_URL_OPTION, $url);
 
-        $result = $this->xmlService->validateUrlAndSaveXml($url);
+        $result = $url = $this->xmlService->validateUrl($url);
+        $result = $this->xmlService->validateDownloadAndSaveXml($result);
+
         $this->assertSame($url, $result);
         $this->assertCount(1, $this->feedRepository->savedFeeds);
-        $this->assertSame($xmlContent, $this->feedRepository->getLatest()->content());
+        $this->assertSame($xmlContent, $this->feedRepository->getLatest()?->content());
     }
 
-    public function test_validateUrlAndSaveXml_handles_download_exception(): void
+    /**
+     * @throws InvalidXmlException
+     */
+    public function test_downloadValidateAndSaveXml_throws_on_download_error(): void
     {
         $url = 'https://example.com/feed.xml';
+        $this->httpClient->method('get')->with($url)->willReturn(new WP_Error('http_error', 'Network error'));
 
-		$this->xmlService->method('downloadXmlContent')
-			->willThrowException(new DownloadException());
-
-        $this->optionRepository->method('getOption')->willReturn('');
-
-        $result = $this->xmlService->validateUrlAndSaveXml($url);
-
-        $this->assertSame('', $result);
-        $this->assertCount(0, $this->feedRepository->savedFeeds);
+        $this->expectException(DownloadException::class);
+        $this->xmlService->validateDownloadAndSaveXml($url);
     }
 
-    public function test_validateUrlAndSaveXml_handles_invalid_xml_exception(): void
+    /**
+     * @throws DownloadException
+     */
+    public function test_downloadValidateAndSaveXml_throws_on_invalid_xml(): void
     {
         $url = 'https://example.com/feed.xml';
-        $this->httpClient->method('get')->willReturn([
+        $this->httpClient->method('get')->with($url)->willReturn([
             'response' => ['code' => 200],
-            'body' => 'invalid'
+            'body' => 'invalid-xml',
         ]);
 
         $this->xmlParser->method('validateFormat')
             ->willThrowException(new InvalidXmlException('Invalid XML'));
 
-        $this->optionRepository->method('getOption')->willReturn('');
-
-        $result = $this->xmlService->validateUrlAndSaveXml($url);
-
-        $this->assertSame('', $result);
-        $this->assertCount(0, $this->feedRepository->savedFeeds);
+        $this->expectException(InvalidXmlException::class);
+        $this->xmlService->validateDownloadAndSaveXml($url);
     }
 
-	/**
-	 * @throws InvalidXmlException
-	 */
-	public function test_getXml_returns_simplexmlelement_on_success(): void
+    /**
+     * @throws InvalidXmlException
+     */
+    public function test_getXml_returns_SimpleXMLElement_on_success(): void
     {
         $xmlContent = '<?xml version="1.0" encoding="UTF-8"?><root><item>test</item></root>';
         $this->feedRepository->setLatest(new Feed(time(), 'example.com', $xmlContent));
 
         $xml = $this->xmlService->getXml();
-
-        $this->assertSame('test', (string)$xml->item);
+        $this->assertSame('test', (string) $xml->item);
     }
 
-    public function test_getUrl_returns_option_value(): void
+    /**
+     * @throws InvalidXmlException
+     */
+    public function test_getXml_throws_when_no_feed_found(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Feed not found');
+        $this->xmlService->getXml();
+    }
+
+    public function test_getXml_throws_on_invalid_xml_content(): void
+    {
+        $this->feedRepository->setLatest(new Feed(time(), 'example.com', 'invalid'));
+        $this->expectException(InvalidXmlException::class);
+        $this->expectExceptionMessage('Invalid XML');
+        $this->xmlService->getXml();
+    }
+
+    public function test_getUrl_returns_configured_url(): void
     {
         $this->optionRepository->method('getOption')
             ->with(XmlService::SINEFINE_PROMIMPORT_URL_OPTION)
@@ -141,15 +157,25 @@ class XmlServiceTest extends TestCase
         $this->assertSame('https://example.com', $this->xmlService->getUrl());
     }
 
-    public function test_getUrl_throws_exception_if_option_empty(): void
+    public function test_getUrl_throws_when_empty(): void
     {
         $this->optionRepository->method('getOption')
             ->with(XmlService::SINEFINE_PROMIMPORT_URL_OPTION)
             ->willReturn('');
 
-        $this->expectException( RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('XML URL is not configured');
+        $this->xmlService->getUrl();
+    }
 
+    public function test_getUrl_throws_when_invalid_format(): void
+    {
+        $this->optionRepository->method('getOption')
+            ->with(XmlService::SINEFINE_PROMIMPORT_URL_OPTION)
+            ->willReturn('not-a-url');
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid XML URL provided');
         $this->xmlService->getUrl();
     }
 }
