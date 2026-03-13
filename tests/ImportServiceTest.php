@@ -34,6 +34,18 @@ class ImportServiceTest extends TestCase
         $this->assertSame('has no title', $res->code);
     }
 
+	public function test_import_returns_error_when_product_not_saved(): void
+	{
+		$repo = new FakeProductRepository(123, true);
+		$mapping = new FakeCategoryMappingRepository();
+		$service = $this->createService($repo, $mapping);
+
+		$dto = new ProductDto(new Sku(1), 'title', 'desc', new Price(10));
+		$res = $service->importProductFromDto($dto);
+		$this->assertTrue(is_wp_error($res));
+		$this->assertSame('Failed to save product', $res->code);
+	}
+
     public function test_import_saves_product_and_adds_gallery_images_skipping_first(): void
     {
         $repo = new FakeProductRepository(42);

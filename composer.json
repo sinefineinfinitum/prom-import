@@ -20,7 +20,8 @@
     "phpstan/extension-installer": "^1.4.3",
     "szepeviktor/phpstan-wordpress": "^2.0.3",
     "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^10.5"
+    "phpunit/phpunit": "^10.5",
+    "infection/infection": "^0.29.8"
   },
   "autoload": {
     "psr-4": {
@@ -36,7 +37,8 @@
     "vendor-dir": "vendor",
     "allow-plugins": {
       "composer/installers": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "infection/extension-installer": true
     }
   },
   "scripts": {

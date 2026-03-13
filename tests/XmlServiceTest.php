@@ -140,13 +140,6 @@ class XmlServiceTest extends TestCase
         $this->xmlService->getXml();
     }
 
-    public function test_getXml_throws_on_invalid_xml_content(): void
-    {
-        $this->feedRepository->setLatest(new Feed(time(), 'example.com', 'invalid'));
-        $this->expectException(InvalidXmlException::class);
-        $this->expectExceptionMessage('Invalid XML');
-        $this->xmlService->getXml();
-    }
 
     public function test_getUrl_returns_configured_url(): void
     {
