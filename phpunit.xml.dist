@@ -10,7 +10,7 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <source restrictDeprecations="true">
+    <source>
         <include>
             <directory>src</directory>
         </include>

@@ -12,17 +12,21 @@ class FakeProductRepository implements ProductRepositoryInterface
 	public array $savedProducts = [];
 	public array $galleryImages = [];
 
-	public function __construct(private int $returnId)
-	{
-	}
+	public function __construct(
+		private int $returnId,
+		private bool $shouldReturnError = false,
+	) {}
 
 	public function findIdBySku(Sku $sku): int|false
 	{
 		return false;
 	}
 
-	public function save(Product $product): int|WP_Error
+	public function save(?Product $product): int|WP_Error
 	{
+		if( $this->shouldReturnError) {
+			return new WP_Error('Failed to save product', 'error');
+		}
 		$this->savedProducts[] = $product;
 		return $this->returnId;
 	}
