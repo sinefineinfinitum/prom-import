@@ -12,6 +12,7 @@ use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
+use SineFine\PromImport\Domain\Product\ImageAttachable;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Admin\Assets;
 use SineFine\PromImport\Infrastructure\Admin\MenuPage;
@@ -23,6 +24,7 @@ use SineFine\PromImport\Infrastructure\Logging\HandlerInterface;
 use SineFine\PromImport\Infrastructure\Logging\WpLogger;
 use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
+use SineFine\PromImport\Infrastructure\Persistence\ImageProductService;
 use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Presentation\AdminController;
@@ -47,8 +49,10 @@ class ContainerConfig {
 	{
 		return [
 			//Interfaces
+			ImageAttachable::class => create( ImageProductService::class ),
 			ProductRepositoryInterface::class         => autowire( ProductRepository::class )
 				->constructor(
+					get( ImageAttachable::class ),
 					get( LoggerInterface::class )
 				),
 			CategoryMappingRepositoryInterface::class => autowire( CategoryMappingRepository::class ),

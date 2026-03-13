@@ -9,12 +9,14 @@ use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Product\Product;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
+use SineFine\PromImport\Infrastructure\File\FileService;
 use WP_Error;
 use WP_Query;
 
 class ProductRepository implements ProductRepositoryInterface
 {
 	public function __construct(
+		private ImageAttachable $imageService,
 		private LoggerInterface $logger
 	) {}
 
@@ -111,7 +113,7 @@ class ProductRepository implements ProductRepositoryInterface
         if (! empty($dto->mediaUrls)) {
             $first = reset($dto->mediaUrls);
             if ($first) {
-                $this->assignFeatureImageToProduct($first, (int) $postId, $dto->title);
+                $this->imageService->assignFeatureImageToProduct($first, (int) $postId, $dto->title);
             }
         }
 
@@ -170,50 +172,10 @@ class ProductRepository implements ProductRepositoryInterface
         if (! empty($media)) {
             $first = reset($media);
             if ($first) {
-                $this->assignFeatureImageToProduct($first, (int) $postId, $product->title());
+                $this->imageService->assignFeatureImageToProduct($first, (int) $postId, $product->title());
             }
         }
 
         return (int) $postId;
     }
-
-    public function assignFeatureImageToProduct(string $url, int $postId, string $title = ''): void
-    {
-        include_once ABSPATH . 'wp-admin/includes/media.php';
-        include_once ABSPATH . 'wp-admin/includes/file.php';
-        include_once ABSPATH . 'wp-admin/includes/image.php';
-		$attachmentId = media_sideload_image($url, $postId, $title, 'id');
-        if (! is_wp_error($attachmentId) && is_numeric($attachmentId)) {
-            set_post_thumbnail($postId, (int) $attachmentId);
-        } elseif (is_wp_error($attachmentId)) {
-	        $this->logger->error('Failed to sideload featured image from {url} for product {post_id}: {error}', [
-		        'url' => $url,
-		        'post_id' => $postId,
-		        'error' => $attachmentId->get_error_message()
-	        ]);
-        }
-    }
-
-	public function addImageToProductGallery(string $url, int $postId, string $title = ''): void
-	{
-		include_once ABSPATH . 'wp-admin/includes/media.php';
-		include_once ABSPATH . 'wp-admin/includes/file.php';
-		include_once ABSPATH . 'wp-admin/includes/image.php';
-		$attachmentId = media_sideload_image($url, $postId, $title, 'id');
-		if (is_wp_error($attachmentId)) {
-			$this->logger->error('Failed to sideload gallery image from {url} for product {post_id}: {error}', [
-				'url' => $url,
-				'post_id' => $postId,
-				'error' => $attachmentId->get_error_message()
-			]);
-			return;
-		}
-
-		if ( is_null( get_post_meta( $postId, "_product_image_gallery" ) ) ) {
-			add_post_meta( $postId, "_product_image_gallery", $attachmentId );
-		} else {
-			$images_meta = get_post_meta( $postId, "_product_image_gallery", true );
-			update_post_meta( $postId, "_product_image_gallery", $images_meta . "," . $attachmentId );
-		}
-	}
 }
