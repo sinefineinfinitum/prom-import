@@ -128,7 +128,7 @@ jobs:
                -H "Accept: application/json" \
                -H "X-WP-Nonce: ${NONCE}" \
                -H "Content-Type: application/json" \
-               -d '{"url": "https://gist.githubusercontent.com/sorbing/bd64b781f7c67e7a780c60727f321b84/raw/8af6a1e88cf278f9f7a3048f48fbc8421569e520/"}'
+               -d '{"url": "https://gist.githubusercontent.com/sinefineinfinitum/3eb94b5bb04db8051837fa0dc79dfea5/raw/0a474c1db84b2f93a7cd485f41551e55eea1d59b/gistfile1.txt"}'
 
       - name: Verify REST API update price endpoint
         env:
