@@ -9,7 +9,8 @@
         endpoints: {
             product: '/import/product',
             categories: '/import/categories',
-            config: '/import/config'
+            config: '/import/config',
+            updatePrices: '/import/update-prices'
         },
 
         /**
@@ -179,6 +180,27 @@
     }
 
     /**
+     * Update all product prices via REST API
+     */
+    async function update_prices(nonce) {
+        try {
+            const response = await RestAPI.request(RestAPI.endpoints.updatePrices, {}, 'POST', true);
+
+            if (response.success) {
+                alert(response.message || 'Prices updated successfully');
+                location.reload();
+                return response;
+            } else {
+                throw new Error(response.message || 'Update failed');
+            }
+        } catch (error) {
+            alert(error.message || sinefinePromimportAjax.error_text || 'An error occurred');
+            console.error('Update prices error:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Show admin notice (if wp.notices available)
      */
     function showNotice(message, type = 'success') {
@@ -266,6 +288,24 @@
             $btn.prop('disabled', false).text(originalText);
         }
     });
+    // Update prices
+    $('#update-prices').on('click', async function(event) {
+        event.preventDefault();
+
+        const $btn = $(this);
+        const originalText = $btn.text();
+
+        // Disable button and show loading state
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.loading_text || 'Updating...');
+
+        try {
+            await update_prices($btn.attr('data-nonce'));
+        } catch (error) {
+            // Error: restore button
+            $btn.prop('disabled', false).text(originalText);
+        }
+    });
+
     /**
      * Expose API for external usage (optional)
      */
@@ -274,6 +314,7 @@
         importProduct: import_product,
         importCategories: import_categories,
         importConfig: import_config,
+        updatePrices: update_prices,
     };
 
     console.log('Prom Importer REST API initialized');

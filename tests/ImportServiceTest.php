@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Application\Import\ImportService;
-use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Product\ImageAttachable;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
@@ -20,12 +19,11 @@ use WP_Term;
 class ImportServiceTest extends TestCase
 {
     private LoggerInterface $logger;
-    private XmlParserInterface $xmlParser;
 	private function createService($repo, $mapping, $imageService): ImportService
 	{
 		$this->logger = $this->createMock(LoggerInterface::class);
-		$this->xmlParser = $this->createMock(XmlParserInterface::class);
-		return new ImportService($repo, $imageService, $mapping, $this->xmlParser, $this->logger );
+
+		return new ImportService($repo, $imageService, $mapping, $this->logger);
 	}
 
     public function test_import_returns_error_when_title_is_empty(): void

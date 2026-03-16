@@ -123,9 +123,19 @@ jobs:
         env:
           NONCE: ${{ env.NONCE }}
         run: >
-          curl  -b .github/cookies.txt \
+          curl  -f -b .github/cookies.txt \
                -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/config' \
                -H "Accept: application/json" \
                -H "X-WP-Nonce: ${NONCE}" \
                -H "Content-Type: application/json" \
                -d '{"url": "https://gist.githubusercontent.com/sorbing/bd64b781f7c67e7a780c60727f321b84/raw/8af6a1e88cf278f9f7a3048f48fbc8421569e520/"}'
+
+      - name: Verify REST API update price endpoint
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl  -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/update-prices' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json"

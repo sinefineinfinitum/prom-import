@@ -19,3 +19,5 @@ find . -type d \( -path ./cache -o -path ./node_modules -o -path ./tests -o -pat
   -o -name 'LICENSE' -o -name '*.txt' \) -print \
 | zip spss12-import-prom-woo.zip -@
  ## php composer.phar install
+ # for mutation test need to install pcov
+ # pecl install pcov

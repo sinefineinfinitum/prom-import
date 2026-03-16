@@ -132,6 +132,7 @@ class ContainerConfig {
 					get( CategoryMappingRepositoryInterface::class ),
                     get(XmlService::class ),
                     get(OptionRepositoryInterface::class ),
+					get( ProductRepositoryInterface::class ),
                     get( LoggerInterface::class )
 				),
 

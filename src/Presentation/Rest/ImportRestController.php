@@ -13,6 +13,7 @@ use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Exception\DomainException;
 use SineFine\PromImport\Domain\Exception\InvalidImportException;
+use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use Throwable;
@@ -31,6 +32,7 @@ class ImportRestController extends WP_REST_Controller
 		private CategoryMappingRepositoryInterface $categoryMappingRepository,
         private XmlService $xmlService,
         private OptionRepositoryInterface $optionRepository,
+		private ProductRepositoryInterface $productRepository,
 		private LoggerInterface $logger,
 	) {}
 
@@ -68,6 +70,16 @@ class ImportRestController extends WP_REST_Controller
                 'args'                => $this->get_config_import_args(),
             ],
         ]);
+
+		// POST /wp-json/spss12-prom-import/v1/import/update-prices
+		register_rest_route($this->namespace, '/' . $this->rest_base . '/update-prices', [
+			[
+				'methods'             => 'POST',
+				'callback'            => [$this, 'update_prices'],
+				'permission_callback' => [$this, 'check_permission'],
+				'args'                => [],
+			],
+		]);
 	}
 
 	/**
@@ -196,6 +208,41 @@ class ImportRestController extends WP_REST_Controller
                 'data'    => $url,
             ], 200);
         } catch ( Throwable $e) {
+            return $this->handle_exception($e);
+        }
+    }
+
+    /**
+     * Update all product prices from XML
+     *
+     * @template T of WP_REST_Request
+     * @param T $request
+     */
+    public function update_prices(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        try {
+            $xml = $this->xmlService->getXml();
+            $products = $this->xmlService->getProductsFromXml($xml);
+            $updatedCount = 0;
+
+            foreach ($products as $productDto) {
+                $postId = $this->productRepository->updateProductPrice($productDto);
+                if ($postId && !is_wp_error($postId)) {
+                    $updatedCount++;
+                }
+            }
+
+            return new WP_REST_Response([
+                'success' => true,
+                'message' => sprintf(
+                    esc_html(__('Successfully updated prices for %d products', 'spss12-import-prom-woo')),
+                    $updatedCount
+                ),
+                'data'    => [
+                    'updated_count' => $updatedCount,
+                ],
+            ], 200);
+        } catch (Throwable $e) {
             return $this->handle_exception($e);
         }
     }

@@ -57,67 +57,6 @@ class ProductRepository implements ProductRepositoryInterface
         return $this->findIdBySkuId($sku->value());
     }
 
-    /**
-     * Create or update WooCommerce product from ProductDto.
-     * Returns post ID or WP_Error.
-     */
-    public function upsertFromDto(ProductDto $dto): int|WP_Error
-    {
-        $scu_id = $dto->sku->value();
-        $existing = $this->findIdBySkuId($scu_id);
-
-        $postArr = [
-            'post_type'    => 'product',
-            'post_title'   => sanitize_text_field($dto->title),
-            'post_status'  => 'publish',
-            'post_author'  => get_current_user_id(),
-            'post_excerpt' => wp_kses_post($dto->description),
-            'post_content' => wp_kses_post($dto->description),
-        ];
-
-        if ($existing) {
-            $postArr['ID'] = $existing;
-            $postId = wp_update_post($postArr, true);
-        } else {
-            $postId = wp_insert_post($postArr, true);
-        }
-
-        if (is_wp_error($postId)) {
-            return $postId;
-        }
-
-        // Store source id
-        update_post_meta($postId, '_sku', $scu_id );
-
-        // Set product type
-        wp_set_object_terms($postId, 'simple', 'product_type');
-
-        // Woo product data
-        if (function_exists('wc_get_product')) {
-            $product = wc_get_product($postId);
-            if ($product) {
-                $product->set_virtual(true);
-                $product->set_downloadable(true);
-                $amount = $dto->price->amount();
-                if ($amount > 0) {
-                    $product->set_price($amount);
-                    $product->set_regular_price($amount);
-                }
-                $product->save();
-            }
-        }
-
-        // Featured image: use first available media url
-        if (! empty($dto->mediaUrls)) {
-            $first = reset($dto->mediaUrls);
-            if ($first) {
-                $this->imageService->assignFeatureImageToProduct($first, (int) $postId, $dto->title);
-            }
-        }
-
-        return (int) $postId;
-    }
-
 	/**
 	 * Persist Domain Product and return post ID or WP_Error
 	 * @param Product $product
@@ -177,4 +116,33 @@ class ProductRepository implements ProductRepositoryInterface
 
         return (int) $postId;
     }
+
+	public function updateProductPrice(ProductDto $dto): int|false|WP_Error
+	{
+		$postId = $this->findIdBySku( $dto->sku );
+		if ( ! $postId ) {
+			return false;
+		}
+
+		if ( ! function_exists( 'wc_get_product' ) ) {
+			return new WP_Error( 'no function', esc_html( __( 'No wc_get_product function', 'spss12-import-prom-woo' ) ) );
+		}
+
+		$product = wc_get_product( $postId );
+		if ( ! $product ) {
+			return false;
+		}
+
+		$amount = $dto->price->amount();
+
+		if ( $amount > 0 ) {
+			$product->set_price( $amount );
+			$product->set_regular_price( $amount );
+			$product->save();
+
+			return $postId;
+		}
+		return false;
+	}
+
 }
