@@ -2,7 +2,8 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          bootstrap="tests/bootstrap.php"
          colors="true"
-         executionOrder="default"
+         executionOrder="random"
+         resolveDependencies="true"
          beStrictAboutTestsThatDoNotTestAnything="false"
          displayDetailsOnTestsThatTriggerWarnings="true"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd">

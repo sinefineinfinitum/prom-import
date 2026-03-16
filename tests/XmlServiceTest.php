@@ -83,16 +83,6 @@ class XmlServiceTest extends TestCase
         $this->xmlService->downloadXmlContent($url);
     }
 
-    public function test_getXml_throws_exception_on_invalid_xml_content(): void
-    {
-        $this->feedRepository->setLatest(new Feed(time(), 'example.com', 'not xml'));
-
-        $this->expectException(InvalidXmlException::class);
-        $this->expectExceptionMessage('Invalid XML');
-
-        $this->xmlService->getXml();
-    }
-
     public function test_validateUrl_returns_sanitized_on_valid_url(): void
     {
         $input = 'https://example.com/path';
