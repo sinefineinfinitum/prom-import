@@ -13,20 +13,23 @@ use SineFine\PromImport\Domain\Product\Product;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SineFine\PromImport\Tests\Fake\FakeCategoryMappingRepository;
+use SineFine\PromImport\Tests\Fake\FakeImageService;
 use SineFine\PromImport\Tests\Fake\FakeProductRepository;
 
 class ImportServiceTest extends TestCase
 {
-	private function createService($repo, $mapping): ImportService
+	private function createService($repo, $mapping, $imageService): ImportService
 	{
-		return new ImportService($repo, $mapping, $this->createMock(LoggerInterface::class));
+		$loggerService = $this->createMock(LoggerInterface::class);
+		return new ImportService($repo, $imageService, $mapping, $loggerService );
 	}
 
     public function test_import_returns_error_when_title_is_empty(): void
     {
         $repo = new FakeProductRepository(123);
         $mapping = new FakeCategoryMappingRepository();
-        $service = $this->createService($repo, $mapping);
+	    $imageService = new FakeImageService();
+        $service = $this->createService($repo, $mapping, $imageService);
 
         $dto = new ProductDto(new Sku(1), '', 'desc', new Price(10));
         $res = $service->importProductFromDto($dto);
@@ -38,7 +41,8 @@ class ImportServiceTest extends TestCase
 	{
 		$repo = new FakeProductRepository(123, true);
 		$mapping = new FakeCategoryMappingRepository();
-		$service = $this->createService($repo, $mapping);
+		$imageService = new FakeImageService();
+		$service = $this->createService($repo, $mapping, $imageService);
 
 		$dto = new ProductDto(new Sku(1), 'title', 'desc', new Price(10));
 		$res = $service->importProductFromDto($dto);
@@ -50,7 +54,8 @@ class ImportServiceTest extends TestCase
     {
         $repo = new FakeProductRepository(42);
         $mapping = new FakeCategoryMappingRepository();
-        $service = $this->createService($repo, $mapping);
+	    $imageService = new FakeImageService();
+        $service = $this->createService($repo, $mapping, $imageService);
 
         $dto = new ProductDto(
             new Sku(10),
@@ -64,33 +69,31 @@ class ImportServiceTest extends TestCase
 
         $postId = $service->importProductFromDto($dto);
         $this->assertSame(42, $postId);
-        // save called once with Product
+
         $this->assertCount(1, $repo->savedProducts);
         $this->assertInstanceOf(Product::class, $repo->savedProducts[0]);
-        // gallery added for all except first
-        $this->assertSame([
-            ['https://img/2.jpg', 42, 'Title'],
-            ['https://img/3.jpg', 42, 'Title'],
-        ], $repo->galleryImages);
-        // featured not directly tested here (handled inside repository)
+		$this->assertSame(5, $repo->savedProducts[0]->category->id);
+        $this->assertSame([], $imageService->galleryImages);
     }
 
     public function test_addCategoryForProduct_returns_zero_when_no_mapping(): void
     {
         $repo = new FakeProductRepository(1);
         $mapping = new FakeCategoryMappingRepository([]);
-        $service = $this->createService($repo, $mapping);
+	    $imageService = new FakeImageService();
+        $service = $this->createService($repo, $mapping, $imageService);
 
-        $this->assertSame(0, $service->addCategoryForProduct(10, 999));
+        $this->assertSame(0, $service->addCategoryToProduct(10, 999));
     }
 
     public function test_addCategoryForProduct_returns_zero_when_term_not_exists(): void
     {
         $repo = new FakeProductRepository(1);
         $mapping = new FakeCategoryMappingRepository([777 => 777]);
-        $service = $this->createService($repo, $mapping);
+	    $imageService = new FakeImageService();
+        $service = $this->createService($repo, $mapping, $imageService);
 
-        $res = $service->addCategoryForProduct(10, 2);
+        $res = $service->addCategoryToProduct(10, 2);
         $this->assertTrue($res === 0);
     }
 }

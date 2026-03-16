@@ -90,6 +90,7 @@ class ContainerConfig {
 			ImportService::class => autowire( ImportService::class )
 				->constructor(
 					get( ProductRepositoryInterface::class ),
+					get( ImageAttachable::class ),
 					get( CategoryMappingRepositoryInterface::class ),
 					get( LoggerInterface::class )
 				),
