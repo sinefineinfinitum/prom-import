@@ -168,10 +168,7 @@
 
             const response = await RestAPI.request(RestAPI.endpoints.config, data, 'POST', true);
 
-            if (response.success && response.data?.edit_url) {
-                window.open(response.data.edit_url, '_blank');
-                return response;
-            } else {
+            if (!response.success) {
                 throw new Error(response.message || 'Config save failed');
             }
         } catch (error) {
