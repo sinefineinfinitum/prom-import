@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\Persistence;
 
-use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Product\ImageAttachable;
 use SineFine\PromImport\Domain\Product\Product;
@@ -17,7 +16,6 @@ class ProductRepository implements ProductRepositoryInterface
 {
 	public function __construct(
 		private ImageAttachable $imageService,
-		private LoggerInterface $logger
 	) {}
 
 	/**

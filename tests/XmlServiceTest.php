@@ -24,6 +24,7 @@ class XmlServiceTest extends TestCase
     private XmlParserInterface $xmlParser;
     private OptionRepositoryInterface $optionRepository;
     private FakeFeedRepository $feedRepository;
+    private LoggerInterface $logger;
     private XmlService $xmlService;
 
     protected function setUp(): void
@@ -32,15 +33,64 @@ class XmlServiceTest extends TestCase
         $this->xmlParser = $this->createMock(XmlParserInterface::class);
         $this->optionRepository = $this->createMock(OptionRepositoryInterface::class);
         $this->feedRepository = new FakeFeedRepository();
-        $logger = $this->createMock(LoggerInterface::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->xmlService = new XmlService(
             httpClient: $this->httpClient,
             feedRepository: $this->feedRepository,
             xmlParser: $this->xmlParser,
             optionRepository: $this->optionRepository,
-            logger: $logger,
+            logger: $this->logger,
         );
+    }
+
+    public function test_downloadXmlContent_throws_exception_on_wp_error(): void
+    {
+        $url = 'https://example.com/feed.xml';
+        $error = new WP_Error('test_error', 'Test error message');
+
+        $this->httpClient->expects($this->once())
+            ->method('get')
+            ->with($url)
+            ->willReturn($error);
+
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                'Failed to fetch XML from {url}: {error}',
+                ['url' => $url, 'error' => 'Test error message']
+            );
+
+        $this->expectException(DownloadException::class);
+        $this->expectExceptionMessage('Failed to fetch XML from ' . $url . ' : Test error message');
+
+        $this->xmlService->downloadXmlContent($url);
+    }
+
+    public function test_downloadXmlContent_throws_exception_on_non_200_code(): void
+    {
+        $url = 'https://example.com/feed.xml';
+        $response = ['response' => ['code' => 404]];
+
+        $this->httpClient->expects($this->once())
+            ->method('get')
+            ->with($url)
+            ->willReturn($response);
+
+        $this->expectException(DownloadException::class);
+        $this->expectExceptionMessage('Failed to fetch XML. HTTP Code:404');
+
+        $this->xmlService->downloadXmlContent($url);
+    }
+
+    public function test_getXml_throws_exception_on_invalid_xml_content(): void
+    {
+        $this->feedRepository->setLatest(new Feed(time(), 'example.com', 'not xml'));
+
+        $this->expectException(InvalidXmlException::class);
+        $this->expectExceptionMessage('Invalid XML');
+
+        $this->xmlService->getXml();
     }
 
     public function test_validateUrl_returns_sanitized_on_valid_url(): void

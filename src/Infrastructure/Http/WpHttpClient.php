@@ -20,7 +20,7 @@ class WpHttpClient
 		    'user-agent' => $this->getRandomUserAgent(),
 		    'headers' => $this->getHeader(),
 	    ]);
-
+		/** @var array<string, mixed> $args */
 		$response = wp_remote_get($url, $args);
 
 	    if (is_wp_error($response)) {
@@ -50,7 +50,7 @@ class WpHttpClient
 	{
 		try {
 			return UserAgent::random();
-		} catch ( Exception $e ) {
+		} catch ( Exception ) {
 			return new WP_Error(
 				'problem with user agent',
 				esc_html(__('Problem with user agent generation', 'spss12-import-prom-woo'))

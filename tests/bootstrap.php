@@ -48,6 +48,17 @@ if (!function_exists('esc_html__')) {
 	}
 }
 
+if (!class_exists('WP_Term')) {
+    class WP_Term
+    {
+        public int $term_id;
+        public function __construct(int $id)
+        {
+            $this->term_id = $id;
+        }
+    }
+}
+
 if (!class_exists('WP_Error')) {
     class WP_Error
     {

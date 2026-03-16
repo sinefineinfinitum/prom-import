@@ -12,6 +12,8 @@
   "require": {
     "php": ">=8.0",
     "ext-simplexml": "*",
+    "ext-xmlreader": "*",
+    "ext-libxml": "*",
     "campo/random-user-agent": "*",
     "php-di/php-di": "^7.1",
     "psr/log": "*"
