@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\FeedDto;
+use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
@@ -120,5 +121,14 @@ class XmlService
 		}
 
 		return $url;
+	}
+
+	/**
+	 * @return ProductDto[]
+	 */
+	public function getProductsFromXml(\SimpleXMLElement $xml): array
+	{
+		$categories = $this->xmlParser->parseCategories($xml);
+		return $this->xmlParser->parseProducts($xml, $categories);
 	}
 }

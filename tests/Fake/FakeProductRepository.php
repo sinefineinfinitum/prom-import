@@ -2,6 +2,7 @@
 
 namespace SineFine\PromImport\Tests\Fake;
 
+use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Product\Product;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
@@ -33,5 +34,9 @@ class FakeProductRepository implements ProductRepositoryInterface
 	public function findIdBySkuId( int $scuId ): int|false
 	{
 		// not needed yet
+	}
+
+	public function updateProductPrice( ProductDto $dto ): int|false|WP_Error {
+		// TODO: Implement updateProductPrice() method.
 	}
 }

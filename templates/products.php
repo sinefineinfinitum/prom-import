@@ -18,6 +18,11 @@
                 ?>
             </li>
         </ul>
+        <div style="margin-bottom: 20px;">
+            <button id="update-prices" class="button-primary" data-nonce="<?php echo esc_attr(wp_create_nonce('sinefine_promimport_nonce')); ?>">
+                <?php echo esc_html(__('Update Price', 'spss12-import-prom-woo')) ?>
+            </button>
+        </div>
         <table class="wp-list-table widefat fixed striped">
             <thead>
             <tr>

@@ -14,7 +14,7 @@ use SineFine\PromImport\Presentation\Rest\ImportRestController;
 
 final class Plugin
 {
-	public const SINEFINE_PROMIMPORT_VERSION = '0.0.6';
+	public const SINEFINE_PROMIMPORT_VERSION = '0.0.8';
 
 	/**
 	 * @throws Exception

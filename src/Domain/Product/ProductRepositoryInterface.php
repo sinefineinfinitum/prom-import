@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Domain\Product;
 
+use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use WP_Error;
 
@@ -16,4 +17,5 @@ interface ProductRepositoryInterface
 
 	/** Persist product and return WP post ID or WP_Error */
     public function save(Product $product): int|WP_Error;
+	public function updateProductPrice(ProductDto $dto): int|false|WP_Error;
 }
