@@ -6,10 +6,10 @@ namespace SineFine\PromImport\Infrastructure\Persistence;
 
 use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Domain\Product\ImageAttachable;
 use SineFine\PromImport\Domain\Product\Product;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
-use SineFine\PromImport\Infrastructure\File\FileService;
 use WP_Error;
 use WP_Query;
 
@@ -120,10 +120,11 @@ class ProductRepository implements ProductRepositoryInterface
         return (int) $postId;
     }
 
-    /**
-     * Persist Domain Product and return post ID or WP_Error
-     * @return int|WP_Error
-     */
+	/**
+	 * Persist Domain Product and return post ID or WP_Error
+	 * @param Product $product
+	 * @return int|WP_Error
+	 */
     public function save(Product $product): int|WP_Error
     {
         $scu_id = $product->sku()->value();

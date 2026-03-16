@@ -35,14 +35,14 @@ class Product
     public function mediaUrls(): array { return $this->mediaUrls; }
     public function link(): string { return $this->link; }
 
-	public static function createFromDto(ProductDto $dto, ?Category $category = null): self
+	public static function createFromDto(ProductDto $dto): self
 	{
 		return new self(
 			$dto->sku,
 			$dto->title,
 			$dto->description,
 			$dto->price,
-			$category,
+			null,
 			$dto->mediaUrls,
 			$dto->link);
 	}

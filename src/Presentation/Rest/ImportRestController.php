@@ -102,12 +102,13 @@ class ImportRestController extends WP_REST_Controller
 			);
 
 			$productId = $this->service->importProductFromDto($dto);
+			$this->service->addMediaToProductGallery( $dto, $productId );
 			if (is_wp_error($productId)) {
 				throw InvalidImportException::importFromDto($productId->get_error_message());
 			}
 
 			if ($externalCategoryId > 0) {
-				$this->service->addCategoryForProduct($productId, $externalCategoryId);
+				$this->service->addCategoryToProduct($productId, $externalCategoryId);
 			}
 
 			return new WP_REST_Response([
