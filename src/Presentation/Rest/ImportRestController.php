@@ -102,10 +102,10 @@ class ImportRestController extends WP_REST_Controller
 			);
 
 			$productId = $this->service->importProductFromDto($dto);
-			$this->service->addMediaToProductGallery( $dto, $productId );
 			if (is_wp_error($productId)) {
 				throw InvalidImportException::importFromDto($productId->get_error_message());
 			}
+			$this->service->addImagesToProductGallery( $dto, $productId );
 
 			if ($externalCategoryId > 0) {
 				$this->service->addCategoryToProduct($productId, $externalCategoryId);

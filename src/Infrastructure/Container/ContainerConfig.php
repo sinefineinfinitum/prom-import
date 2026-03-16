@@ -49,11 +49,13 @@ class ContainerConfig {
 	{
 		return [
 			//Interfaces
-			ImageAttachable::class => create( ImageProductService::class ),
+			ImageAttachable::class => autowire( ImageProductService::class)
+				->constructor(
+					get( LoggerInterface::class ),
+				),
 			ProductRepositoryInterface::class         => autowire( ProductRepository::class )
 				->constructor(
 					get( ImageAttachable::class ),
-					get( LoggerInterface::class )
 				),
 			CategoryMappingRepositoryInterface::class => autowire( CategoryMappingRepository::class ),
 			FeedRepositoryInterface::class            => autowire( FeedRepository::class )

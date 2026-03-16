@@ -6,7 +6,6 @@ namespace SineFine\PromImport\Application\Import;
 
 use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
-use SineFine\PromImport\Domain\Category\Category;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ImageAttachable;
 use SineFine\PromImport\Domain\Product\Product;
@@ -45,11 +44,9 @@ class ImportService
 		        'sku' => $dto->sku->value(),
 		        'error' => $postId->get_error_message()
 	        ]);
-            return $postId;
         }
 
-
-	    return (int) $postId;
+	    return $postId;
     }
 
 	public function addCategoryToProduct(int $productId, int $externalCategoryId): int|WP_Error
@@ -74,7 +71,7 @@ class ImportService
 		}
 	}
 
-	public function addMediaToProductGallery( ProductDto $dto, WP_Error|int $postId ): void {
+	public function addImagesToProductGallery( ProductDto $dto, int $postId ): void {
 	// Add gallery images (featured image is handled inside repository using the first URL)
 		if ( ! empty( $dto->mediaUrls ) ) {
 			$first = $dto->mediaUrls[0] ?? null;
@@ -82,7 +79,7 @@ class ImportService
 				if ( $first !== null && $url === $first ) {
 					continue; // already set as featured in repository
 				}
-				$this->imageService->addImageToProductGallery( $url, (int) $postId, $dto->title );
+				$this->imageService->addImageToProductGallery( $url, $postId, $dto->title );
 			}
 		}
 	}

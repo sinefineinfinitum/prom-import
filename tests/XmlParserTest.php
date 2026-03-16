@@ -7,9 +7,72 @@ namespace SineFine\PromImport\Tests;
 use PHPUnit\Framework\TestCase;
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
 use SineFine\PromImport\Application\Import\XmlParser;
+use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 
 class XmlParserTest extends TestCase
 {
+    public function test_validateFormat_throws_exception_on_empty_content(): void
+    {
+        $parser = new XmlParser();
+        $this->expectException(InvalidXmlException::class);
+        $this->expectExceptionMessage('XML content is empty');
+        $parser->validateFormat('');
+    }
+
+    public function test_validateFormat_throws_exception_on_invalid_xml(): void
+    {
+        $parser = new XmlParser();
+        $this->expectException(InvalidXmlException::class);
+        $this->expectExceptionMessage('Failed to load XML content');
+        // This should cause an error during read() because it's not well-formed
+        $parser->validateFormat('<<<<'); 
+    }
+
+    public function test_validateFormat_throws_exception_on_missing_root_element(): void
+    {
+        $parser = new XmlParser();
+        $this->expectException(InvalidXmlException::class);
+        $this->expectExceptionMessage('Invalid XML structure: missing root element');
+        $parser->validateFormat('<?xml version="1.0" encoding="UTF-8"?><wrong_root></wrong_root>');
+    }
+
+    public function test_validateFormat_passes_on_valid_root_elements(): void
+    {
+        $parser = new XmlParser();
+        $parser->validateFormat('<?xml version="1.0" encoding="UTF-8"?><yml_catalog></yml_catalog>');
+        $parser->validateFormat('<?xml version="1.0" encoding="UTF-8"?><shop></shop>');
+        $this->assertTrue(true); // Should not throw exception
+    }
+
+    public function test_parseCategories_returns_empty_when_no_categories_section(): void
+    {
+        $parser = new XmlParser();
+        $xml = new \SimpleXMLElement('<shop></shop>');
+        $this->assertSame([], $parser->parseCategories($xml));
+    }
+
+    public function test_parseProducts_returns_empty_when_no_offers_section(): void
+    {
+        $parser = new XmlParser();
+        $xml = new \SimpleXMLElement('<shop></shop>');
+        $this->assertSame([], $parser->parseProducts($xml));
+    }
+
+    public function test_parseProducts_skips_offers_with_invalid_id(): void
+    {
+        $parser = new XmlParser();
+        $xml = new \SimpleXMLElement('
+            <shop>
+                <offers>
+                    <offer id="0"><name>Invalid</name></offer>
+                    <offer id="-1"><name>Invalid</name></offer>
+                    <offer><name>No ID</name></offer>
+                </offers>
+            </shop>
+        ');
+        $this->assertSame([], $parser->parseProducts($xml));
+    }
+
     private function sampleXml(): string
     {
         return <<<XML

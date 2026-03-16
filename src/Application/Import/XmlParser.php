@@ -37,12 +37,20 @@ class XmlParser implements XmlParserInterface
                 // For Prom/Rozetka it's usually yml_catalog
                 if ($reader->name === 'yml_catalog' || $reader->name === 'shop') {
                     $reader->close();
+                    libxml_clear_errors();
                     return;
                 }
             }
         }
 
+        if (libxml_get_errors()) {
+            $reader->close();
+            libxml_clear_errors();
+            throw new InvalidXmlException('Failed to load XML content');
+        }
+
         $reader->close();
+        libxml_clear_errors();
         throw new InvalidXmlException('Invalid XML structure: missing root element');
     }
 
