@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Presentation;
 
 use Exception;
+use SineFine\PromImport\Application\Import\ImportApplicationService;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
 use SineFine\PromImport\Domain\Common\XmlParserInterface;
@@ -16,7 +17,14 @@ class AdminController extends BaseController {
 		private XmlService $xmlService,
 		private ProductRepositoryInterface $productRepository,
 		private CategoryMappingRepositoryInterface $categoryMappingRepository,
+        private ImportApplicationService $importAppService,
     ) {
+    }
+
+    public function imports_page(): void
+    {
+        $imports = $this->importAppService->getAllImports();
+        $this->render('imports', compact('imports'));
     }
 
     public function categories_importer(): void
@@ -48,7 +56,21 @@ class AdminController extends BaseController {
     public function products_importer(): void
     {
         try {
-            $xml = $this->xmlService->getXml();
+            $importId = isset($_GET['import_id']) ? (int)$_GET['import_id'] : null;
+            if ($importId) {
+                $import = $this->importAppService->getAllImports();
+                $import = array_filter($import, fn($i) => $i->getId() === $importId);
+                $import = reset($import);
+                if ($import) {
+                    $url = $import->getUrl();
+                    $xmlContent = $this->xmlService->downloadXmlContent($url);
+                    $xml = simplexml_load_string($xmlContent);
+                } else {
+                    $xml = $this->xmlService->getXml();
+                }
+            } else {
+                $xml = $this->xmlService->getXml();
+            }
         } catch ( Exception $exception ) {
             $message = $exception->getMessage();
             $this->render('notification', compact(['message']));

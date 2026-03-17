@@ -27,6 +27,15 @@ class MenuPage
 			    11
 		    );
 
+            add_submenu_page(
+                'spss12-import-prom-woo',
+                esc_html(__('Imports', 'spss12-import-prom-woo')),
+                esc_html(__('Imports', 'spss12-import-prom-woo')),
+                'manage_options',
+                'prom-imports',
+                [$this->adminController, 'imports_page']
+            );
+
 		    add_submenu_page(
 			    'spss12-import-prom-woo',
 			    esc_html(__('Categories Importer', 'spss12-import-prom-woo')),

@@ -3,6 +3,7 @@
 namespace SineFine\PromImport\Infrastructure\Container;
 
 use Psr\Log\LoggerInterface;
+use SineFine\PromImport\Application\Import\ImportApplicationService;
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
@@ -12,6 +13,7 @@ use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
+use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ImageAttachable;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Admin\Assets;
@@ -25,6 +27,7 @@ use SineFine\PromImport\Infrastructure\Logging\WpLogger;
 use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
 use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ImageProductService;
+use SineFine\PromImport\Infrastructure\Persistence\ImportRepository;
 use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Presentation\AdminController;
@@ -32,6 +35,7 @@ use SineFine\PromImport\Presentation\AdminNotificationService;
 use SineFine\PromImport\Presentation\Middleware\AuthMiddleware;
 use SineFine\PromImport\Presentation\Middleware\NonceMiddleware;
 use SineFine\PromImport\Presentation\Rest\ImportRestController;
+use SineFine\PromImport\Presentation\Rest\ImportRestV2Controller;
 use SineFine\PromImport\Presentation\SettingController;
 use function DI\autowire;
 use function DI\create;
@@ -53,6 +57,7 @@ class ContainerConfig {
 				->constructor(
 					get( LoggerInterface::class ),
 				),
+			ImportRepositoryInterface::class          => autowire( ImportRepository::class ),
 			ProductRepositoryInterface::class         => autowire( ProductRepository::class )
 				->constructor(
 					get( ImageAttachable::class ),
@@ -96,6 +101,13 @@ class ContainerConfig {
 					get( CategoryMappingRepositoryInterface::class ),
 					get( LoggerInterface::class )
 				),
+            ImportApplicationService::class => autowire( ImportApplicationService::class )
+                ->constructor(
+                    get( ImportRepositoryInterface::class ),
+                    get( XmlService::class ),
+                    get( XmlParserInterface::class ),
+                    get( ImportService::class )
+                ),
 			AdminNotificationService::class => autowire( AdminNotificationService::class )
 				->constructor(
 					get( HookRegistrar::class ),
@@ -118,10 +130,11 @@ class ContainerConfig {
 				),
 			AdminController::class   => autowire( AdminController::class )
 				->constructor(
-					get( XmlParser::class ),
+					get( XmlParserInterface::class ),
 					get( XmlService::class ),
 					get( ProductRepositoryInterface::class ),
 					get( CategoryMappingRepositoryInterface::class ),
+                    get( ImportApplicationService::class )
 				)
 				->method( 'setMiddlewares',
 					[get(AuthMiddleware::class),]
@@ -135,6 +148,16 @@ class ContainerConfig {
 					get( ProductRepositoryInterface::class ),
                     get( LoggerInterface::class )
 				),
+            ImportRestV2Controller::class => autowire( ImportRestV2Controller::class )
+                ->constructor(
+                    get( ImportService::class ),
+                    get( ImportApplicationService::class ),
+                    get( CategoryMappingRepositoryInterface::class ),
+                    get( XmlService::class ),
+                    get( OptionRepositoryInterface::class ),
+                    get( ProductRepositoryInterface::class ),
+                    get( LoggerInterface::class )
+                ),
 
 			'logger.filepath'     => DIRECTORY_SEPARATOR . SINEFINE_PROMIMPORT_PLUGIN_DIR . DIRECTORY_SEPARATOR . self::LOG_DIRECTORY,
 			'logger.file'     => string('{logger.filepath}/import-plugin.log'),

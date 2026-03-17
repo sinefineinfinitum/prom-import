@@ -20,6 +20,7 @@ class Assets
                 'toplevel_page_spss12-import-prom-woo',
 				'prom-ua-importer_page_prom-products-importer',
 				'prom-ua-importer_page_prom-categories-importer',
+		        'prom-ua-importer_page_prom-imports',
 			] ) ) {
 			return;
 		}
