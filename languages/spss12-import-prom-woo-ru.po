@@ -1,0 +1,272 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: spss12 Importer from Prom.ua to WooCoommerce\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-17 09:46+0000\n"
+"PO-Revision-Date: 2026-03-17 12:20+0000\n"
+"Last-Translator: \n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10 >= 2 && "
+"n%10<=4 &&(n%100<10||n%100 >= 20)? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: spss12-import-prom-woo\n"
+
+#. 1: Current page number, 2: Total number of pages
+#: templates/pagination.php:31
+#, php-format
+msgid "%1$s of %2$s"
+msgstr "%1$s из %2$s"
+
+#. %d: Number of items
+#: templates/pagination.php:8
+msgid "%d items"
+msgstr "%d элементов"
+
+#: templates/products.php:34
+msgid "Action"
+msgstr "Действие"
+
+#: templates/categories.php:9 src/Infrastructure/Admin/MenuPage.php:32
+#: src/Infrastructure/Admin/MenuPage.php:33
+msgid "Categories Importer"
+msgstr "Импортер категорий"
+
+#: templates/products.php:31
+msgid "Category"
+msgstr "Категория"
+
+#: templates/categories.php:31
+msgid "Category Id from xml"
+msgstr "ID категории из XML"
+
+#: templates/categories.php:33
+msgid "Category Name from Woo"
+msgstr "Название категории из Woo"
+
+#: templates/categories.php:32
+msgid "Category Name from xml"
+msgstr "Название категории из XML"
+
+#: spss12-import-prom-woo.php:25
+msgid "Composer autoload not found. Please run `composer install`."
+msgstr "Автозагрузка не найдена. Пожалуйста, выполните `composer install`."
+
+#: templates/pagination.php:25
+msgid "Current Page"
+msgstr "Текущая страница"
+
+#: templates/products.php:32
+msgid "Description"
+msgstr "Описание"
+
+#: src/Infrastructure/WP/Install.php:44
+msgid "Directory is not writable: "
+msgstr "Директория недоступна для записи: "
+
+#: templates/products.php:96
+msgid "Edit Imported"
+msgstr "Редактировать импортированное"
+
+#: src/Infrastructure/Admin/Assets.php:62
+msgid "Error importing product"
+msgstr "Ошибка при импорте товара"
+
+#: src/Presentation/AdminNotificationService.php:23
+msgid "Error: "
+msgstr "Ошибка: "
+
+#: src/Application/Import/XmlService.php:81
+msgid "Failed to fetch XML from "
+msgstr "Не удалось получить XML из "
+
+#: src/Application/Import/XmlService.php:86
+msgid "Failed to fetch XML. HTTP Code:"
+msgstr "Не удалось получить XML. HTTP код:"
+
+#. URI of the plugin
+msgid "https://github.com/sinefineinfinitum/prom-import"
+msgstr "https://github.com/sinefineinfinitum/prom-import"
+
+#: templates/products.php:108
+msgid "Import"
+msgstr "Импорт"
+
+#. Description of the plugin
+msgid "Import products from prom.ua to woo"
+msgstr "Импорт товаров из prom.ua в woo"
+
+#: src/Infrastructure/Admin/Assets.php:63
+msgid "Imported"
+msgstr "Импортировано"
+
+#: src/Infrastructure/Admin/Assets.php:60
+msgid "Importing..."
+msgstr "Импортирование..."
+
+#: src/Presentation/Rest/ImportRestController.php:153
+msgid "Invalid or missing categories data"
+msgstr "Неверные или отсутствующие данные категорий"
+
+#: src/Presentation/Rest/ImportRestController.php:199
+msgid "Invalid or missing config url"
+msgstr "Неверный или отсутствующий URL-адрес конфигурации"
+
+#: src/Domain/Exception/InvalidImportException.php:11
+msgid "Invalid product data: "
+msgstr "Неверные данные товара: "
+
+#: src/Infrastructure/Admin/Assets.php:59
+msgid "Loading..."
+msgstr "Загрузка..."
+
+#: src/Infrastructure/Admin/Assets.php:65
+msgid "No categories selected"
+msgstr "Категории не выбраны"
+
+#: templates/products.php:54
+msgid "No spssImage"
+msgstr "Нет spssImage"
+
+#: src/Application/Import/ImportService.php:70
+msgid "No such category"
+msgstr "Такой категории не существует"
+
+#: src/Infrastructure/Persistence/ProductRepository.php:128
+msgid "No wc_get_product function"
+msgstr "Функция wc_get_product не найдена"
+
+#: templates/products.php:68 templates/products.php:77
+#: templates/products.php:86
+msgid "None"
+msgstr "Нет"
+
+#: templates/notification.php:4
+msgid "Notification"
+msgstr "Уведомление"
+
+#: src/Application/Import/ImportService.php:36
+msgid "Post has no title"
+msgstr "У записи нет заголовка"
+
+#: templates/products.php:33
+msgid "Price"
+msgstr "Цена"
+
+#: src/Infrastructure/Http/WpHttpClient.php:56
+msgid "Problem with user agent generation"
+msgstr "Проблема с генерацией user agent"
+
+#: templates/products.php:4 src/Infrastructure/Admin/MenuPage.php:41
+#: src/Infrastructure/Admin/MenuPage.php:42
+msgid "Products Importer"
+msgstr "Импортер товаров"
+
+#: src/Infrastructure/Admin/MenuPage.php:22
+msgid "Prom Ua Importer"
+msgstr "Импортер Prom Ua"
+
+#: src/Infrastructure/Admin/MenuPage.php:21
+msgid "Prom Ua Importer Catalogs Settings"
+msgstr "Настройки каталогов Импортера Prom Ua"
+
+#: templates/settings.php:4
+msgid "Prom.ua Settings"
+msgstr "Настройки Prom.ua"
+
+#: src/Infrastructure/Http/WpHttpClient.php:30
+msgid "Request timeout. Server respond is too long."
+msgstr "Тайм-аут запроса. Ответ сервера слишком долгий."
+
+#: templates/categories.php:24
+msgid "Save category mapping settings"
+msgstr "Сохранить настройки соответствия категорий"
+
+#: templates/settings.php:18
+msgid "Save xml url and update cache"
+msgstr "Сохранить URL XML и обновить кэш"
+
+#: src/Infrastructure/Admin/Assets.php:64
+msgid "Saved"
+msgstr "Сохранено"
+
+#: src/Presentation/Middleware/NonceMiddleware.php:21
+msgid "Security check failed"
+msgstr "Проверка безопасности не удалась"
+
+#. Author of the plugin
+msgid "spss12"
+msgstr "spss12"
+
+#. Name of the plugin
+msgid "spss12 Importer from Prom.ua to WooCoommerce"
+msgstr "spss12 Импортер из Prom.ua в WooCoommerce"
+
+#: src/Presentation/Rest/ImportRestController.php:128
+#: src/Presentation/Rest/ImportRestController.php:177
+msgid "Successfully imported"
+msgstr "Успешно импортировано"
+
+#: src/Infrastructure/Admin/Assets.php:61
+msgid "Successfully imported!"
+msgstr "Успешно импортировано!"
+
+#: src/Presentation/Rest/ImportRestController.php:207
+msgid "Successfully saved config"
+msgstr "Конфигурация успешно сохранена"
+
+#: src/Presentation/Rest/ImportRestController.php:238
+msgid "Successfully updated prices for %d products"
+msgstr "Успешно обновлены цены для %d товаров"
+
+#: src/Infrastructure/WP/Install.php:41
+msgid "There is no existing directory and cannot create it: "
+msgstr "Директория не существует и её невозможно создать: "
+
+#: spss12-import-prom-woo.php:36
+msgid "This plugin requires PHP 8.0 or higher to function."
+msgstr "Для работы плагина требуется PHP 8.0 или выше."
+
+#: templates/products.php:29
+msgid "Thumbnails"
+msgstr "Миниатюры"
+
+#: templates/products.php:30
+msgid "Title"
+msgstr "Заголовок"
+
+#. %s: Total number of categories
+#: templates/categories.php:16
+#, php-format
+msgid "Total Categories: %s"
+msgstr "Всего категорий: %s"
+
+#. %s: Total number of pages
+#: templates/products.php:17
+#, php-format
+msgid "Total Pages: %s"
+msgstr "Всего страниц: %s"
+
+#. %s: Total number of products
+#: templates/products.php:11
+#, php-format
+msgid "Total Products: %s"
+msgstr "Всего товаров: %s"
+
+#: templates/products.php:23
+msgid "Update Price"
+msgstr "Обновить цену"
+
+#: src/Presentation/Rest/ImportRestController.php:168
+msgid "Validation error: invalid numeric values"
+msgstr "Ошибка валидации: неверные числовые значения"
+
+#: src/Presentation/Rest/ImportRestController.php:162
+msgid "Validation error: missing required fields"
+msgstr "Ошибка валидации: отсутствуют обязательные поля"
+
+#: src/Presentation/Middleware/AuthMiddleware.php:13
+msgid "You do not have sufficient permissions to access this page."
+msgstr "У вас недостаточно прав для доступа к этой странице."
