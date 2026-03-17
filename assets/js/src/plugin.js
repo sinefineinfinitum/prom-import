@@ -172,6 +172,13 @@
             if (!response.success) {
                 throw new Error(response.message || 'Config save failed');
             }
+
+            // Show success notice
+            if (typeof response.message === 'string') {
+                showNotice(response.message, 'success');
+            }
+
+            return response;
         } catch (error) {
             alert(error.message || sinefinePromimportAjax.error_text || 'An error occurred');
             console.error('Config save error:', error);
@@ -211,6 +218,7 @@
             });
         } else {
             // Fallback: show browser alert
+            alert(`${type.toUpperCase()}: ${message}`);
             console.log(`[${type.toUpperCase()}] ${message}`);
         }
     }
@@ -283,6 +291,9 @@
 
         try {
             await import_config($btn.attr('data-nonce'), url);
+
+            // Success: restore button
+            $btn.prop('disabled', false).text(originalText);
         } catch (error) {
             // Error: restore button
             $btn.prop('disabled', false).text(originalText);
