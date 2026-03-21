@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\WP;
 
-use SineFine\PromImport\Application\Import\XmlService;
-use SineFine\PromImport\Domain\Category\Category;
-
 use SineFine\PromImport\Domain\Common\FileServiceInterface;
-use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Container\ContainerConfig;
 use SineFine\PromImport\Infrastructure\File\FileService;
-use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 
 class Uninstall
 {
     public function __construct(
         private ?FileServiceInterface $fileService = null,
-    ){
+    ) {
     }
 	public function run(): void
     {
