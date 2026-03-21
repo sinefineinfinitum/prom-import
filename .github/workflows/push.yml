@@ -116,7 +116,8 @@ jobs:
                -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/update-prices' \
                -H "Accept: application/json" \
                -H "X-WP-Nonce: ${NONCE}" \
-               -H "Content-Type: application/json"
+               -H "Content-Type: application/json" \
+               -d '{}'
 
       - name: Verify REST API import endpoint - create
         env:
