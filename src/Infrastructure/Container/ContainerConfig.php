@@ -3,11 +3,11 @@
 namespace SineFine\PromImport\Infrastructure\Container;
 
 use Psr\Log\LoggerInterface;
-use SineFine\PromImport\Application\Import\ImportApplicationService;
 use SineFine\PromImport\Application\Import\ImportService;
+use SineFine\PromImport\Application\Import\ProductManager;
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
-use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
+use SineFine\PromImport\Domain\Category\CategoryRepositoryInterface;
 use SineFine\PromImport\Domain\Common\FileServiceInterface;
 use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Common\XmlParserInterface;
@@ -15,6 +15,7 @@ use SineFine\PromImport\Domain\Feed\Feed;
 use SineFine\PromImport\Domain\Feed\FeedRepositoryInterface;
 use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ImageAttachable;
+use SineFine\PromImport\Domain\Product\ProductManagerInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Infrastructure\Admin\Assets;
 use SineFine\PromImport\Infrastructure\Admin\MenuPage;
@@ -24,19 +25,19 @@ use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 use SineFine\PromImport\Infrastructure\Logging\FileHandler;
 use SineFine\PromImport\Infrastructure\Logging\HandlerInterface;
 use SineFine\PromImport\Infrastructure\Logging\WpLogger;
-use SineFine\PromImport\Infrastructure\Persistence\CategoryMappingRepository;
+use SineFine\PromImport\Infrastructure\Persistence\CategoryRepository;
 use SineFine\PromImport\Infrastructure\Persistence\FeedRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ImageProductService;
 use SineFine\PromImport\Infrastructure\Persistence\ImportRepository;
 use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
+use SineFine\PromImport\Infrastructure\Queue\QueueManager;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\AdminNotificationService;
 use SineFine\PromImport\Presentation\Middleware\AuthMiddleware;
 use SineFine\PromImport\Presentation\Middleware\NonceMiddleware;
 use SineFine\PromImport\Presentation\Rest\ImportRestController;
 use SineFine\PromImport\Presentation\Rest\ImportRestV2Controller;
-use SineFine\PromImport\Presentation\SettingController;
 use function DI\autowire;
 use function DI\create;
 use function DI\get;
@@ -52,22 +53,20 @@ class ContainerConfig {
 	public static function getConfig(): array
 	{
 		return [
-			//Interfaces
-			ImageAttachable::class => autowire( ImageProductService::class)
-				->constructor(
-					get( LoggerInterface::class ),
-				),
+			//Repositories
 			ImportRepositoryInterface::class          => autowire( ImportRepository::class ),
 			ProductRepositoryInterface::class         => autowire( ProductRepository::class )
 				->constructor(
 					get( ImageAttachable::class ),
 				),
-			CategoryMappingRepositoryInterface::class => autowire( CategoryMappingRepository::class ),
 			FeedRepositoryInterface::class            => autowire( FeedRepository::class )
                 ->constructor(
                     get(FileServiceInterface::class),
                 ),
-            OptionRepositoryInterface::class          => autowire( OptionRepository::class ),
+			OptionRepositoryInterface::class          => autowire( OptionRepository::class ),
+			CategoryRepositoryInterface::class        => create( CategoryRepository::class ),
+
+			//Services
 			LoggerInterface::class                    => autowire( WpLogger::class ),
 			HandlerInterface::class                   => autowire( FileHandler::class )
 				->constructor(
@@ -75,12 +74,13 @@ class ContainerConfig {
                     get(FileServiceInterface::class ),
                 ),
 			XmlParserInterface::class => autowire( XmlParser::class ),
-
-			//Services
+			ImageAttachable::class => autowire( ImageProductService::class)
+				->constructor(
+					get( LoggerInterface::class ),
+				),
 			HookRegistrar::class => create( HookRegistrar::class ),
 			MenuPage::class      => create( MenuPage::class )
 				->constructor(
-					get( SettingController::class ),
 					get( AdminController::class ),
 				),
 			Assets::class        => create( Assets::class )
@@ -91,29 +91,32 @@ class ContainerConfig {
 					get( WpHttpClient::class ),
 					get( FeedRepositoryInterface::class ),
 					get( XmlParserInterface::class ),
-                    get(OptionRepositoryInterface::class ),
 					get( LoggerInterface::class )
 				),
-			ImportService::class => autowire( ImportService::class )
+			ProductManagerInterface::class       => autowire( ProductManager::class )
 				->constructor(
 					get( ProductRepositoryInterface::class ),
 					get( ImageAttachable::class ),
-					get( CategoryMappingRepositoryInterface::class ),
 					get( LoggerInterface::class )
 				),
-            ImportApplicationService::class => autowire( ImportApplicationService::class )
+			QueueManager::class => autowire( QueueManager::class )
+				->constructor(
+					get( ProductManagerInterface::class ),
+					get(ImportRepositoryInterface::class ),
+					get(XmlService::class),
+					get(LoggerInterface::class),
+				),
+			ImportService::class          => autowire( ImportService::class )
                 ->constructor(
                     get( ImportRepositoryInterface::class ),
                     get( XmlService::class ),
-                    get( XmlParserInterface::class ),
-                    get( ImportService::class )
                 ),
 			AdminNotificationService::class => autowire( AdminNotificationService::class )
 				->constructor(
 					get( HookRegistrar::class ),
 					get( LoggerInterface::class )
 				),
-            FileServiceInterface::class => autowire( FileService::class ),
+			FileServiceInterface::class => autowire( FileService::class ),
 
 			// Middlewares
 			AuthMiddleware::class => create( AuthMiddleware::class ),
@@ -121,41 +124,27 @@ class ContainerConfig {
 				->constructor( get('nonce.action' ) ),
 
 			// Controllers
-			SettingController::class => autowire( SettingController::class )
-                ->constructor(
-                    get(OptionRepositoryInterface::class )
-                )
-				->method( 'setMiddlewares',
-					[ get(AuthMiddleware::class),]
-				),
-			AdminController::class   => autowire( AdminController::class )
+			AdminController::class        => autowire( AdminController::class )
 				->constructor(
 					get( XmlParserInterface::class ),
 					get( XmlService::class ),
 					get( ProductRepositoryInterface::class ),
-					get( CategoryMappingRepositoryInterface::class ),
-                    get( ImportApplicationService::class )
+					get( CategoryRepositoryInterface::class ),
+                    get( ImportRepositoryInterface::class )
 				)
 				->method( 'setMiddlewares',
 					[get(AuthMiddleware::class),]
 				),
 			ImportRestController::class => autowire( ImportRestController::class )
 				->constructor(
-					get( ImportService::class ),
-					get( CategoryMappingRepositoryInterface::class ),
                     get(XmlService::class ),
-                    get(OptionRepositoryInterface::class ),
+					get( ProductManagerInterface::class ),
 					get( ProductRepositoryInterface::class ),
                     get( LoggerInterface::class )
 				),
-            ImportRestV2Controller::class => autowire( ImportRestV2Controller::class )
+			ImportRestV2Controller::class => autowire( ImportRestV2Controller::class )
                 ->constructor(
                     get( ImportService::class ),
-                    get( ImportApplicationService::class ),
-                    get( CategoryMappingRepositoryInterface::class ),
-                    get( XmlService::class ),
-                    get( OptionRepositoryInterface::class ),
-                    get( ProductRepositoryInterface::class ),
                     get( LoggerInterface::class )
                 ),
 

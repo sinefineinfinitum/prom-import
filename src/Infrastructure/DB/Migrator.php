@@ -6,7 +6,7 @@ namespace SineFine\PromImport\Infrastructure\DB;
 class Migrator {
 	public const PLUGIN_DB_PREFIX = "spss12_import_";
 	private const OPTION_KEY = 'spss12_import_db_schema_version';
-	private const SCHEMA_VERSION = '0.0.1';
+	private const SCHEMA_VERSION = '0.0.2';
 
 	public static function migrate(): void {
 		if ( ! function_exists( 'dbDelta' ) ) {
@@ -44,7 +44,7 @@ class Migrator {
                 url VARCHAR(2048) NOT NULL,
                 category_mapping JSON NULL,
                 path VARCHAR(2048) NULL,
-                last_imported_at DATETIME NULL,
+                updated_at DATETIME NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;";
 	}

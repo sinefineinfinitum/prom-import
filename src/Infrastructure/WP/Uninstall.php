@@ -17,17 +17,12 @@ class Uninstall
 {
     public function __construct(
         private ?FileServiceInterface $fileService = null,
-        private ?OptionRepositoryInterface $optionRepository = null,
     ){
     }
 	public function run(): void
     {
         // Lazy instantiate to avoid loading DI container on uninstall
         $this->fileService = $this->fileService ?? new FileService();
-        $this->optionRepository = $this->optionRepository ?? new OptionRepository();
-
-        $this->optionRepository->deleteOption(XmlService::SINEFINE_PROMIMPORT_URL_OPTION);
-        $this->optionRepository->deleteOption(Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION);
 
         $dir = ContainerConfig::getCommonDir();
         if ($this->fileService->isExist($dir)) {

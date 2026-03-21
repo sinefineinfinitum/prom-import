@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Infrastructure\Persistence;
 
 use DateTime;
+use Exception;
+use SineFine\PromImport\Domain\Category\CategoryMapping;
 use SineFine\PromImport\Domain\Import\Import;
 use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
-use SineFine\PromImport\Infrastructure\DB\Migrator;
 
 class ImportRepository implements ImportRepositoryInterface
 {
@@ -16,13 +17,16 @@ class ImportRepository implements ImportRepositoryInterface
     public function __construct()
     {
         global $wpdb;
-        $this->table = $wpdb->prefix . Migrator::PLUGIN_DB_PREFIX . 'imports';
+        $this->table = $wpdb->prefix . 'spss12_import_imports';
     }
 
-    public function findById(int $id): ?Import
+	/**
+	 * @throws Exception
+	 */
+	public function findById(int $id): ?Import
     {
         global $wpdb;
-        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table} WHERE id = %d", $id));
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table} WHERE id = %d", $id), ARRAY_A);
 
         if (!$row) {
             return null;
@@ -30,11 +34,12 @@ class ImportRepository implements ImportRepositoryInterface
 
         return $this->mapToEntity($row);
     }
-
+	/**
+	* @throws Exception @return Import[]*/
     public function findAll(): array
     {
         global $wpdb;
-        $rows = $wpdb->get_results("SELECT * FROM {$this->table} ORDER BY created_at DESC");
+        $rows = $wpdb->get_results("SELECT * FROM {$this->table} ORDER BY created_at DESC", ARRAY_A);
 
         return array_map([$this, 'mapToEntity'], $rows);
     }
@@ -46,14 +51,14 @@ class ImportRepository implements ImportRepositoryInterface
         $data = [
             'name' => $import->getName(),
             'url' => $import->getUrl(),
-            'category_mapping' => $import->getCategoryMapping() ? json_encode($import->getCategoryMapping()) : null,
+            'category_mapping' => json_encode($import->getCategoryMapping()?->getMapping()),
             'path' => $import->getPath(),
-            'updated_at' => $import->getUpdatedAt() ? $import->getUpdatedAt()->format('Y-m-d H:i:s') : null,
+            'updated_at' => $import->getUpdatedAt()?->format('Y-m-d H:i:s'),
         ];
 
         if ($import->getId() === null) {
             $wpdb->insert($this->table, $data);
-            return (int) $wpdb->insert_id;
+            return $wpdb->insert_id;
         }
 
         $wpdb->update($this->table, $data, ['id' => $import->getId()]);
@@ -66,16 +71,25 @@ class ImportRepository implements ImportRepositoryInterface
         return (bool) $wpdb->delete($this->table, ['id' => $id]);
     }
 
-    private function mapToEntity(object $row): Import
+	/**
+	 * @param array{id: int, name: string, url: string, category_mapping: string, path: ?string, updated_at: ?string, created_at: string} $row
+	 * @throws Exception
+	 */
+	private function mapToEntity(array $row): Import
     {
-        return new Import(
-            (int) $row->id,
-            $row->name,
-            $row->url,
-            $row->category_mapping ? json_decode($row->category_mapping, true) : null,
-            $row->path,
-            $row->updated_at ? new DateTime($row->updated_at) : null,
-            new DateTime($row->created_at)
+        $mapping = $row['category_mapping'] ? json_decode($row['category_mapping'], true) : null;
+        if (is_array($mapping)) {
+            $mapping = CategoryMapping::create($mapping);
+        }
+
+        return Import::create(
+            (int) $row['id'],
+            $row['name'],
+            $row['url'],
+            $mapping,
+            $row['path'],
+            $row['updated_at'] ? new DateTime($row['updated_at']) : null,
+            new DateTime($row['created_at'])
         );
     }
 }

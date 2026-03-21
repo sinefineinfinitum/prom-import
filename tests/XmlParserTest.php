@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\CategoryDto;
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
@@ -36,7 +37,10 @@ class XmlParserTest extends TestCase
         $parser->validateFormat('<?xml version="1.0" encoding="UTF-8"?><wrong_root></wrong_root>');
     }
 
-    public function test_validateFormat_passes_on_valid_root_elements(): void
+	/**
+	 * @throws InvalidXmlException
+	 */
+	public function test_validateFormat_passes_on_valid_root_elements(): void
     {
         $parser = new XmlParser();
         $parser->validateFormat('<?xml version="1.0" encoding="UTF-8"?><yml_catalog></yml_catalog>');
@@ -47,21 +51,21 @@ class XmlParserTest extends TestCase
     public function test_parseCategories_returns_empty_when_no_categories_section(): void
     {
         $parser = new XmlParser();
-        $xml = new \SimpleXMLElement('<shop></shop>');
+        $xml = new SimpleXMLElement('<shop></shop>');
         $this->assertSame([], $parser->parseCategories($xml));
     }
 
     public function test_parseProducts_returns_empty_when_no_offers_section(): void
     {
         $parser = new XmlParser();
-        $xml = new \SimpleXMLElement('<shop></shop>');
+        $xml = new SimpleXMLElement('<shop></shop>');
         $this->assertSame([], $parser->parseProducts($xml));
     }
 
     public function test_parseProducts_skips_offers_with_invalid_id(): void
     {
         $parser = new XmlParser();
-        $xml = new \SimpleXMLElement('
+        $xml = new SimpleXMLElement('
             <shop>
                 <offers>
                     <offer id="0"><name>Invalid</name></offer>
@@ -129,7 +133,7 @@ XML;
         $this->assertArrayHasKey(1, $cats);
         $this->assertArrayHasKey(2, $cats);
         $this->assertInstanceOf(CategoryDto::class, $cats[1]);
-        $this->assertSame('Phones', $cats[1]->name);
+        $this->assertSame('Phones', $cats[1]->name());
     }
 
     public function test_parse_products_maps_fields_sanitizes_description_and_collects_media_and_tags(): void
@@ -151,7 +155,7 @@ XML;
         $this->assertStringNotContainsString('<a', $p1->description);
         $this->assertSame('USD', $p1->price->currency());
         $this->assertNotNull($p1->category);
-        $this->assertSame(1, $p1->category->id);
+        $this->assertSame(1, $p1->category->id());
         $this->assertSame([
             'https://img.example/a.jpg',
             'https://img.example/b.jpg',

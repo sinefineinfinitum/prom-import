@@ -6,47 +6,37 @@ namespace SineFine\PromImport\Infrastructure\Admin;
 
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Presentation\AdminController;
-use SineFine\PromImport\Presentation\SettingController;
 
 class MenuPage
 {
+	private const PARENT_SLUG_FOR_HIDDEN_PAGE = 'options.php';
 	public function __construct(
-		private SettingController $settingController,
 		private AdminController $adminController
 	){}
     public function register(): void
     {
 	    if (is_admin()) {
-		    add_menu_page(
-			    esc_html(__('Prom Ua Importer Catalogs Settings', 'spss12-import-prom-woo')),
-			    esc_html(__('Prom Ua Importer', 'spss12-import-prom-woo')),
-			    'manage_options',
-			    'spss12-import-prom-woo',
-			    [$this->settingController, 'settings_page_content'],
-			    'dashicons-products',
-			    11
-		    );
+            add_menu_page(
+                esc_html(__('Imports', 'spss12-import-prom-woo')),
+                esc_html(__('Prom Ua Imports', 'spss12-import-prom-woo')),
+                'manage_options',
+                'spss12-import-prom-woo',
+                [$this->adminController, 'imports_page'],
+	            'dashicons-products',
+	            11
+            );
 
             add_submenu_page(
-                'spss12-import-prom-woo',
-                esc_html(__('Imports', 'spss12-import-prom-woo')),
-                esc_html(__('Imports', 'spss12-import-prom-woo')),
+                self::PARENT_SLUG_FOR_HIDDEN_PAGE,
+                esc_html(__('Edit Import', 'spss12-import-prom-woo')),
+                esc_html(__('Edit Import', 'spss12-import-prom-woo')),
                 'manage_options',
-                'prom-imports',
-                [$this->adminController, 'imports_page']
+                'prom-edit-import',
+                [$this->adminController, 'edit_import_page']
             );
 
 		    add_submenu_page(
-			    'spss12-import-prom-woo',
-			    esc_html(__('Categories Importer', 'spss12-import-prom-woo')),
-			    esc_html(__('Categories Importer', 'spss12-import-prom-woo')),
-			    'manage_options',
-			    'prom-categories-importer',
-			    [$this->adminController, 'categories_importer']
-		    );
-
-		    add_submenu_page(
-			    'spss12-import-prom-woo',
+			    self::PARENT_SLUG_FOR_HIDDEN_PAGE,
 			    esc_html(__('Products Importer', 'spss12-import-prom-woo')),
 			    esc_html(__('Products Importer', 'spss12-import-prom-woo')),
 			    'manage_options',

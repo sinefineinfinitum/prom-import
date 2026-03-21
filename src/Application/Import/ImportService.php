@@ -4,83 +4,93 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Application\Import;
 
-use Psr\Log\LoggerInterface;
-use SineFine\PromImport\Application\Import\Dto\ProductDto;
-use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
-use SineFine\PromImport\Domain\Product\ImageAttachable;
-use SineFine\PromImport\Domain\Product\Product;
-use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
-use WP_Error;
+use SineFine\PromImport\Domain\Category\CategoryMapping;
+use SineFine\PromImport\Domain\Import\Import;
+use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
+use DateTime;
 
 class ImportService
 {
-    public function __construct(
-        private ProductRepositoryInterface $repository,
-		private ImageAttachable $imageService,
-	    private CategoryMappingRepositoryInterface $mappingRepository,
-	    private LoggerInterface $logger,
+	public function __construct(
+        private ImportRepositoryInterface $importRepository,
     ) {
     }
 
-	/**
-	 * Import or update a single product using DTO.
-	 * Returns created/updated post ID or WP_Error
-	 *
-	 * @param ProductDto $dto
-	 *
-	 * @return int|WP_Error
-	 */
-    public function importProductFromDto(ProductDto $dto): int|WP_Error
+    /** @return Import[] */
+	public function getAllImports(): array
     {
-        if (trim($dto->title) === '') {
-            return new WP_Error('has no title', esc_html(__('Post has no title', 'spss12-import-prom-woo')));
-        }
-
-	    $product = Product::createFromDto($dto);
-
-        $postId = $this->repository->save($product);
-        if (is_wp_error($postId)) {
-	        $this->logger->error('Failed to save product {sku}: {error}', [
-		        'sku' => $dto->sku->value(),
-		        'error' => $postId->get_error_message()
-	        ]);
-        }
-
-	    return $postId;
+        return $this->importRepository->findAll();
     }
 
-	public function addCategoryToProduct(int $productId, int $externalCategoryId): int|WP_Error
-	{
-		$categoryId = $this->mappingRepository->mapping($externalCategoryId);
-		if (empty($categoryId)) {
-			$this->logger->warning('No mapping found for external category {ext_id} for product {post_id}', [
-				'ext_id' => $externalCategoryId,
-				'post_id' => $productId
-			]);
-			return 0;
-		}
-		if (term_exists($categoryId->term_id, 'product_cat')) {
-			wp_set_object_terms($productId, [$categoryId->term_id], 'product_cat');
-			return $categoryId->term_id;
-		} else {
-			$this->logger->error('Category {cat_id} does not exist in WordPress for product {post_id}', [
-				'cat_id' => $categoryId->term_id,
-				'post_id' => $productId
-			]);
-			return new WP_Error('No such category', esc_html(__('No such category', 'spss12-import-prom-woo')));
-		}
-	}
+    public function createImport(string $name, string $url): int
+    {
+        $import = new Import(null, $name, $url);
+        return $this->importRepository->save($import);
+    }
 
-	public function addImagesToProductGallery( ProductDto $dto, int $postId ): void {
-	// Add gallery images (featured image is handled inside repository using the first URL)
-		if ( ! empty( $dto->mediaUrls ) ) {
-			$first = $dto->mediaUrls[0] ?? null;
-			foreach ( $dto->mediaUrls as $url ) {
-				if ( $first !== null && $url === $first ) {
-					continue; // already set as featured in repository
-				}
-				$this->imageService->addImageToProductGallery( $url, $postId, $dto->title );
-			}
-		}
-	}
+    public function updateImport(int $id, string $name, string $url): bool
+    {
+        $import = $this->importRepository->findById($id);
+        if (!$import) {
+            return false;
+        }
+
+        $import->setName($name);
+        $import->setUrl($url);
+        $import->setUpdatedAt(new DateTime());
+
+        $this->importRepository->save($import);
+        return true;
+    }
+
+    public function deleteImport(int $id): bool
+    {
+        return $this->importRepository->delete($id);
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    public function getImportCategories(int $id): array
+    {
+        $import = $this->importRepository->findById($id);
+        if (!$import) {
+            return [];
+        }
+		return $import->getCategoryMapping()?->getMapping() ?? [];
+    }
+
+    /**
+     * @param int $id
+     * @param array<int, mixed> $mapping
+     * @return bool
+     */
+	public function updateImportMapping(int $id, array $mapping): bool
+    {
+        $import = $this->importRepository->findById($id);
+        if (!$import) {
+            return false;
+        }
+
+        $import->setCategoryMapping(new CategoryMapping($mapping));
+        $import->setUpdatedAt(new DateTime());
+        $this->importRepository->save($import);
+
+        return true;
+    }
+
+	/**
+	* @return array{success: bool, import_id: int, job_id: int|false}
+	*/
+	public function runImport(int $id): array
+    {
+	    // @phpstan-ignore function.notFound
+		$job_id = as_enqueue_async_action('spss12-import-prom-woo_queue_run_batch', ['import_id' => $id]);
+
+        return [
+            'success' => true,
+            'import_id' => $id,
+	        'job_id' => $job_id,
+        ];
+    }
 }
