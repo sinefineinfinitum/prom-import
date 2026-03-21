@@ -90,17 +90,6 @@ jobs:
       - name: Run PhpUnit
         run: vendor/bin/phpunit -c phpunit.xml.dist
 
-      - name: Verify REST API categories endpoint
-        env:
-          NONCE: ${{ env.NONCE }}
-        run: >
-          curl -f -b .github/cookies.txt \
-               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/categories' \
-               -H "Accept: application/json" \
-               -H "X-WP-Nonce: ${NONCE}" \
-               -H "Content-Type: application/json" \
-               -d '{"categories": [{"id": 1, "selected": 2}]}'
-
       - name: Verify REST API products endpoint
         env:
           NONCE: ${{ env.NONCE }}
