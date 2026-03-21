@@ -6,18 +6,19 @@
      */
     const RestAPI = {
         namespace: 'spss12-prom-import/v1',
+        namespaceV2: 'spss12-prom-import/v2',
         endpoints: {
             product: '/import/product',
-            categories: '/import/categories',
-            config: '/import/config',
-            updatePrices: '/import/update-prices'
+            updatePrices: '/import/update-prices',
+            imports: '/imports'
         },
 
         /**
          * Get full REST API URL
          */
-        getUrl(endpoint) {
-            return `${sinefinePromimportAjax.rest_url}${this.namespace}${endpoint}`;
+        getUrl(endpoint, version = 'v1') {
+            const ns = version === 'v2' ? this.namespaceV2 : this.namespace;
+            return `${sinefinePromimportAjax.rest_url}${ns}${endpoint}`;
         },
 
         /**
@@ -30,21 +31,27 @@
         /**
          * Make a REST API request
          */
-        async request(endpoint, data = {}, method = 'POST', isJsonResponse = true ) {
+        async request(endpoint, data = {}, method = 'POST', isJsonResponse = true, version = 'v1' ) {
             try {
-                const response = await fetch(this.getUrl(endpoint), {
+                const url = this.getUrl(endpoint, version);
+                const options = {
                     method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'X-WP-Nonce': this.getNonce()
-                    },
-                    body: JSON.stringify(data)
-                });
+                    }
+                };
+
+                if (method !== 'GET' && method !== 'HEAD') {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, options);
 
                 const responseBody = isJsonResponse ? await response.json() : await response.text();
 
                 if (!response.ok) {
-                    throw new Error(response.message || 'Request failed');
+                    throw new Error(responseBody.message || 'Request failed');
                 }
 
                 return responseBody;
@@ -102,89 +109,6 @@
         }
     }
 
-    /**
-     * Import categories mapping via REST API
-     */
-    async function import_categories(nonce, btn) {
-        try {
-            const mappings = [];
-
-            // Iterate each row in the categories table
-            $('#categories-table tbody tr').each(function(index, row) {
-                const $row = $(row);
-                // Column 1 contains XML category id inside span
-                const xmlId = $.trim($row.find('td').eq(0).find('span').text());
-                // The select is in the 3rd column
-                const $select = $row.find('td').eq(2).find('select');
-                const selectedValue = $select.val();
-
-                if (xmlId !== '' && typeof selectedValue !== 'undefined') {
-                    mappings.push({
-                        id: xmlId,          // Prom XML category id
-                        selected: selectedValue // Woo category (slug by current dropdown config)
-                    });
-                }
-            });
-
-
-            if (mappings.length === 0) {
-                alert(sinefinePromimportAjax.no_categories_text || 'No categories selected');
-                return;
-            }
-
-            const response = await RestAPI.request(RestAPI.endpoints.categories, {
-                categories: mappings
-            });
-
-            if (response.success) {
-                btn
-                    .text(sinefinePromimportAjax.saved_text || 'Saved')
-                    .removeClass('import-category')
-                    .attr('data-nonce', '')
-                    .prop('disabled', true)
-                    .addClass('button-disabled');
-
-                // Show success notice
-                if (typeof response.message === 'string') {
-                    showNotice(response.message, 'success');
-                }
-            }
-
-            return response;
-        } catch (error) {
-            alert(error.message || sinefinePromimportAjax.error_text || 'An error occurred');
-            console.error('Categories import error:', error);
-            throw error;
-        }
-    }
-
-    async function import_config(
-        nonce,
-        url
-    ) {
-        try {
-            const data = {
-                url: url || '',
-            };
-
-            const response = await RestAPI.request(RestAPI.endpoints.config, data, 'POST', true);
-
-            if (!response.success) {
-                throw new Error(response.message || 'Config save failed');
-            }
-
-            // Show success notice
-            if (typeof response.message === 'string') {
-                showNotice(response.message, 'success');
-            }
-
-            return response;
-        } catch (error) {
-            alert(error.message || sinefinePromimportAjax.error_text || 'An error occurred');
-            console.error('Config save error:', error);
-            throw error;
-        }
-    }
 
     /**
      * Update all product prices via REST API
@@ -205,6 +129,34 @@
             console.error('Update prices error:', error);
             throw error;
         }
+    }
+
+    /**
+     * CRUD for Imports (v2)
+     */
+    async function get_imports() {
+        return await RestAPI.request(RestAPI.endpoints.imports, {}, 'GET', true, 'v2');
+    }
+
+    async function create_import(name, url) {
+        return await RestAPI.request(RestAPI.endpoints.imports, { name, url }, 'POST', true, 'v2');
+    }
+
+    async function update_import(id, name, url) {
+        return await RestAPI.request(`${RestAPI.endpoints.imports}/${id}`, { name, url }, 'PATCH', true, 'v2');
+    }
+
+    async function delete_import(id) {
+        return await RestAPI.request(`${RestAPI.endpoints.imports}/${id}`, {}, 'DELETE', true, 'v2');
+    }
+
+    async function run_import(id) {
+        return await RestAPI.request(`${RestAPI.endpoints.imports}/${id}/run`, {}, 'POST', true, 'v2');
+    }
+
+
+    async function update_import_mapping(id, mapping) {
+        return await RestAPI.request(`${RestAPI.endpoints.imports}/${id}/mapping`, { mapping }, 'PATCH', true, 'v2');
     }
 
     /**
@@ -260,45 +212,6 @@
         }
     });
 
-    // Import categories button
-    $('#import-categories').on('click', async function(event) {
-        event.preventDefault();
-
-        const $btn = $(this);
-        const originalText = $btn.text();
-
-        // Disable button and show loading state
-        $btn.prop('disabled', true).text(sinefinePromimportAjax.loading_text || 'Saving...');
-
-        try {
-            await import_categories($btn.attr('data-nonce'), $btn);
-        } catch (error) {
-            // Error: restore button
-            $btn.prop('disabled', false).text(originalText);
-        }
-    });
-
-    // Import config
-    $('#import-config').on('click', async function(event) {
-        event.preventDefault();
-
-        const $btn = $(this);
-        const originalText = $btn.text();
-        const url = $("#url").val();
-
-        // Disable button and show loading state
-        $btn.prop('disabled', true).text(sinefinePromimportAjax.loading_text || 'Saving...');
-
-        try {
-            await import_config($btn.attr('data-nonce'), url);
-
-            // Success: restore button
-            $btn.prop('disabled', false).text(originalText);
-        } catch (error) {
-            // Error: restore button
-            $btn.prop('disabled', false).text(originalText);
-        }
-    });
     // Update prices
     $('#update-prices').on('click', async function(event) {
         event.preventDefault();
@@ -318,15 +231,141 @@
     });
 
     /**
+     * Imports Management UI
+     */
+    const $modal = $('#import-modal');
+    const $form = $('#import-form');
+
+    $('#open-create-import-modal').on('click', function() {
+        $('#modal-title').text(sinefinePromimportAjax.add_new_text || 'Add New Import');
+        $form[0].reset();
+        $('#import-id').val('');
+        $('#mapping-container').hide();
+        $modal.show();
+    });
+
+    $('#close-modal').on('click', function() {
+        $modal.hide();
+    });
+
+    // Run import
+    $('.run-import').on('click', async function() {
+        const id = $(this).data('id');
+        const $btn = $(this);
+        const originalText = $btn.text();
+
+        if (!confirm(sinefinePromimportAjax.confirm_run_text || 'Start import process?')) {
+            return;
+        }
+
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.running_text || 'Running...');
+
+        try {
+            const result = await run_import(id);
+            alert((sinefinePromimportAjax.imported_text || 'Added to the queue Import with ID:') + ' ' + result.import_id);
+            location.reload();
+        } catch (error) {
+            alert(error.message);
+            $btn.prop('disabled', false).text(originalText);
+        }
+    });
+
+    // Delete import
+    $('.delete-import').on('click', async function() {
+        if (!confirm(sinefinePromimportAjax.confirm_delete_text || 'Are you sure you want to delete this import?')) {
+            return;
+        }
+
+        const id = $(this).data('id');
+        const $row = $(this).closest('tr');
+
+        try {
+            await delete_import(id);
+            $row.fadeOut(300, function() {
+                $(this).remove();
+                if ($('#imports-table tbody tr').length === 0) {
+                    $('#imports-table tbody').append('<tr><td colspan="5">' + (sinefinePromimportAjax.no_imports_text || 'No imports found') + '</td></tr>');
+                }
+            });
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    // Form submission
+    $form.on('submit', async function(e) {
+        e.preventDefault();
+        const name = $('#import-name-input').val();
+        const url = $('#import-url-input').val();
+        const $btn = $('#save-import-btn');
+        const originalText = $btn.text();
+
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.saving_text || 'Saving...');
+
+        try {
+            await create_import(name, url);
+            $modal.hide();
+            location.reload(); // Refresh to show changes in table
+        } catch (error) {
+            alert(error.message);
+            $btn.prop('disabled', false).text(originalText);
+        }
+    });
+
+    /**
      * Expose API for external usage (optional)
      */
     window.sinefinePromimporter = {
         RestAPI,
         importProduct: import_product,
-        importCategories: import_categories,
-        importConfig: import_config,
         updatePrices: update_prices,
+        getImports: get_imports,
+        createImport: create_import,
+        updateImport: update_import,
+        deleteImport: delete_import,
     };
+
+    /**
+     * Edit Import Page Logic
+     */
+    $('#edit-import-form').on('submit', async function(e) {
+        e.preventDefault();
+        console.log('Edit Import Form Submitted');
+        const id = $('#import-id').val();
+        const name = $('#import-name').val();
+        const url = $('#import-url').val();
+        const $btn = $('#save-edit-import');
+        const $spinner = $('.spinner');
+        const originalText = $btn.text();
+
+        // Collect mapping
+        const mapping = {};
+        $('.category-select').each(function() {
+            const externalId = $(this).data('external-id');
+            const val = $(this).val();
+            if (val && val !== '0') {
+                mapping[externalId] = val;
+            }
+        });
+
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.saving_text || 'Saving...');
+        $spinner.addClass('is-active');
+
+        try {
+            await update_import(id, name, url);
+            await update_import_mapping(id, mapping);
+            
+            showNotice(sinefinePromimportAjax.saved_text || 'Import settings saved successfully', 'success');
+            
+            // Optionally redirect back or stay on page
+            // window.location.href = 'admin.php?page=prom-imports';
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            $btn.prop('disabled', false).text(originalText);
+            $spinner.removeClass('is-active');
+        }
+    });
 
     console.log('Prom Importer REST API initialized');
 

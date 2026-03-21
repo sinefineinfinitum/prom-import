@@ -56,15 +56,16 @@ use SineFine\PromImport\Application\Import\Dto\CategoryDto;
                             <?php
                                 $sinefine_promimport_is_already_selected = false;
                                 foreach ( $sinefine_promimport_existing_categories as $sinefine_promimport_existing_category ) {
-                                    $sinefine_promimport_is_saved = $sinefine_promimport_existing_category->cat_ID == ( $sinefine_promimport_saved_categories[$sinefine_promimport_category->id] ?? false);
+                                    $saved_cat_id = isset($sinefine_promimport_saved_categories[$sinefine_promimport_category->id]) ? (int)$sinefine_promimport_saved_categories[$sinefine_promimport_category->id] : 0;
+                                    $sinefine_promimport_is_saved = (int)$sinefine_promimport_existing_category->term_id === $saved_cat_id;
                                     if ($sinefine_promimport_is_saved) {
                                         $sinefine_promimport_is_already_selected = true;
                                     }
                                     $spssIsEqualName = (sanitize_title(sanitize_title($sinefine_promimport_category->name), '', 'query')
                                                    === $sinefine_promimport_existing_category->slug) && !$sinefine_promimport_is_saved && !$sinefine_promimport_is_already_selected; ?>
-                            <option class="level-<?php echo count( get_ancestors($sinefine_promimport_existing_category->id, 'sinefine_promimport_category') ) ?>"
+                            <option class="level-<?php echo count( get_ancestors((int)$sinefine_promimport_existing_category->term_id, 'product_cat') ) ?>"
                                     <?php if ( $sinefine_promimport_is_saved OR $spssIsEqualName ): ?>selected="selected"<?php endif; ?>
-                                    value="<?php echo esc_html($sinefine_promimport_existing_category->cat_ID); ?>"><?php echo esc_html($sinefine_promimport_existing_category->name); ?></option>
+                                    value="<?php echo esc_attr($sinefine_promimport_existing_category->term_id); ?>"><?php echo esc_html($sinefine_promimport_existing_category->name); ?></option>
                             <?php } ?>
                         </select>
                     </td>

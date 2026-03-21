@@ -10,7 +10,6 @@ use RuntimeException;
 use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\FeedDto;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
-use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Common\XmlParserInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Exception\InvalidXmlException;
@@ -24,23 +23,9 @@ class XmlService
 		private WpHttpClient $httpClient,
 		private FeedRepositoryInterface $feedRepository,
 		private XmlParserInterface $xmlParser,
-        private OptionRepositoryInterface $optionRepository,
 		private LoggerInterface $logger,
 	) {}
 
-    /**
-     * @throws DownloadException
-     * @throws InvalidXmlException
-     * @throws InvalidArgumentException
-     */
-    public function validateDownloadAndSaveXml(string $url ): string
-	{
-        $responseBody = $this->downloadXmlContent( $url );
-        $this->xmlParser->validateFormat( $responseBody );
-        $this->saveXml($url, $responseBody);
-
-        return $url;
-	}
 
 	/**
 	 * Validate URL format.
@@ -54,7 +39,16 @@ class XmlService
 
 		return esc_url_raw( $url );
 	}
-    
+    public function getXmlFromUrl(string $url): SimpleXMLElement
+    {
+	    $xmlContent  = $this->downloadXmlContent( $url );
+	    $xml         = simplexml_load_string( $xmlContent );
+	    if ( ! $xml instanceof SimpleXMLElement ) {
+		    throw new InvalidXmlException( 'Invalid XML Content' );
+	    }
+		return $xml;
+    }
+
 	/**
 	 * Persist an XML and update plugin option with source URL.
 	 */
@@ -62,7 +56,6 @@ class XmlService
 	{
 		$feedDto = FeedDto::create( $url, $responseBody );
 		$this->feedRepository->save( $feedDto );
-		$this->optionRepository->updateOption(self::SINEFINE_PROMIMPORT_URL_OPTION, $url);
 	}
 
 	/**
@@ -107,26 +100,10 @@ class XmlService
 		return $xml;
 	}
 
-    /**
-     * @throws InvalidArgumentException | RuntimeException
-     */
-	public function getUrl(): string
-	{
-		$url =  $this->optionRepository->getOption(self::SINEFINE_PROMIMPORT_URL_OPTION);
-		if ( empty( $url ) ) {
-			throw new RuntimeException( 'XML URL is not configured' );
-		}
-		if ( ! is_string($url) || ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
-			throw new InvalidArgumentException( 'Invalid XML URL provided' );
-		}
-
-		return $url;
-	}
-
 	/**
 	 * @return ProductDto[]
 	 */
-	public function getProductsFromXml(\SimpleXMLElement $xml): array
+	public function getProductsFromXml( SimpleXMLElement $xml): array
 	{
 		$categories = $this->xmlParser->parseCategories($xml);
 		return $this->xmlParser->parseProducts($xml, $categories);

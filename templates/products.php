@@ -28,7 +28,7 @@
             <tr>
                 <th><?php echo esc_html(__('Thumbnails', 'spss12-import-prom-woo')) ?></th>
                 <th><?php echo esc_html(__('Title', 'spss12-import-prom-woo')) ?></th>
-                <th><?php echo esc_html(__('Category', 'spss12-import-prom-woo')) ?></th>
+                <th><?php echo esc_html(__('WooCommerce Category', 'spss12-import-prom-woo')) ?></th>
                 <th><?php echo esc_html(__('Description', 'spss12-import-prom-woo')) ?></th>
                 <th><?php echo esc_html(__('Price', 'spss12-import-prom-woo')) ?></th>
                 <th><?php echo esc_html(__('Action', 'spss12-import-prom-woo')) ?></th>
@@ -101,7 +101,7 @@
                                data-title="<?php echo esc_attr($sinefine_promimport_product->title); ?>"
                                data-description="<?php echo esc_attr($sinefine_promimport_product->description); ?>"
                                data-price="<?php echo esc_attr($sinefine_promimport_product->price->amount()); ?>"
-                               data-category="<?php echo esc_attr($sinefine_promimport_product->category ? $sinefine_promimport_product->category->id : 0); ?>"
+                               data-category="<?php echo esc_attr($sinefine_promimport_product->category ? $sinefine_promimport_product->category->id() : 0); ?>"
                                data-featured-media="<?php echo esc_attr(json_encode($sinefine_promimport_product->mediaUrls)); ?>"
                                data-nonce="<?php echo esc_attr(wp_create_nonce('sinefine_promimport_nonce')); ?>"
                                class="import-product button-primary">

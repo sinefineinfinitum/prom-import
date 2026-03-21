@@ -25,8 +25,10 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     wp_die( esc_html( __('Composer autoload not found. Please run `composer install`.', 'spss12-import-prom-woo' )));
 }
 
+use SineFine\PromImport\Infrastructure\DB\Migrator;
 use SineFine\PromImport\Infrastructure\WP\Install;
 use SineFine\PromImport\Infrastructure\WP\Uninstall;
+use SineFine\PromImport\Plugin;
 
 define( 'SINEFINE_PROMIMPORT_PLUGIN_DIR', basename(plugin_dir_path( __FILE__ )));
 
@@ -39,6 +41,7 @@ if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
 // Activate plugin
 function sinefine_promimport_activate(): void {
     (new Install())->run();
+	Migrator::migrate();
 }
 register_activation_hook( __FILE__, 'sinefine_promimport_activate' );
 
@@ -51,6 +54,6 @@ register_uninstall_hook( __FILE__, 'sinefine_promimport_uninstall' );
 // Bootstrap plugin via Plugin class
 add_action('plugins_loaded', static function () {
     if (class_exists('SineFine\\PromImport\\Plugin')) {
-        (new \SineFine\PromImport\Plugin())->boot();
+        (new Plugin())->boot();
     }
 });

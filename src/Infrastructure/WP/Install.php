@@ -15,17 +15,12 @@ class Install
 {
     public function __construct(
         private ?FileServiceInterface $fileService = null,
-        private ?OptionRepositoryInterface $optionRepository = null,
     ) {
     }
     public function run(): void
     {
         // Lazy instantiate dependencies to avoid loading DI container on activation
         $this->fileService = $this->fileService ?? new FileService();
-        $this->optionRepository = $this->optionRepository ?? new OptionRepository();
-
-        $this->optionRepository->addOption(XmlService::SINEFINE_PROMIMPORT_URL_OPTION);
-        $this->optionRepository->addOption(Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION);
 
         $dirs = [
             ContainerConfig::getCommonDir(),

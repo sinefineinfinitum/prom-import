@@ -75,7 +75,7 @@ class XmlParser implements XmlParserInterface
         foreach ($root->shop->categories->category as $cat) {
             $id = isset($cat['id']) ? (int) $cat['id'] : 0;
             $name = trim((string) $cat);
-            $result[$id] = new CategoryDto($id, $name);
+            $result[$id] = CategoryDto::create($id, $name);
         }
         return $result;
     }

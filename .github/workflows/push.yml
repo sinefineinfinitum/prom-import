@@ -119,23 +119,54 @@ jobs:
                  "product_featured_media": []
                }'
 
-      - name: Verify REST API config endpoint
-        env:
-          NONCE: ${{ env.NONCE }}
-        run: >
-          curl  -f -b .github/cookies.txt \
-               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/config' \
-               -H "Accept: application/json" \
-               -H "X-WP-Nonce: ${NONCE}" \
-               -H "Content-Type: application/json" \
-               -d '{"url": "https://gist.githubusercontent.com/sinefineinfinitum/3eb94b5bb04db8051837fa0dc79dfea5/raw/0a474c1db84b2f93a7cd485f41551e55eea1d59b/gistfile1.txt"}'
-
       - name: Verify REST API update price endpoint
         env:
           NONCE: ${{ env.NONCE }}
         run: >
           curl  -f -b .github/cookies.txt \
                -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v1/import/update-prices' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json"
+
+      - name: Verify REST API import endpoint - create
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl  -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v2/imports' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json" \
+               -d '{ "name": "Test","url": "https://gist.githubusercontent.com/sinefineinfinitum/3eb94b5bb04db8051837fa0dc79dfea5/raw/0a474c1db84b2f93a7cd485f41551e55eea1d59b/gistfile1.txt"}'
+
+      - name: Verify REST API import endpoint - list
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl  -f -b .github/cookies.txt \
+               -X GET 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v2/imports' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json"
+
+      - name: Verify REST API import endpoint - update
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl  -f -b .github/cookies.txt \
+               -X PATCH 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v2/imports/1' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json" \
+               -d '{ "name": "Test 2","url": "https://gist.githubusercontent.com/sinefineinfinitum/3eb94b5bb04db8051837fa0dc79dfea5/raw/0a474c1db84b2f93a7cd485f41551e55eea1d59b/gistfile1.txt"}'
+
+      - name: Verify REST API import endpoint - delete
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: >
+          curl  -f -b .github/cookies.txt \
+               -X DELETE 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v2/imports/1' \
                -H "Accept: application/json" \
                -H "X-WP-Nonce: ${NONCE}" \
                -H "Content-Type: application/json"

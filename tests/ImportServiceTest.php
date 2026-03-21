@@ -5,126 +5,139 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Application\Import\ImportService;
-use SineFine\PromImport\Domain\Product\ImageAttachable;
+use SineFine\PromImport\Application\Import\ProductManager;
+use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Exception\DownloadException;
+use SineFine\PromImport\Domain\Import\Import;
+use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
-use SineFine\PromImport\Tests\Fake\FakeCategoryMappingRepository;
-use SineFine\PromImport\Tests\Fake\FakeImageService;
-use SineFine\PromImport\Tests\Fake\FakeProductRepository;
-use WP_Term;
 
 class ImportServiceTest extends TestCase
 {
-    private LoggerInterface $logger;
-	private function createService($repo, $mapping, $imageService): ImportService
-	{
-		$this->logger = $this->createMock(LoggerInterface::class);
+    private $repository;
+    private $xmlService;
+    private $productManager;
+    private ImportService $service;
 
-		return new ImportService($repo, $imageService, $mapping, $this->logger);
-	}
-
-    public function test_import_returns_error_when_title_is_empty(): void
+    protected function setUp(): void
     {
-        $repo = new FakeProductRepository(123);
-        $mapping = new FakeCategoryMappingRepository();
-	    $imageService = new FakeImageService();
-        $service = $this->createService($repo, $mapping, $imageService);
-
-        $dto = new ProductDto(new Sku(1), '   ', 'desc', new Price(10));
-        $res = $service->importProductFromDto($dto);
-        $this->assertTrue(is_wp_error($res));
-        $this->assertSame('has no title', $res->code);
+        $this->repository = $this->createMock(ImportRepositoryInterface::class);
+        $this->xmlService = $this->createMock(XmlService::class);
+        $this->productManager = $this->createMock(ProductManager::class);
+        $this->service = new ImportService(
+            $this->repository,
+            $this->xmlService,
+        );
     }
 
-	public function test_import_returns_error_and_logs_when_product_not_saved(): void
-	{
-		$repo = new FakeProductRepository(123, true);
-		$mapping = new FakeCategoryMappingRepository();
-		$imageService = new FakeImageService();
-		$service = $this->createService($repo, $mapping, $imageService);
-
-		$dto = new ProductDto(new Sku(1), 'title', 'desc', new Price(10));
-
-        $this->logger->expects($this->once())
-            ->method('error')
-            ->with(
-                'Failed to save product {sku}: {error}',
-                ['sku' => 1, 'error' => 'error']
-            );
-
-		$res = $service->importProductFromDto($dto);
-		$this->assertTrue(is_wp_error($res));
-		$this->assertSame('Failed to save product', $res->code);
-	}
-
-    public function test_addCategoryToProduct_logs_warning_when_no_mapping(): void
+    public function test_getAllImports_returns_array_from_repository(): void
     {
-        $repo = new FakeProductRepository(1);
-        $mapping = new FakeCategoryMappingRepository([]);
-	    $imageService = new FakeImageService();
-        $service = $this->createService($repo, $mapping, $imageService);
+        $imports = [
+            new Import(1, 'Import 1', 'http://url1.com'),
+            new Import(2, 'Import 2', 'http://url2.com'),
+        ];
 
-        $this->logger->expects($this->once())
-            ->method('warning')
-            ->with(
-                'No mapping found for external category {ext_id} for product {post_id}',
-                ['ext_id' => 999, 'post_id' => 10]
-            );
+        $this->repository->expects($this->once())
+            ->method('findAll')
+            ->willReturn($imports);
 
-        $this->assertSame(0, $service->addCategoryToProduct(10, 999));
+        $result = $this->service->getAllImports();
+
+        $this->assertCount(2, $result);
+        $this->assertSame($imports, $result);
     }
 
-    public function test_addCategoryToProduct_returns_error_and_logs_when_term_not_exists(): void
+    public function test_createImport_saves_new_import(): void
     {
-        $repo = new FakeProductRepository(1);
-        $mapping = new FakeCategoryMappingRepository([777 => new WP_Term(777)]);
-	    $imageService = new FakeImageService();
-        $service = $this->createService($repo, $mapping, $imageService);
+        $this->repository->expects($this->once())
+            ->method('save')
+            ->with($this->callback(function (Import $import) {
+                return $import->getId() === null &&
+                       $import->getName() === 'New Import' &&
+                       $import->getUrl() === 'http://new.com';
+            }))
+            ->willReturn(123);
 
-        $this->logger->expects($this->once())
-            ->method('error')
-            ->with(
-                'Category {cat_id} does not exist in WordPress for product {post_id}',
-                ['cat_id' => 777, 'post_id' => 10]
-            );
+        $id = $this->service->createImport('New Import', 'http://new.com');
 
-        $res = $service->addCategoryToProduct(10, 777);
-        $this->assertTrue(is_wp_error($res));
-        $this->assertSame('No such category', $res->code);
+        $this->assertSame(123, $id);
     }
 
-    public function test_addImagesToProductGallery_skips_first_image_and_adds_others(): void
+    public function test_updateImport_updates_existing_import(): void
     {
-        $repo = new FakeProductRepository(42);
-        $mapping = new FakeCategoryMappingRepository();
-        $imageService = $this->createMock( ImageAttachable::class);
-        $service = $this->createService($repo, $mapping, $imageService);
+        $existingImport = new Import(1, 'Old Name', 'http://old.com');
 
-        $dto = new ProductDto(
-            new Sku(10),
+        $this->repository->expects($this->once())
+            ->method('findById')
+            ->with(1)
+            ->willReturn($existingImport);
+
+        $this->repository->expects($this->once())
+            ->method('save')
+            ->with($this->callback(function (Import $import) {
+                return $import->getId() === 1 &&
+                       $import->getName() === 'Updated Name' &&
+                       $import->getUrl() === 'http://updated.com' &&
+                       $import->getUpdatedAt() !== null;
+            }))
+            ->willReturn(1);
+
+        $success = $this->service->updateImport(1, 'Updated Name', 'http://updated.com');
+
+        $this->assertTrue($success);
+    }
+
+    public function test_updateImport_returns_false_if_not_found(): void
+    {
+        $this->repository->expects($this->once())
+            ->method('findById')
+            ->with(999)
+            ->willReturn(null);
+
+        $this->repository->expects($this->never())
+            ->method('save');
+
+        $success = $this->service->updateImport(999, 'Name', 'http://url.com');
+
+        $this->assertFalse($success);
+    }
+
+    public function test_deleteImport_calls_repository_delete(): void
+    {
+        $this->repository->expects($this->once())
+            ->method('delete')
+            ->with(1)
+            ->willReturn(true);
+
+        $success = $this->service->deleteImport(1);
+
+        $this->assertTrue($success);
+    }
+
+	/**
+	 * @throws DownloadException
+	 */
+	public function test_runImport_executes_import_logic(): void
+    {
+        $import = new Import(1, 'Test', 'http://test.com');
+        $this->repository->method('findById')->willReturn($import);
+        $this->xmlService->method('downloadXmlContent')->willReturn('<xml></xml>');
+        
+        $productDto = new ProductDto(
+            new Sku(1),
             'Title',
             'Desc',
-            new Price(9.99),
-            null,
-            ['https://img/1.jpg', 'https://img/2.jpg', 'https://img/3.jpg']
+            new Price(10)
         );
+        $this->xmlService->method('getProductsFromXml')->willReturn([$productDto]);
+        $this->productManager->method( 'createProductFromDto' )->willReturn(456);
 
-        $expectedUrls = ['https://img/2.jpg', 'https://img/3.jpg'];
-        $actualUrls = [];
+        $result = $this->service->runImport(1);
 
-        $imageService->expects($this->exactly(2))
-            ->method('addImageToProductGallery')
-            ->willReturnCallback(function ( $url ) use (&$actualUrls) {
-                $actualUrls[] = $url;
-            });
-
-        $service->addImagesToProductGallery($dto, 42);
-
-        $this->assertSame($expectedUrls, $actualUrls);
+        $this->assertTrue($result['success']);
+        $this->assertSame(1, $result['import_id']);
     }
 }
-
-

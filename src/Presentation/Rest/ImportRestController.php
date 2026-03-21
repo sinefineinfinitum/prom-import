@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Presentation\Rest;
 
 use Psr\Log\LoggerInterface;
-use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Application\Import\XmlService;
-use SineFine\PromImport\Domain\Category\Category;
-use SineFine\PromImport\Domain\Category\CategoryMappingRepositoryInterface;
-use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Exception\DomainException;
 use SineFine\PromImport\Domain\Exception\InvalidImportException;
+use SineFine\PromImport\Domain\Product\ProductManagerInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
-use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
+use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use Throwable;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -28,10 +25,8 @@ class ImportRestController extends WP_REST_Controller
 	protected $rest_base = 'import';
 
 	public function __construct(
-		private ImportService $service,
-		private CategoryMappingRepositoryInterface $categoryMappingRepository,
         private XmlService $xmlService,
-        private OptionRepositoryInterface $optionRepository,
+		private ProductManagerInterface $productManager,
 		private ProductRepositoryInterface $productRepository,
 		private LoggerInterface $logger,
 	) {}
@@ -50,27 +45,6 @@ class ImportRestController extends WP_REST_Controller
 				'args'                => $this->get_product_import_args(),
 			],
 		]);
-
-		// POST /wp-json/spss12-prom-import/v1/import/categories
-		register_rest_route($this->namespace, '/' . $this->rest_base . '/categories', [
-			[
-				'methods'             => 'POST',
-				'callback'            => [$this, 'import_categories'],
-				'permission_callback' => [$this, 'check_permission'],
-				'args'                => $this->get_categories_import_args(),
-			],
-		]);
-
-        // POST /wp-json/spss12-prom-import/v1/import/config
-        register_rest_route($this->namespace, '/' . $this->rest_base . '/config', [
-            [
-                'methods'             => 'POST',
-                'callback'            => [$this, 'import_config'],
-                'permission_callback' => [$this, 'check_permission'],
-                'args'                => $this->get_config_import_args(),
-            ],
-        ]);
-
 		// POST /wp-json/spss12-prom-import/v1/import/update-prices
 		register_rest_route($this->namespace, '/' . $this->rest_base . '/update-prices', [
 			[
@@ -113,14 +87,14 @@ class ImportRestController extends WP_REST_Controller
 				$media,
 			);
 
-			$productId = $this->service->importProductFromDto($dto);
+			$productId = $this->productManager->createProductFromDto($dto);
 			if (is_wp_error($productId)) {
 				throw InvalidImportException::importFromDto($productId->get_error_message());
 			}
-			$this->service->addImagesToProductGallery( $dto, $productId );
+			$this->productManager->addImagesToProductGallery( $dto, $productId );
 
 			if ($externalCategoryId > 0) {
-				$this->service->addCategoryToProduct($productId, $externalCategoryId);
+				$this->productManager->addCategoryToProduct($productId, $externalCategoryId);
 			}
 
 			return new WP_REST_Response([
@@ -135,83 +109,6 @@ class ImportRestController extends WP_REST_Controller
 			return $this->handle_exception($e);
 		}
 	}
-
-	/**
-	 * Import categories mapping
-	 *
-	 * @template T of WP_REST_Request
-	 * @param T $request
-	 **/
-	public function import_categories(WP_REST_Request $request): WP_REST_Response|WP_Error
-	{
-		try {
-			$categories = $request->get_param('categories');
-
-			if (empty($categories) || !is_array($categories)) {
-				return new WP_Error(
-					'invalid_categories',
-					__('Invalid or missing categories data', 'spss12-import-prom-woo')
-				);
-			}
-
-			// Validate categories structure
-			foreach ($categories as $category) {
-				if (!isset($category['id'], $category['selected'])) {
-					return new WP_Error(
-						'validation_error',
-						__('Validation error: missing required fields', 'spss12-import-prom-woo')
-					);
-				}
-				if (!ctype_digit((string)$category['id']) || !ctype_digit((string)$category['selected'])) {
-					return new WP_Error(
-						'validation_error',
-						__('Validation error: invalid numeric values', 'spss12-import-prom-woo')
-					);
-				}
-			}
-
-			$this->categoryMappingRepository->setCategoryMapping($categories);
-
-			return new WP_REST_Response([
-				'success' => true,
-				'message' => esc_html(__('Successfully imported', 'spss12-import-prom-woo')),
-				'data'    => $this->optionRepository->getOption( Category::SINEFINE_PROMIMPORT_CATEGORIES_OPTION),
-			], 200);
-		} catch ( Throwable $e) {
-			return $this->handle_exception($e);
-		}
-	}
-
-    /**
-     * Import config
-     *
-     * @template T of WP_REST_Request
-     * @param T $request
-     **/
-    public function import_config(WP_REST_Request $request): WP_REST_Response|WP_Error
-    {
-        try {
-            $url = $request->get_param('url');
-
-            if (empty($url)) {
-                return new WP_Error(
-                    'invalid_config',
-                    __('Invalid or missing config url', 'spss12-import-prom-woo')
-                );
-            }
-            $url = $this->xmlService->validateUrl($url);
-            $url = $this->xmlService->validateDownloadAndSaveXml($url);
-
-            return new WP_REST_Response([
-                'success' => true,
-                'message' => esc_html(__('Successfully saved config', 'spss12-import-prom-woo')),
-                'data'    => $url,
-            ], 200);
-        } catch ( Throwable $e) {
-            return $this->handle_exception($e);
-        }
-    }
-
     /**
      * Update all product prices from XML
      *
@@ -305,43 +202,6 @@ class ImportRestController extends WP_REST_Controller
 			],
 		];
 	}
-
-	/**
-	 * Get arguments schema for categories import endpoint
-	 *
-	 * @return array<string, mixed>
-	 */
-	private function get_categories_import_args(): array
-	{
-		return [
-			'categories' => [
-				'required' => true,
-				'type'     => 'array',
-				'items'    => [
-					'type'       => 'object',
-					'properties' => [
-						'id'       => ['type' => 'integer'],
-						'selected' => ['type' => 'integer'],
-					],
-				],
-			],
-		];
-	}
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function get_config_import_args(): array
-    {
-        return [
-            'url' => [
-                'required' => true,
-                'type' => 'string',
-                'sanitize_callback' => 'sanitize_url',
-            ],
-        ];
-    }
-
 	/**
 	 * Handle exception and return the appropriate REST response
 	 */

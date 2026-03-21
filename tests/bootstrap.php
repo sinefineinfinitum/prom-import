@@ -65,7 +65,7 @@ if (!class_exists('WP_Error')) {
         public string $code;
         public string $message;
 
-        public function __construct(string $code = '', string $message = '')
+        public function __construct(string $code = '', string $message = '', $args = [])
         {
             $this->code = $code;
             $this->message = $message;
@@ -184,5 +184,12 @@ if(!function_exists('do_action')){
 				$callback(...$arg);
 			}
 		}
+	}
+}
+
+if (!function_exists('as_enqueue_async_action')) {
+	function as_enqueue_async_action(string $action, array $data): int|false
+	{
+		return 1;
 	}
 }
