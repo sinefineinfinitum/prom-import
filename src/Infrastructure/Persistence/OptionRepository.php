@@ -6,9 +6,9 @@ use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 
 class OptionRepository implements OptionRepositoryInterface
 {
-    public function addOption(string $name): void
+    public function addOption(string $name, string $value): void
     {
-        add_option($name);
+        add_option($name, $value);
     }
     public function getOption(string $name , mixed $default = false): mixed
     {

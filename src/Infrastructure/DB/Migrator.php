@@ -3,6 +3,8 @@
 namespace SineFine\PromImport\Infrastructure\DB;
 
 
+use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
+
 class Migrator {
 	public const PLUGIN_DB_PREFIX = "spss12_import_";
 	private const OPTION_KEY = 'spss12_import_db_schema_version';
@@ -12,8 +14,9 @@ class Migrator {
 		if ( ! function_exists( 'dbDelta' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		}
+		$optionRepository = new OptionRepository();
 
-		$installedVersion = get_option( self::OPTION_KEY, '0.0.0' );
+		$installedVersion = $optionRepository->getOption(self::OPTION_KEY, '0.0.0' );
 		if ( $installedVersion === self::SCHEMA_VERSION ) {
 			return; // Up-to-date
 		}
@@ -31,9 +34,9 @@ class Migrator {
 		}
 
 		if ( $installedVersion === false ) {
-			add_option( self::OPTION_KEY, self::SCHEMA_VERSION );
+			$optionRepository->addOption( self::OPTION_KEY, self::SCHEMA_VERSION );
 		} else {
-			update_option( self::OPTION_KEY, self::SCHEMA_VERSION );
+			$optionRepository->updateOption( self::OPTION_KEY, self::SCHEMA_VERSION );
 		}
 	}
 
