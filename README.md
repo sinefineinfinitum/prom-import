@@ -1,18 +1,29 @@
  [![PHPStan ](https://img.shields.io/badge/PHPStan-Level%208%20-2a5ea7.svg)](https://github.com/szepeviktor/phpstan-wordpress)
 
+ ## Description
 
-## Description
+**spss12 Importer from Prom.ua to WooCommerce** is an effective solution for automatically importing products from Prom.ua XML feeds to your WooCommerce online store. The plugin simplifies catalog synchronization, allowing you to flexibly configure import rules and category mapping.
 
-A plugin for importing products from Prom.ua xml feed to WooCommerce.
-Supports basic product import, list display, and management via the WordPress admin panel.
-Exist both ways to import: manual and automatic.
+### Key features:
+* **Import by link:** Automatically download data from Prom.ua XML exports.
+* **Category mapping:** Conveniently map source categories to your store's categories.
+* **SKU control:** Prevent duplicates and update existing products by SKU.
+* **Flexible management:** Ability to manually launch or configure automatic import queues.
+* **Background processes:** Process large volumes of data in the background.
+* **Reporting:** Detailed logs and import history.
 
-## Installation & Usage
+## Installation and Usage
 
-1. Install the plugin in the /wp-content/plugins/ directory.
-2. Activate the plugin via the Plugins menu in the WordPress admin panel.
-3. Specify the url to xml feed to Prom.ua in the plugin settings.
-4. Run the import manually or configure automatic import.
+1. Upload the plugin to the /wp-content/plugins/ directory.
+2. Activate the plugin via the "Plugins" menu in the WordPress admin panel.
+3. Go to the **Product Import** section to create a new import profile.
+4. Enter the XML feed URL and configure category mapping.
+5. Run the import manually or wait for the scheduled task to complete.
+
+## System Requirements
+* PHP 8.1+
+* WordPress 5.5+
+* WooCommerce
 
 ## Changelog
 

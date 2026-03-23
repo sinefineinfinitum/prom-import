@@ -21,3 +21,5 @@ find . -type d \( -path ./cache -o -path ./node_modules -o -path ./tests -o -pat
  ## php composer.phar install
  # for mutation test need to install pcov
  # pecl install pcov
+ ## run wp jobs
+ # wp action-scheduler run --batches=1 --batch-size=50

@@ -18,7 +18,7 @@ class MenuPage
 	    if (is_admin()) {
             add_menu_page(
                 esc_html(__('Imports', 'spss12-import-prom-woo')),
-                esc_html(__('Prom Ua Imports', 'spss12-import-prom-woo')),
+                esc_html(__('Product Imports', 'spss12-import-prom-woo')),
                 'manage_options',
                 'spss12-import-prom-woo',
                 [$this->adminController, 'imports_page'],
