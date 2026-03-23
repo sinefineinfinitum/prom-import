@@ -1,4 +1,10 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
+<?php
+
+use SineFine\PromImport\Application\Import\Dto\ProductDto;
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+/** @var ProductDto[] $sinefine_promimport_products */
+?>
 <div class="wrap">
     <h1>
         <?php echo esc_html(__('Products Importer', 'spss12-import-prom-woo')) ?>
@@ -19,9 +25,9 @@
             </li>
         </ul>
         <div style="margin-bottom: 20px;">
-            <button id="update-prices" class="button-primary" data-nonce="<?php echo esc_attr(wp_create_nonce('sinefine_promimport_nonce')); ?>">
-                <?php echo esc_html(__('Update Price', 'spss12-import-prom-woo')) ?>
-            </button>
+<!--            <button id="update-prices" class="button-primary" data-nonce="--><?php //echo esc_attr(wp_create_nonce('sinefine_promimport_nonce')); ?><!--">-->
+<!--                --><?php //echo esc_html(__('Update Price', 'spss12-import-prom-woo')) ?>
+<!--            </button>-->
         </div>
         <table class="wp-list-table widefat fixed striped">
             <thead>
@@ -36,7 +42,6 @@
             </thead>
             <tbody id="append-result">
             <?php
-            /** @var \SineFine\PromImport\Application\Import\Dto\ProductDto $sinefine_promimport_product */
             foreach ($sinefine_promimport_products as $sinefine_promimport_product):?>
                 <tr>
                     <td class="text-center" width="150">

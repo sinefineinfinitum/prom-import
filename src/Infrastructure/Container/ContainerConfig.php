@@ -33,7 +33,6 @@ use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
 use SineFine\PromImport\Infrastructure\Queue\QueueManager;
 use SineFine\PromImport\Presentation\AdminController;
-use SineFine\PromImport\Presentation\AdminNotificationService;
 use SineFine\PromImport\Presentation\Middleware\AuthMiddleware;
 use SineFine\PromImport\Presentation\Middleware\NonceMiddleware;
 use SineFine\PromImport\Presentation\Rest\ImportRestController;
@@ -111,11 +110,6 @@ class ContainerConfig {
                     get( ImportRepositoryInterface::class ),
                     get( XmlService::class ),
                 ),
-			AdminNotificationService::class => autowire( AdminNotificationService::class )
-				->constructor(
-					get( HookRegistrar::class ),
-					get( LoggerInterface::class )
-				),
 			FileServiceInterface::class => autowire( FileService::class ),
 
 			// Middlewares
