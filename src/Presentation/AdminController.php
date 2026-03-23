@@ -41,7 +41,7 @@ class AdminController extends BaseController {
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $sinefine_promimport_import = $this->importRepository->findById($id);
         if (!$sinefine_promimport_import) {
-            wp_die(__('Import not found', 'spss12-import-prom-woo'));
+            wp_die(esc_html(__('Import not found', 'spss12-import-prom-woo')));
         }
 
         $sinefine_promimport_existing_categories = get_categories([

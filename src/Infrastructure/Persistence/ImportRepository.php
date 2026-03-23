@@ -26,7 +26,10 @@ class ImportRepository implements ImportRepositoryInterface
 	public function findById(int $id): ?Import
     {
         global $wpdb;
-        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table} WHERE id = %d", $id), ARRAY_A);
+	    $row = $wpdb->get_row(
+		    $wpdb->prepare("SELECT * FROM %i WHERE id = %d", $this->table, $id),
+		    ARRAY_A
+	    );
 
         if (!$row) {
             return null;
@@ -39,7 +42,10 @@ class ImportRepository implements ImportRepositoryInterface
     public function findAll(): array
     {
         global $wpdb;
-        $rows = $wpdb->get_results("SELECT * FROM {$this->table} ORDER BY created_at DESC", ARRAY_A);
+        $rows = $wpdb->get_results(
+			$wpdb->prepare( "SELECT * FROM %i ORDER BY created_at DESC", $this->table),
+			ARRAY_A
+        );
 
         return array_map([$this, 'mapToEntity'], $rows);
     }

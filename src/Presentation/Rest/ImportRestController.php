@@ -131,10 +131,9 @@ class ImportRestController extends WP_REST_Controller
 
             return new WP_REST_Response([
                 'success' => true,
-                'message' => sprintf(
-                    esc_html(__('Successfully updated prices for %d products', 'spss12-import-prom-woo')),
-                    $updatedCount
-                ),
+                'message' =>
+                    esc_html(__('Successfully updated prices for products: ', 'spss12-import-prom-woo'))
+                    . $updatedCount,
                 'data'    => [
                     'updated_count' => $updatedCount,
                 ],

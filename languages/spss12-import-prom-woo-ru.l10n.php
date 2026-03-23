@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 return [
 	'project-id-version'        => 'spss12 Importer from Prom.ua to WooCoommerce',
 	'report-msgid-bugs-to'      => '',
