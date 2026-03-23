@@ -5,6 +5,7 @@
 
 A plugin for importing products from Prom.ua xml feed to WooCommerce.
 Supports basic product import, list display, and management via the WordPress admin panel.
+Exist both ways to import: manual and automatic.
 
 ## Installation & Usage
 
@@ -13,24 +14,26 @@ Supports basic product import, list display, and management via the WordPress ad
 3. Specify the url to xml feed to Prom.ua in the plugin settings.
 4. Run the import manually or configure automatic import.
 
+## Changelog
+
+- version 0.1.0: add ability to have many different imports and now imports running in the background.
+
 ## Roadmap / Development Plan
 
 Next tasks and improvements (public plan):
 
+### Functionality
+- Import price only.
+- Logging event, errors and warnings of import.
+
 ### Pagination
 - Pagination in the admin UI for the list of imported products/import results (improved UX for large volumes).
-- Support for pagination of products.
 - Display of progress indicators and the number of pages/elements.
 
 ### Bulk import
-- Background batch import (batch/queue) with chunking and rate limiting.
+- [x] Background batch import (batch/queue) with chunking and rate limiting.
 - Retry of failed requests with backoff, error logging, and results reporting.
 - WP-CLI command for bulk import (for cron/CI).
-
-### SKU — optional addition
-- Setting: add/hide SKU when creating a product.
-- SKU missing behavior options: auto-generation, skipping, or writing to the meta field.
-- SKU uniqueness validation and conflict strategy.
 
 ### Static analyzers and code quality
 - [x] PHPStan (phpstan.neon config already added) — increase strictness level, cover exceptions.
@@ -39,11 +42,10 @@ Next tasks and improvements (public plan):
 
 ### Testing and CI
 - [x] Unit tests.
-- WooCommerce integration tests (using a test database).
+- [x] WooCommerce integration tests (using a test database).
 - [x] GitHub Actions: running tests, PHPStan/Psalm/PHPCS, collecting release artifacts.
 
 ### Performance and stability
-- Streaming processing of large responses (minimal memory usage).
 - [x] Caching of immutable reference categories.
 - Timeout control, limiting simultaneous requests.
 
