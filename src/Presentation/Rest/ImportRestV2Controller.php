@@ -103,17 +103,15 @@ class ImportRestV2Controller extends WP_REST_Controller
     {
         try {
             $imports = $this->importService->getAllImports();
-            $data = array_map(function(Import $import) {
-                return [
-                    'id' => $import->getId(),
-                    'name' => $import->getName(),
-                    'url' => $import->getUrl(),
-                    'category_mapping' => $import->getCategoryMapping(),
-                    'path' => $import->getPath(),
-                    'updated_at' => $import->getUpdatedAt()?->format( 'Y-m-d H:i:s' ),
-                    'created_at' => $import->getCreatedAt()?->format( 'Y-m-d H:i:s' ),
-                ];
-            }, $imports);
+            $data = array_map(fn(Import $import) => [
+                'id' => $import->getId(),
+                'name' => $import->getName(),
+                'url' => $import->getUrl(),
+                'category_mapping' => $import->getCategoryMapping(),
+                'path' => $import->getPath(),
+                'updated_at' => $import->getUpdatedAt()?->format( 'Y-m-d H:i:s' ),
+                'created_at' => $import->getCreatedAt()?->format( 'Y-m-d H:i:s' ),
+            ], $imports);
 
             return new WP_REST_Response($data, 200);
         } catch (Throwable $e) {
@@ -218,12 +216,10 @@ class ImportRestV2Controller extends WP_REST_Controller
             $id = (int) $request->get_param('id');
             $categories = $this->importService->getImportCategories($id);
             
-            $data = array_map(function($category) {
-                return [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                ];
-            }, $categories);
+            $data = array_map(fn($category) => [
+                'id' => $category->id,
+                'name' => $category->name,
+            ], $categories);
 
             return new WP_REST_Response($data, 200);
         } catch (Throwable $e) {
@@ -277,9 +273,7 @@ class ImportRestV2Controller extends WP_REST_Controller
                 'required' => true,
                 'type' => 'string',
                 'sanitize_callback' => 'sanitize_url',
-                'validate_callback' => function($param) {
-                    return filter_var($param, FILTER_VALIDATE_URL) !== false;
-                },
+                'validate_callback' => fn($param) => filter_var($param, FILTER_VALIDATE_URL) !== false,
             ],
         ];
     }

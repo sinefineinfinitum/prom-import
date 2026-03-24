@@ -16,7 +16,7 @@ class Install
     public function run(): void
     {
         // Lazy instantiate dependencies to avoid loading DI container on activation
-        $this->fileService = $this->fileService ?? new FileService();
+        $this->fileService ??= new FileService();
 
         $dirs = [
             ContainerConfig::getCommonDir(),

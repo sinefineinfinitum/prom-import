@@ -17,7 +17,7 @@ class Uninstall
 	public function run(): void
     {
         // Lazy instantiate to avoid loading DI container on uninstall
-        $this->fileService = $this->fileService ?? new FileService();
+        $this->fileService ??= new FileService();
 
         $dir = ContainerConfig::getCommonDir();
         if ($this->fileService->isExist($dir)) {

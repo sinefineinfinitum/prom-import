@@ -164,9 +164,7 @@ class ImportRestController extends WP_REST_Controller
 			'product_id' => [
 				'required'          => true,
 				'type'              => 'integer',
-				'validate_callback' => function($param) {
-					return is_numeric($param) && $param > 0;
-				},
+				'validate_callback' => fn($param) => is_numeric($param) && $param > 0,
 				'sanitize_callback' => 'absint',
 			],
 			'product_title' => [
@@ -183,9 +181,7 @@ class ImportRestController extends WP_REST_Controller
 			'product_price' => [
 				'required'          => false,
 				'type'              => 'number',
-				'validate_callback' => function($param) {
-					return is_numeric($param) && $param >= 0;
-				},
+				'validate_callback' => fn($param) => is_numeric($param) && $param >= 0,
 				'default'           => 0.0,
 			],
 			'product_category' => [

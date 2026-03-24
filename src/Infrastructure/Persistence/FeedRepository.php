@@ -26,9 +26,7 @@ class FeedRepository implements FeedRepositoryInterface
 		$files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
 		if (!$files) return null;
 
-		usort($files, function($a, $b) {
-			return filemtime($b) - filemtime($a);
-		});
+		usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
 		$filePath = $files[0];
 		if (!file_exists($filePath)) {
 			return null;
@@ -62,9 +60,7 @@ class FeedRepository implements FeedRepositoryInterface
 		$files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
 		if (!$files) return;
 
-		usort($files, function($a, $b) {
-			return filemtime($b) - filemtime($a);
-		});
+		usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
 
 		$toDelete = array_slice($files, $keepCount);
 		foreach ($toDelete as $file) {
