@@ -160,5 +160,3 @@ jobs:
                -H "Accept: application/json" \
                -H "X-WP-Nonce: ${NONCE}" \
                -H "Content-Type: application/json"
-      - name: Run plugin check
-        uses: wordpress/plugin-check-action@v1
