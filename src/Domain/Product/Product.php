@@ -12,8 +12,14 @@ use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 class Product
 {
     /**
-     * @param string[] $mediaUrls
-     */
+     * @param Sku                $sku
+     * @param string             $title
+     * @param string             $description
+     * @param Price              $price
+     * @param ?Category          $category
+     * @param array<int, string> $mediaUrls
+     * @param string             $link
+     *  */
     public function __construct(
         private Sku $sku,
         private string $title,
@@ -26,24 +32,50 @@ class Product
         $this->title = trim($this->title);
     }
 
-    public function sku(): Sku { return $this->sku; }
-    public function title(): string { return $this->title; }
-    public function description(): string { return $this->description; }
-    public function price(): Price { return $this->price; }
-    public function category(): ?Category { return $this->category; }
-    /** @return string[] */
-    public function mediaUrls(): array { return $this->mediaUrls; }
-    public function link(): string { return $this->link; }
+    public function sku(): Sku
+    {
+        return $this->sku;
+    }
+    public function title(): string
+    {
+        return $this->title;
+    }
+    public function description(): string
+    {
+        return $this->description;
+    }
+    public function price(): Price
+    {
+        return $this->price;
+    }
+    public function category(): ?Category
+    {
+        return $this->category;
+    }
+    /**
+     * 
+     *
+     * @return string[] 
+     */
+    public function mediaUrls(): array
+    {
+        return $this->mediaUrls; 
+    }
+    public function link(): string
+    {
+        return $this->link; 
+    }
 
-	public static function createFromDto(ProductDto $dto): self
-	{
-		return new self(
-			$dto->sku,
-			$dto->title,
-			$dto->description,
-			$dto->price,
-			null,
-			$dto->mediaUrls,
-			$dto->link);
-	}
+    public static function createFromDto(ProductDto $dto): self
+    {
+        return new self(
+            $dto->sku,
+            $dto->title,
+            $dto->description,
+            $dto->price,
+            null,
+            $dto->mediaUrls,
+            $dto->link
+        );
+    }
 }

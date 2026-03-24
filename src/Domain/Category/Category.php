@@ -14,6 +14,12 @@ class Category
         $this->name = trim($this->name);
     }
 
-    public function id(): int { return $this->id; }
-    public function name(): string { return $this->name; }
+    public function id(): int
+    {
+        return $this->id; 
+    }
+    public function name(): string
+    {
+        return $this->name; 
+    }
 }

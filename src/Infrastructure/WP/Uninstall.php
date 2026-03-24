@@ -14,7 +14,7 @@ class Uninstall
         private ?FileServiceInterface $fileService = null,
     ) {
     }
-	public function run(): void
+    public function run(): void
     {
         // Lazy instantiate to avoid loading DI container on uninstall
         $this->fileService ??= new FileService();

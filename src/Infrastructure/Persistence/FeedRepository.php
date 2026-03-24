@@ -20,53 +20,56 @@ class FeedRepository implements FeedRepositoryInterface
         $this->dir = ContainerConfig::getFeedDir();
     }
 
-	public function getLatest(): ?Feed
-	{
-		
-		$files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
-		if (!$files) return null;
+    public function getLatest(): ?Feed
+    {
+        
+        $files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
+        if (!$files) {
+            return null;
+        }
 
-		usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
-		$filePath = $files[0];
-		if (!file_exists($filePath)) {
-			return null;
-		}
+        usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+        $filePath = $files[0];
+        if (!file_exists($filePath)) {
+            return null;
+        }
 
-		return new Feed(
-			(int)explode('_', pathinfo($filePath, PATHINFO_FILENAME))[1],
-			explode('_', pathinfo($filePath, PATHINFO_FILENAME))[0],
-			file_get_contents($filePath) ?: ''
-		);
-	}
+        return new Feed(
+            (int)explode('_', pathinfo($filePath, PATHINFO_FILENAME))[1],
+            explode('_', pathinfo($filePath, PATHINFO_FILENAME))[0],
+            file_get_contents($filePath) ?: ''
+        );
+    }
 
-	public function save(FeedDto $feedDto): void
-	{
-		$feed = Feed::fromDto($feedDto);
+    public function save(FeedDto $feedDto): void
+    {
+        $feed = Feed::fromDto($feedDto);
         $latestFeed = $this->getLatest();
-        if (
-            empty($feed->content())
+        if (        empty($feed->content())
             || (!empty($latestFeed) && !$this->isNewFeed($feed, $latestFeed))
         ) {
-			return;
-		}
+            return;
+        }
 
-		$filePath = $this->dir . DIRECTORY_SEPARATOR . $feed->filename();
+        $filePath = $this->dir . DIRECTORY_SEPARATOR . $feed->filename();
         $this->fileService->writeFile($filePath, $feed->content());
         $this->clearOldFeeds();
-	}
+    }
 
-	public function clearOldFeeds(int $keepCount = 5): void
-	{
-		$files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
-		if (!$files) return;
+    public function clearOldFeeds(int $keepCount = 5): void
+    {
+        $files = glob($this->dir . DIRECTORY_SEPARATOR . '*.xml');
+        if (!$files) {
+            return;
+        }
 
-		usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+        usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
 
-		$toDelete = array_slice($files, $keepCount);
-		foreach ($toDelete as $file) {
-			$this->fileService->unlink($file);
-		}
-	}
+        $toDelete = array_slice($files, $keepCount);
+        foreach ($toDelete as $file) {
+            $this->fileService->unlink($file);
+        }
+    }
 
     private function isNewFeed(Feed $feed, Feed $lastFeed): bool
     {

@@ -13,7 +13,7 @@ class FileService implements FileServiceInterface
     public function __construct()
     {
         if (!function_exists('WP_Filesystem')) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
+            include_once ABSPATH . 'wp-admin/includes/file.php';
         }
 
         WP_Filesystem();

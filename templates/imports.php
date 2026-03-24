@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         </tr>
         </thead>
         <tbody>
-        <?php if (empty($sinefine_promimport_imports)): ?>
+        <?php if (empty($sinefine_promimport_imports)) : ?>
             <tr>
                 <td colspan="5"><?php echo esc_html(__('No imports found', 'spss12-import-prom-woo')); ?></td>
             </tr>

@@ -64,14 +64,15 @@ class XmlParser implements XmlParserInterface
 
     /**
      * Parse categories from <shop><categories><category>...
+     *
      * @return array<int,CategoryDto> keyed by category id
      */
     public function parseCategories(SimpleXMLElement $root): array
     {
         $result = [];
-		if (!$root->shop->categories) {
-			return $result;
-		}
+        if (!$root->shop->categories) {
+            return $result;
+        }
         foreach ($root->shop->categories->category as $cat) {
             $id = isset($cat['id']) ? (int) $cat['id'] : 0;
             $name = trim((string) $cat);
@@ -82,15 +83,17 @@ class XmlParser implements XmlParserInterface
 
     /**
      * Parse products from <shop><offers><offer>...
-     * @param array<int,CategoryDto> $categories
+     *
+     * @param  SimpleXMLElement       $root
+     * @param  array<int,CategoryDto> $categories
      * @return ProductDto[]
      */
     public function parseProducts(SimpleXMLElement $root, array $categories = []): array
     {
         $products = [];
-	    if (!$root->shop->offers) {
-		    return $products;
-	    }
+        if (!$root->shop->offers) {
+            return $products;
+        }
 
         foreach ($root->shop->offers->offer as $offer) {
             $dto = $this->mapOfferToProductDto($offer, $categories);
@@ -101,15 +104,16 @@ class XmlParser implements XmlParserInterface
         return $products;
     }
 
-	public function getTotalProducts(SimpleXMLElement $xml): int
-	{
-		return $xml->shop?->offers?->offer?->count() ? $xml->shop->offers->offer->count() : 0;
-	}
+    public function getTotalProducts(SimpleXMLElement $xml): int
+    {
+        return $xml->shop?->offers?->offer?->count() ? $xml->shop->offers->offer->count() : 0;
+    }
 
     /**
      * Map a single <offer> item to ProductDto
-     * @param SimpleXMLElement $offer
-     * @param array<int, CategoryDto> $categories
+     *
+     * @param  SimpleXMLElement        $offer
+     * @param  array<int, CategoryDto> $categories
      * @return ProductDto|null
      */
     private function mapOfferToProductDto(SimpleXMLElement $offer, array $categories = []): ?ProductDto
@@ -159,10 +163,12 @@ class XmlParser implements XmlParserInterface
             return '';
         }
         //remove anchors, emails, and auto-linked URLs
-        return preg_replace([
-            '/<\/?a( [^>]*)?>/i',
-            '/[^@\s]*@[^@\s]*\.[^@\s]*/',
-            '/(?<!src=")(?:(https?)+[:\/]+([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![.,:])/i',
-        ], ['', '', ''], $html) ?? '';
+        return preg_replace(
+            [
+                '/<\/?a( [^>]*)?>/i',
+                '/[^@\s]*@[^@\s]*\.[^@\s]*/',
+                '/(?<!src=")(?:(https?)+[:\/]+([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![.,:])/i',
+            ], ['', '', ''], $html
+        ) ?? '';
     }
 }

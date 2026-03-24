@@ -10,12 +10,18 @@ use WP_Error;
 
 interface ProductRepositoryInterface
 {
-    /** Returns WP post ID or false if not found */
+    /**
+     * 
+     * Returns WP post ID or false if not found 
+     */
     public function findIdBySku(Sku $sku): int|false;
 
-	public function findIdBySkuId(int $scuId): int|false;
+    public function findIdBySkuId(int $scuId): int|false;
 
-	/** Persist product and return WP post ID or WP_Error */
+    /**
+     * 
+     * Persist product and return WP post ID or WP_Error 
+     */
     public function save(Product $product): int|WP_Error;
-	public function updateProductPrice(ProductDto $dto): int|false|WP_Error;
+    public function updateProductPrice(ProductDto $dto): int|false|WP_Error;
 }

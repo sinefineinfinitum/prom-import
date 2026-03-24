@@ -8,31 +8,38 @@ use WP_Error;
 
 class WpHttpClient
 {
-	private const CACHE_TIMEOUT_SEC = 60;
+    private const CACHE_TIMEOUT_SEC = 60;
     /**
-     * @param array<string, mixed> $args
+     * @param  string               $url
+     * @param  array<string, mixed> $args
      * @return array<string, mixed>|WP_Error
      */
     public function get(string $url, array $args = []): array|WP_Error
     {
-		$args = array_merge($args,[
-		    'timeout' => self::CACHE_TIMEOUT_SEC,
-		    'user-agent' => $this->getRandomUserAgent(),
-		    'headers' => $this->getHeader(),
-	    ]);
-		/** @var array<string, mixed> $args */
-		$response = wp_remote_get($url, $args);
+        $args = array_merge(
+            $args, [
+                'timeout' => self::CACHE_TIMEOUT_SEC,
+                'user-agent' => $this->getRandomUserAgent(),
+                'headers' => $this->getHeader(),
+            ]
+        );
+        /**
+* 
+         *
+ * @var array<string, mixed> $args 
+*/
+        $response = wp_remote_get($url, $args);
 
-	    if (is_wp_error($response)) {
-		    if (str_contains($response->get_error_message(), 'cURL error 28')) {
+        if (is_wp_error($response)) {
+            if (str_contains($response->get_error_message(), 'cURL error 28')) {
                 return new WP_Error(
                     'timeout',
-	                esc_html(__('Request timeout. Server respond is too long.', 'spss12-import-prom-woo'))
+                    esc_html(__('Request timeout. Server respond is too long.', 'spss12-import-prom-woo'))
                 );
             }
         }
 
-	    return $response;
+        return $response;
     }
     
     /**
@@ -46,15 +53,15 @@ class WpHttpClient
         ];
     }
 
-	private function getRandomUserAgent(): string|WP_Error
-	{
-		try {
-			return UserAgent::random();
-		} catch ( Exception ) {
-			return new WP_Error(
-				'problem with user agent',
-				esc_html(__('Problem with user agent generation', 'spss12-import-prom-woo'))
-			);
-		}
-	}
+    private function getRandomUserAgent(): string|WP_Error
+    {
+        try {
+            return UserAgent::random();
+        } catch ( Exception ) {
+            return new WP_Error(
+                'problem with user agent',
+                esc_html(__('Problem with user agent generation', 'spss12-import-prom-woo'))
+            );
+        }
+    }
 }

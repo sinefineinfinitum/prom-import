@@ -6,4 +6,7 @@ namespace SineFine\PromImport\Domain\Exception;
 
 use Exception;
 
-class DownloadException extends Exception {}
+class DownloadException extends Exception
+{
+
+}

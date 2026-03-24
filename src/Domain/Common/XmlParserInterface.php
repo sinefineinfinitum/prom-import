@@ -12,27 +12,27 @@ use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 interface XmlParserInterface
 {
     /**
-     * @param string $content
+     * @param  string $content
      * @return void
      * @throws InvalidXmlException
      */
     public function validateFormat(string $content): void;
 
     /**
-     * @param SimpleXMLElement $root
+     * @param  SimpleXMLElement $root
      * @return array<int, CategoryDto>
      */
     public function parseCategories(SimpleXMLElement $root): array;
 
     /**
-     * @param SimpleXMLElement $root
-     * @param array<int, CategoryDto> $categories
+     * @param  SimpleXMLElement        $root
+     * @param  array<int, CategoryDto> $categories
      * @return ProductDto[]
      */
     public function parseProducts(SimpleXMLElement $root, array $categories = []): array;
 
     /**
-     * @param SimpleXMLElement $xml
+     * @param  SimpleXMLElement $xml
      * @return int
      */
     public function getTotalProducts(SimpleXMLElement $xml): int;

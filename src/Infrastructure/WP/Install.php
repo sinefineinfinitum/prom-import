@@ -23,13 +23,13 @@ class Install
             ContainerConfig::getLogDir(),
             ContainerConfig::getCacheDir(),
             ContainerConfig::getFeedDir(),
-            ];
+        ];
         foreach ($dirs as $dir) {
             if (!is_dir($dir)) {
                 $this->fileService->mkdir($dir);
             }
             if (!is_dir($dir)) {
-                throw new UnexpectedValueException(esc_html(__('There is no existing directory and cannot create it: ' , 'spss12-import-prom-woo' )) . esc_html($dir));
+                throw new UnexpectedValueException(esc_html(__('There is no existing directory and cannot create it: ', 'spss12-import-prom-woo' )) . esc_html($dir));
             }
             if (!$this->fileService->isWritable($dir)) {
                 throw new UnexpectedValueException(esc_html(__('Directory is not writable: ', 'spss12-import-prom-woo' )) . esc_html($dir));

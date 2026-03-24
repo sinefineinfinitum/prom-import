@@ -18,94 +18,98 @@ use SineFine\PromImport\Infrastructure\Http\WpHttpClient;
 
 class XmlService
 {
-	public const SINEFINE_PROMIMPORT_URL_OPTION = 'sinefine_promimport_url';
+    public const SINEFINE_PROMIMPORT_URL_OPTION = 'sinefine_promimport_url';
     public function __construct(
-		private WpHttpClient $httpClient,
-		private FeedRepositoryInterface $feedRepository,
-		private XmlParserInterface $xmlParser,
-		private LoggerInterface $logger,
-	) {}
-
-
-	/**
-	 * Validate URL format.
-	 * @throws InvalidArgumentException
-	 */
-	public function validateUrl(string $url): string
-	{
-		if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
-			throw new InvalidArgumentException( 'Invalid URL provided' );
-		}
-
-		return esc_url_raw( $url );
-	}
-    public function getXmlFromUrl(string $url): SimpleXMLElement
-    {
-	    $xmlContent  = $this->downloadXmlContent( $url );
-	    $xml         = simplexml_load_string( $xmlContent );
-	    if ( ! $xml instanceof SimpleXMLElement ) {
-		    throw new InvalidXmlException( 'Invalid XML Content' );
-	    }
-		return $xml;
+        private WpHttpClient $httpClient,
+        private FeedRepositoryInterface $feedRepository,
+        private XmlParserInterface $xmlParser,
+        private LoggerInterface $logger,
+    ) {
     }
 
-	/**
-	 * Persist an XML and update plugin option with source URL.
-	 */
-	public function saveXml(string $url, string $responseBody): void
-	{
-		$feedDto = FeedDto::create( $url, $responseBody );
-		$this->feedRepository->save( $feedDto );
-	}
 
-	/**
-	 * @throws DownloadException
-	 */
-	public function downloadXmlContent( string $url ): string
-	{
-		$response = $this->httpClient->get( $url );
+    /**
+     * Validate URL format.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function validateUrl(string $url): string
+    {
+        if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+            throw new InvalidArgumentException( 'Invalid URL provided' );
+        }
 
-		if ( is_wp_error( $response ) ) {
-			$message = $response->get_error_message();
-			$this->logger->error( 'Failed to fetch XML from {url}: {error}', [
-				'url' => $url,
-				'error' => $message
-			] );
-			throw new DownloadException( esc_html(__('Failed to fetch XML from ', 'spss12-import-prom-woo' )) . esc_html($url) . " : " .  esc_html($message));
-		}
+        return esc_url_raw( $url );
+    }
+    public function getXmlFromUrl(string $url): SimpleXMLElement
+    {
+        $xmlContent  = $this->downloadXmlContent( $url );
+        $xml         = simplexml_load_string( $xmlContent );
+        if ( ! $xml instanceof SimpleXMLElement ) {
+            throw new InvalidXmlException( 'Invalid XML Content' );
+        }
+        return $xml;
+    }
 
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( $code !== 200 ) {
-			throw new DownloadException( esc_html(__('Failed to fetch XML. HTTP Code:', 'spss12-import-prom-woo')) . esc_html((string)$code) );
-		}
+    /**
+     * Persist an XML and update plugin option with source URL.
+     */
+    public function saveXml(string $url, string $responseBody): void
+    {
+        $feedDto = FeedDto::create( $url, $responseBody );
+        $this->feedRepository->save( $feedDto );
+    }
 
-		return wp_remote_retrieve_body( $response );
-	}
+    /**
+     * @throws DownloadException
+     */
+    public function downloadXmlContent( string $url ): string
+    {
+        $response = $this->httpClient->get( $url );
 
-	/**
-	 * @throws InvalidXmlException | RuntimeException
-	 */
-	public function getXml(): SimpleXMLElement
-	{
-		$latestFeed = $this->feedRepository->getLatest();
-		if ( ! $latestFeed ) {
-			throw new RuntimeException( 'Feed not found' );
-		}
+        if ( is_wp_error( $response ) ) {
+            $message = $response->get_error_message();
+            $this->logger->error(
+                'Failed to fetch XML from {url}: {error}', [
+                    'url' => $url,
+                    'error' => $message
+                ] 
+            );
+            throw new DownloadException( esc_html(__('Failed to fetch XML from ', 'spss12-import-prom-woo' )) . esc_html($url) . " : " .  esc_html($message));
+        }
 
-		$xml = simplexml_load_string( $latestFeed->content() );
-		if ( ! $xml instanceof SimpleXMLElement ) {
-			throw new InvalidXmlException( 'Invalid XML' );
-		}
+        $code = wp_remote_retrieve_response_code( $response );
+        if ( $code !== 200 ) {
+            throw new DownloadException( esc_html(__('Failed to fetch XML. HTTP Code:', 'spss12-import-prom-woo')) . esc_html((string)$code) );
+        }
 
-		return $xml;
-	}
+        return wp_remote_retrieve_body( $response );
+    }
 
-	/**
-	 * @return ProductDto[]
-	 */
-	public function getProductsFromXml( SimpleXMLElement $xml): array
-	{
-		$categories = $this->xmlParser->parseCategories($xml);
-		return $this->xmlParser->parseProducts($xml, $categories);
-	}
+    /**
+     * @throws InvalidXmlException | RuntimeException
+     */
+    public function getXml(): SimpleXMLElement
+    {
+        $latestFeed = $this->feedRepository->getLatest();
+        if ( ! $latestFeed ) {
+            throw new RuntimeException( 'Feed not found' );
+        }
+
+        $xml = simplexml_load_string( $latestFeed->content() );
+        if ( ! $xml instanceof SimpleXMLElement ) {
+            throw new InvalidXmlException( 'Invalid XML' );
+        }
+
+        return $xml;
+    }
+
+    /**
+     * @return ProductDto[]
+     */
+    public function getProductsFromXml( SimpleXMLElement $xml): array
+    {
+        $categories = $this->xmlParser->parseCategories($xml);
+        return $this->xmlParser->parseProducts($xml, $categories);
+    }
 }

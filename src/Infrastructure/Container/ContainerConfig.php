@@ -42,111 +42,113 @@ use function DI\create;
 use function DI\get;
 use function DI\string;
 
-class ContainerConfig {
+class ContainerConfig
+{
 
-	private const CACHE_DIRECTORY = 'cache';
-	private const LOG_DIRECTORY = 'log';
-	/**
-	 * @return array<string, mixed>
-	 */
-	public static function getConfig(): array
-	{
-		return [
-			//Repositories
-			ImportRepositoryInterface::class          => autowire( ImportRepository::class ),
-			ProductRepositoryInterface::class         => autowire( ProductRepository::class )
-				->constructor(
-					get( ImageAttachable::class ),
-				),
-			FeedRepositoryInterface::class            => autowire( FeedRepository::class )
+    private const CACHE_DIRECTORY = 'cache';
+    private const LOG_DIRECTORY = 'log';
+    /**
+     * @return array<string, mixed>
+     */
+    public static function getConfig(): array
+    {
+        return [
+        //Repositories
+            ImportRepositoryInterface::class          => autowire( ImportRepository::class ),
+            ProductRepositoryInterface::class         => autowire( ProductRepository::class )
+        ->constructor(
+            get( ImageAttachable::class ),
+        ),
+            FeedRepositoryInterface::class            => autowire( FeedRepository::class )
                 ->constructor(
                     get(FileServiceInterface::class),
                 ),
-			OptionRepositoryInterface::class          => autowire( OptionRepository::class ),
-			CategoryRepositoryInterface::class        => create( CategoryRepository::class ),
+            OptionRepositoryInterface::class          => autowire( OptionRepository::class ),
+            CategoryRepositoryInterface::class        => create( CategoryRepository::class ),
 
-			//Services
-			LoggerInterface::class                    => autowire( WpLogger::class ),
-			HandlerInterface::class                   => autowire( FileHandler::class )
-				->constructor(
-                    get( 'logger.file' ),
-                    get(FileServiceInterface::class ),
-                ),
-			XmlParserInterface::class => autowire( XmlParser::class ),
-			ImageAttachable::class => autowire( ImageProductService::class)
-				->constructor(
-					get( LoggerInterface::class ),
-				),
-			HookRegistrar::class => create( HookRegistrar::class ),
-			MenuPage::class      => create( MenuPage::class )
-				->constructor(
-					get( AdminController::class ),
-				),
-			Assets::class        => create( Assets::class )
+        //Services
+            LoggerInterface::class                    => autowire( WpLogger::class ),
+            HandlerInterface::class                   => autowire( FileHandler::class )
+        ->constructor(
+            get( 'logger.file' ),
+            get(FileServiceInterface::class ),
+        ),
+            XmlParserInterface::class => autowire( XmlParser::class ),
+            ImageAttachable::class => autowire( ImageProductService::class)
+        ->constructor(
+            get( LoggerInterface::class ),
+        ),
+            HookRegistrar::class => create( HookRegistrar::class ),
+            MenuPage::class      => create( MenuPage::class )
+        ->constructor(
+            get( AdminController::class ),
+        ),
+            Assets::class        => create( Assets::class )
                 ->constructor(get(FileServiceInterface::class )),
-			WpHttpClient::class  => create( WpHttpClient::class ),
-			XmlService::class    => autowire( XmlService::class )
-				->constructor(
-					get( WpHttpClient::class ),
-					get( FeedRepositoryInterface::class ),
-					get( XmlParserInterface::class ),
-					get( LoggerInterface::class )
-				),
-			ProductManagerInterface::class       => autowire( ProductManager::class )
-				->constructor(
-					get( ProductRepositoryInterface::class ),
-					get( ImageAttachable::class ),
-					get( LoggerInterface::class )
-				),
-			QueueManager::class => autowire( QueueManager::class )
-				->constructor(
-					get( ProductManagerInterface::class ),
-					get(ImportRepositoryInterface::class ),
-					get(XmlService::class),
-					get(LoggerInterface::class),
-				),
-			ImportService::class          => autowire( ImportService::class )
+            WpHttpClient::class  => create( WpHttpClient::class ),
+            XmlService::class    => autowire( XmlService::class )
+        ->constructor(
+            get( WpHttpClient::class ),
+            get( FeedRepositoryInterface::class ),
+            get( XmlParserInterface::class ),
+            get( LoggerInterface::class )
+        ),
+            ProductManagerInterface::class       => autowire( ProductManager::class )
+        ->constructor(
+            get( ProductRepositoryInterface::class ),
+            get( ImageAttachable::class ),
+            get( LoggerInterface::class )
+        ),
+            QueueManager::class => autowire( QueueManager::class )
+        ->constructor(
+            get( ProductManagerInterface::class ),
+            get(ImportRepositoryInterface::class ),
+            get(XmlService::class),
+            get(LoggerInterface::class),
+        ),
+            ImportService::class          => autowire( ImportService::class )
                 ->constructor(
                     get( ImportRepositoryInterface::class ),
                     get( XmlService::class ),
                 ),
-			FileServiceInterface::class => autowire( FileService::class ),
+            FileServiceInterface::class => autowire( FileService::class ),
 
-			// Middlewares
-			AuthMiddleware::class => create( AuthMiddleware::class ),
-			NonceMiddleware::class => create( NonceMiddleware::class )
-				->constructor( get('nonce.action' ) ),
+        // Middlewares
+            AuthMiddleware::class => create( AuthMiddleware::class ),
+            NonceMiddleware::class => create( NonceMiddleware::class )
+        ->constructor( get('nonce.action' ) ),
 
-			// Controllers
-			AdminController::class        => autowire( AdminController::class )
-				->constructor(
-					get( XmlParserInterface::class ),
-					get( XmlService::class ),
-					get( ProductRepositoryInterface::class ),
-					get( CategoryRepositoryInterface::class ),
+        // Controllers
+            AdminController::class        => autowire( AdminController::class )
+                ->constructor(
+                    get( XmlParserInterface::class ),
+                    get( XmlService::class ),
+                    get( ProductRepositoryInterface::class ),
+                    get( CategoryRepositoryInterface::class ),
                     get( ImportRepositoryInterface::class )
-				)
-				->method( 'setMiddlewares',
-					[get(AuthMiddleware::class),]
-				),
-			ImportRestController::class => autowire( ImportRestController::class )
-				->constructor(
-                    get(XmlService::class ),
-					get( ProductManagerInterface::class ),
-					get( ProductRepositoryInterface::class ),
-                    get( LoggerInterface::class )
-				),
-			ImportRestV2Controller::class => autowire( ImportRestV2Controller::class )
+                )
+                ->method(
+                    'setMiddlewares',
+                    [get(AuthMiddleware::class),]
+                ),
+            ImportRestController::class => autowire( ImportRestController::class )
+        ->constructor(
+            get(XmlService::class ),
+            get( ProductManagerInterface::class ),
+            get( ProductRepositoryInterface::class ),
+            get( LoggerInterface::class )
+        ),
+            ImportRestV2Controller::class => autowire( ImportRestV2Controller::class )
                 ->constructor(
                     get( ImportService::class ),
                     get( LoggerInterface::class )
                 ),
 
-			'logger.filepath'     => DIRECTORY_SEPARATOR . SINEFINE_PROMIMPORT_PLUGIN_DIR . DIRECTORY_SEPARATOR . self::LOG_DIRECTORY,
-			'logger.file'     => string('{logger.filepath}/import-plugin.log'),
-			'nonce.action' => 'sinefine_promimport_nonce',
-		];
-	}
+            'logger.filepath'     => DIRECTORY_SEPARATOR . SINEFINE_PROMIMPORT_PLUGIN_DIR . DIRECTORY_SEPARATOR . self::LOG_DIRECTORY,
+            'logger.file'     => string('{logger.filepath}/import-plugin.log'),
+            'nonce.action' => 'sinefine_promimport_nonce',
+        ];
+    }
 
     public static function getCommonDir(): string
     {

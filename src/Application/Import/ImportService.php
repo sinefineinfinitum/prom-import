@@ -11,13 +11,17 @@ use DateTime;
 
 class ImportService
 {
-	public function __construct(
+    public function __construct(
         private ImportRepositoryInterface $importRepository,
     ) {
     }
 
-    /** @return Import[] */
-	public function getAllImports(): array
+    /**
+     * 
+     *
+     * @return Import[] 
+     */
+    public function getAllImports(): array
     {
         return $this->importRepository->findAll();
     }
@@ -57,15 +61,15 @@ class ImportService
         if (!$import) {
             return [];
         }
-		return $import->getCategoryMapping()?->getMapping() ?? [];
+        return $import->getCategoryMapping()?->getMapping() ?? [];
     }
 
     /**
-     * @param int $id
-     * @param array<int, mixed> $mapping
+     * @param  int               $id
+     * @param  array<int, mixed> $mapping
      * @return bool
      */
-	public function updateImportMapping(int $id, array $mapping): bool
+    public function updateImportMapping(int $id, array $mapping): bool
     {
         $import = $this->importRepository->findById($id);
         if (!$import) {
@@ -79,18 +83,18 @@ class ImportService
         return true;
     }
 
-	/**
-	* @return array{success: bool, import_id: int, job_id: int|false}
-	*/
-	public function runImport(int $id): array
+    /**
+     * @return array{success: bool, import_id: int, job_id: int|false}
+     */
+    public function runImport(int $id): array
     {
-	    // @phpstan-ignore function.notFound
-		$job_id = as_enqueue_async_action('spss12-import-prom-woo_queue_run_batch', ['import_id' => $id]);
+        // @phpstan-ignore function.notFound
+        $job_id = as_enqueue_async_action('spss12-import-prom-woo_queue_run_batch', ['import_id' => $id]);
 
         return [
             'success' => true,
             'import_id' => $id,
-	        'job_id' => $job_id,
+            'job_id' => $job_id,
         ];
     }
 }

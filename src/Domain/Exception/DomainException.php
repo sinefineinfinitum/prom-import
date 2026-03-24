@@ -11,20 +11,21 @@ use Exception;
  */
 abstract class DomainException extends Exception
 {
-	/**
-	 * Get user-friendly error message for display
-	 */
-	public function getUserMessage(): string
-	{
-		return $this->getMessage();
-	}
+    /**
+     * Get user-friendly error message for display
+     */
+    public function getUserMessage(): string
+    {
+        return $this->getMessage();
+    }
 
-	/**
-	 * Get error context data for logging
-	 * @return array<string, mixed>
-	 */
-	public function getContext(): array
-	{
-		return [];
-	}
+    /**
+     * Get error context data for logging
+     *
+     * @return array<string, mixed>
+     */
+    public function getContext(): array
+    {
+        return [];
+    }
 }

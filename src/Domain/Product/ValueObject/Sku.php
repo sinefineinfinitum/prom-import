@@ -24,16 +24,16 @@ class Sku implements JsonSerializable
         return $this->value;
     }
 
-	public static function create(int $value): self
-	{
-		return new self($value);
-	}
+    public static function create(int $value): self
+    {
+        return new self($value);
+    }
 
-	/**
-	 * @return array{value: int}
-	 */
-	public function jsonSerialize(): array
-	{
-		return ['value' => $this->value];
-	}
+    /**
+     * @return array{value: int}
+     */
+    public function jsonSerialize(): array
+    {
+        return ['value' => $this->value];
+    }
 }

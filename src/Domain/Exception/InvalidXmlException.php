@@ -6,4 +6,7 @@ namespace SineFine\PromImport\Domain\Exception;
 
 use Exception;
 
-class InvalidXmlException extends Exception {}
+class InvalidXmlException extends Exception
+{
+
+}

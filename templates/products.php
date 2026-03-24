@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             foreach ($sinefine_promimport_products as $sinefine_promimport_product):?>
                 <tr>
                     <td class="text-center" width="150">
-                        <?php if (!empty($sinefine_promimport_product->mediaUrls)): ?>
+                        <?php if (!empty($sinefine_promimport_product->mediaUrls)) : ?>
                             <?php foreach ($sinefine_promimport_product->mediaUrls as $spssImage):?>
                             <img src="<?php echo esc_url($spssImage); ?>"
                                  loading="lazy"
@@ -118,5 +118,4 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <?php endforeach ?>
             </tbody>
         </table>
-       <?php require_once 'pagination.php'; ?>
 <?php

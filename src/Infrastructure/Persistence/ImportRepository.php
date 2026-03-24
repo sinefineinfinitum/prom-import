@@ -20,16 +20,16 @@ class ImportRepository implements ImportRepositoryInterface
         $this->table = $wpdb->prefix . 'spss12_import_imports';
     }
 
-	/**
-	 * @throws Exception
-	 */
-	public function findById(int $id): ?Import
+    /**
+     * @throws Exception
+     */
+    public function findById(int $id): ?Import
     {
         global $wpdb;
-	    $row = $wpdb->get_row(
-		    $wpdb->prepare("SELECT * FROM %i WHERE id = %d", $this->table, $id),
-		    ARRAY_A
-	    );
+        $row = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM %i WHERE id = %d", $this->table, $id),
+            ARRAY_A
+        );
 
         if (!$row) {
             return null;
@@ -37,14 +37,15 @@ class ImportRepository implements ImportRepositoryInterface
 
         return $this->mapToEntity($row);
     }
-	/**
-	* @throws Exception @return Import[]*/
+    /**
+     * @throws Exception @return Import[]
+     */
     public function findAll(): array
     {
         global $wpdb;
         $rows = $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM %i ORDER BY created_at DESC", $this->table),
-			ARRAY_A
+            $wpdb->prepare( "SELECT * FROM %i ORDER BY created_at DESC", $this->table),
+            ARRAY_A
         );
 
         return array_map([$this, 'mapToEntity'], $rows);
@@ -77,11 +78,11 @@ class ImportRepository implements ImportRepositoryInterface
         return (bool) $wpdb->delete($this->table, ['id' => $id]);
     }
 
-	/**
-	 * @param array{id: int, name: string, url: string, category_mapping: string, path: ?string, updated_at: ?string, created_at: string} $row
-	 * @throws Exception
-	 */
-	private function mapToEntity(array $row): Import
+    /**
+     * @param  array{id: int, name: string, url: string, category_mapping: string, path: ?string, updated_at: ?string, created_at: string} $row
+     * @throws Exception
+     */
+    private function mapToEntity(array $row): Import
     {
         $mapping = $row['category_mapping'] ? json_decode($row['category_mapping'], true) : null;
         if (is_array($mapping)) {

@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                     </tr>
                 </thead>
                 <tbody>
-                <?php if (empty($sinefine_promimport_categories)): ?>
+                <?php if (empty($sinefine_promimport_categories)) : ?>
                     <tr>
                         <td colspan="3"><?php echo esc_html(__('Could not load categories from XML. Please check URL.', 'spss12-import-prom-woo')); ?></td>
                     </tr>
