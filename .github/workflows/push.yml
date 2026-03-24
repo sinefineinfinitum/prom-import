@@ -90,6 +90,9 @@ jobs:
       - name: Run PhpUnit
         run: vendor/bin/phpunit -c phpunit.xml.dist
 
+      - name: Run Php CodeSniffer
+        run: vendor/bin/phpcs -s
+
       - name: Verify REST API products endpoint
         env:
           NONCE: ${{ env.NONCE }}
