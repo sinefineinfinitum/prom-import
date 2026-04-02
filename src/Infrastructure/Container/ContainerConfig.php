@@ -7,6 +7,7 @@ use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\ProductManager;
 use SineFine\PromImport\Application\Import\XmlParser;
 use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Application\Sync\SyncPriceService;
 use SineFine\PromImport\Domain\Category\CategoryRepositoryInterface;
 use SineFine\PromImport\Domain\Common\FileServiceInterface;
 use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
@@ -106,10 +107,15 @@ class ContainerConfig
             get(XmlService::class),
             get(LoggerInterface::class),
         ),
-            ImportService::class          => autowire( ImportService::class )
+            ImportService::class => autowire( ImportService::class )
                 ->constructor(
                     get( ImportRepositoryInterface::class ),
-                    get( XmlService::class ),
+                ),
+            SyncPriceService::class => autowire( SyncPriceService::class )
+                ->constructor(
+                    get(ImportRepositoryInterface::class),
+                    get(XmlService::class),
+                    get( ProductRepositoryInterface::class ),
                 ),
             FileServiceInterface::class => autowire( FileService::class ),
 
@@ -141,6 +147,7 @@ class ContainerConfig
             ImportRestV2Controller::class => autowire( ImportRestV2Controller::class )
                 ->constructor(
                     get( ImportService::class ),
+                    get(SyncPriceService::class ),
                     get( LoggerInterface::class )
                 ),
 

@@ -193,3 +193,58 @@ if (!function_exists('as_enqueue_async_action')) {
 		return 1;
 	}
 }
+
+if (!class_exists('WP_REST_Controller')) {
+    class WP_REST_Controller {}
+}
+
+if (!class_exists('WP_REST_Request')) {
+    class WP_REST_Request {
+        private $method;
+        private $route;
+        private $params = [];
+
+        public function __construct($method = '', $route = '', $args = []) {
+            $this->method = $method;
+            $this->route = $route;
+        }
+
+        public function set_param($key, $value) {
+            $this->params[$key] = $value;
+        }
+
+        public function get_param($key) {
+            return $this->params[$key] ?? null;
+        }
+    }
+}
+
+if (!class_exists('WP_REST_Response')) {
+    class WP_REST_Response {
+        private $data;
+        private $status;
+
+        public function __construct($data = null, $status = 200) {
+            $this->data = $data;
+            $this->status = $status;
+        }
+
+        public function get_data() {
+            return $this->data;
+        }
+
+        public function get_status() {
+            return $this->status;
+        }
+    }
+}
+
+if (!function_exists('register_rest_route')) {
+    function register_rest_route($namespace, $route, $args = [], $override = false) {}
+}
+
+if (!function_exists('current_user_can')) {
+    function current_user_can($capability, ...$args) {
+        return true;
+    }
+}

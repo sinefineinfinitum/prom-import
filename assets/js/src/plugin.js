@@ -154,6 +154,10 @@
         return await RestAPI.request(`${RestAPI.endpoints.imports}/${id}/run`, {}, 'POST', true, 'v2');
     }
 
+    async function sync_prices(id) {
+        return await RestAPI.request(`${RestAPI.endpoints.imports}/${id}/sync-prices`, {}, 'POST', true, 'v2');
+    }
+
 
     async function update_import_mapping(id, mapping) {
         return await RestAPI.request(`${RestAPI.endpoints.imports}/${id}/mapping`, { mapping }, 'PATCH', true, 'v2');
@@ -263,6 +267,29 @@
         try {
             const result = await run_import(id);
             alert((sinefinePromimportAjax.imported_text || 'Added to the queue Import with ID:') + ' ' + result.import_id);
+            location.reload();
+        } catch (error) {
+            alert(error.message);
+            $btn.prop('disabled', false).text(originalText);
+        }
+    });
+
+    // Sync prices
+    $('.sync-prices').on('click', async function() {
+        const id = $(this).data('id');
+        const $btn = $(this);
+        const originalText = $btn.text();
+
+        if (!confirm(sinefinePromimportAjax.confirm_sync_text || 'Synchronize prices for this import?')) {
+            return;
+        }
+
+        $btn.prop('disabled', true).text(sinefinePromimportAjax.sync_prices_text || 'Syncing...');
+
+        try {
+            const result = await sync_prices(id);
+            alert((sinefinePromimportAjax.sync_success_text || 'Prices synchronized successfully!') + 
+                  '\n' + (sinefinePromimportAjax.updated_text || 'Updated:') + ' ' + result.updated + '/' + result.total);
             location.reload();
         } catch (error) {
             alert(error.message);

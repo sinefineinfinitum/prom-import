@@ -6,6 +6,7 @@ namespace SineFine\PromImport\Presentation\Rest;
 
 use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\ImportService;
+use SineFine\PromImport\Application\Sync\SyncPriceService;
 use SineFine\PromImport\Domain\Exception\DomainException;
 use SineFine\PromImport\Domain\Import\Import;
 use Throwable;
@@ -21,6 +22,7 @@ class ImportRestV2Controller extends WP_REST_Controller
 
     public function __construct(
         private ImportService $importService,
+        private SyncPriceService $syncPriceService,
         private LoggerInterface $logger,
     ) {
     }
@@ -104,6 +106,17 @@ class ImportRestV2Controller extends WP_REST_Controller
                 [
                     'methods'             => 'PATCH',
                     'callback'            => [$this, 'update_import_mapping'],
+                    'permission_callback' => [$this, 'check_permission'],
+                ],
+            ]
+        );
+
+        // POST /wp-json/spss12-prom-import/v2/imports/(?P<id>\d+)/sync-prices
+        register_rest_route(
+            $this->namespace, '/imports/(?P<id>\d+)/sync-prices', [
+                [
+                    'methods'             => 'POST',
+                    'callback'            => [$this, 'sync_prices'],
                     'permission_callback' => [$this, 'check_permission'],
                 ],
             ]
@@ -335,5 +348,20 @@ class ImportRestV2Controller extends WP_REST_Controller
             'import_error',
             $message
         );
+    }
+
+    /**
+     * @template T of WP_REST_Request
+     * @param    T $request
+     */
+    public function sync_prices(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        try {
+            $id = (int)$request->get_param('id');
+            $result = $this->syncPriceService->syncPrices($id);
+            return new WP_REST_Response($result, 200);
+        } catch (Throwable $e) {
+            return $this->handle_exception($e);
+        }
     }
 }

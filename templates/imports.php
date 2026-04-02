@@ -38,6 +38,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                 data-id="<?php echo (int)$sinefine_promimport_import->getId(); ?>">
                             <?php echo esc_html(__('Run Import', 'spss12-import-prom-woo')); ?>
                         </button>
+                        <button type="button" class="button sync-prices" 
+                                data-id="<?php echo (int)$sinefine_promimport_import->getId(); ?>">
+                            <?php echo esc_html(__('Sync prices', 'spss12-import-prom-woo')); ?>
+                        </button>
                         <a href="<?php echo esc_url(admin_url('admin.php?page=prom-products-importer&import_id=' . (int)$sinefine_promimport_import->getId())); ?>" class="button">
                             <?php echo esc_html(__('Manual Import', 'spss12-import-prom-woo')); ?>
                         </a>

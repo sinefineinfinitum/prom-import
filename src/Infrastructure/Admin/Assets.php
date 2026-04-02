@@ -69,6 +69,9 @@ class Assets
                 'imported_text'      => esc_html( __( 'Added to the queue Import with ID:', 'spss12-import-prom-woo' ) ),
                 'saved_text'         => esc_html( __( 'Saved', 'spss12-import-prom-woo' ) ),
                 'no_categories_text' => esc_html( __( 'No categories selected', 'spss12-import-prom-woo' ) ),
+                'sync_prices_text'   => esc_html( __( 'Synchronizing prices...', 'spss12-import-prom-woo' ) ),
+                'sync_success_text'  => esc_html( __( 'Prices synchronized successfully!', 'spss12-import-prom-woo' ) ),
+                'confirm_sync_text'  => esc_html( __( 'Synchronize prices for this import?', 'spss12-import-prom-woo' ) ),
             ] 
         );
     }

@@ -29,7 +29,6 @@ class ImportServiceTest extends TestCase
         $this->productManager = $this->createMock(ProductManager::class);
         $this->service = new ImportService(
             $this->repository,
-            $this->xmlService,
         );
     }
 

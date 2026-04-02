@@ -163,3 +163,22 @@ jobs:
                -H "Accept: application/json" \
                -H "X-WP-Nonce: ${NONCE}" \
                -H "Content-Type: application/json"
+
+      - name: Verify REST API sync prices endpoint
+        env:
+          NONCE: ${{ env.NONCE }}
+        run: |
+          # First create an import to have something to sync
+          curl -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v2/imports' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json" \
+               -d '{ "name": "Sync Test","url": "https://gist.githubusercontent.com/sinefineinfinitum/3eb94b5bb04db8051837fa0dc79dfea5/raw/0a474c1db84b2f93a7cd485f41551e55eea1d59b/gistfile1.txt"}'
+          
+          # Now sync prices for the newly created import (ID should be 1 if it's a fresh install)
+          curl -f -b .github/cookies.txt \
+               -X POST 'http://127.0.0.1:8080/?rest_route=/spss12-prom-import/v2/imports/2/sync-prices' \
+               -H "Accept: application/json" \
+               -H "X-WP-Nonce: ${NONCE}" \
+               -H "Content-Type: application/json"
