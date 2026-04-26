@@ -14,10 +14,7 @@ pnpm run dev
 php composer.phar self-update
 php composer.phar clear-cache
 php composer.phar install --no-dev
-find . -type d \( -path ./cache -o -path ./node_modules -o -path ./tests -o -path ./docs -o -path ./.pnpm-store -o -path ./.git  -o -path ./.github  \) -prune \
- -o -type f \( -name '*.php' -o -name '*.json' -o -name '*.js' -o -name '*.md' \
-  -o -name 'LICENSE' -o -name '*.txt' \) -print \
-| zip spss12-import-prom-woo.zip -@
+zip -r spss12-import-prom-woo.zip . -x "cache/*" "node_modules/*" "tests/*" "docs/*" ".pnpm-store/*" ".git/*" ".github/*" "build/*" ".idea/*" ".gitignore" "composer.json" "composer.lock" "phpunit.xml.dist" "phpstan.neon" "rector.php" "phpcs.xml.dist" "psalm.xml" "infection.json5" "webpack.config.js" "package.json" "pnpm-lock.yaml" "pnpm-workspace.yaml" "*.zip" "*.phar" "*.sh"
  ## php composer.phar install
  # for mutation test need to install pcov
  # pecl install pcov

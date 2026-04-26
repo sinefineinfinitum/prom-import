@@ -72,7 +72,7 @@ jobs:
           NEW_VER=${TAG:1}
           sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VER\"/" package.json
           sed -i "s/Stable tag: [^ ]*/Stable tag: $NEW_VER/" readme.txt
-          sed -i "s/public const VERSION = '[^']*';/public const VERSION = '$NEW_VER';/" src/Plugin.php
+          sed -i "s/public const SINEFINE_PROMIMPORT_VERSION = '[^']*';/public const SINEFINE_PROMIMPORT_VERSION = '$NEW_VER';/" src/Plugin.php
           sed -i "s/\* @version[[:space:]]\{1,\}[^ ]*/\* @version           $NEW_VER/" spss12-import-prom-woo.php
           sed -i "s/Version:[[:space:]]\{1,\}[^ ]*/Version:           $NEW_VER/" spss12-import-prom-woo.php
           echo "Version updated to $NEW_VER in all files."
@@ -80,11 +80,7 @@ jobs:
       - name: Build and zip plugin
         run: |
           mkdir -p build/
-          find . -type d \( -path ./cache -o -path ./node_modules -o -path ./tests -o -path ./docs \
-            -o -path ./.pnpm-store -o -path ./.git  -o -path ./.github  \) -prune \
-            -o -type f \( -name '*.php' -o -name '*.json' -o -name '*.js' -o -name '*.md' \
-            -o -name 'LICENSE' -o -name '*.txt' \) -print \
-            | zip build/spss12-import-prom-woo.zip -@
+          zip -r build/spss12-import-prom-woo.zip . -x "cache/*" "node_modules/*" "tests/*" "docs/*" ".pnpm-store/*" ".git/*" ".github/*" "build/*" ".idea/*" ".gitignore" "composer.json" "composer.lock" "phpunit.xml.dist" "phpstan.neon" "rector.php" "phpcs.xml.dist" "psalm.xml" "infection.json5" "webpack.config.js" "package.json" "pnpm-lock.yaml" "pnpm-workspace.yaml" "*.zip" "*.phar" "*.sh"
 
       - name: Upload Plugin artifact
         id: upload_artifact_step

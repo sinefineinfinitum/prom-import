@@ -44,6 +44,9 @@ if ( version_compare( PHP_VERSION, '8.0', '<' ) ) {
  */
 function sinefine_promimport_activate(): void
 {
+    if ( ! class_exists( 'SineFine\PromImport\Infrastructure\WP\Install' ) || ! class_exists( 'SineFine\PromImport\Infrastructure\DB\Migrator' ) ) {
+        wp_die( esc_html( __( 'Plugin classes not found. This might be due to an incomplete installation. Please run `composer install`.', 'spss12-import-prom-woo' ) ) );
+    }
     (new Install())->run();
     Migrator::migrate();
 }
