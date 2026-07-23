@@ -117,3 +117,51 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "build/spss12-import-prom-woo.zip"
+
+  deploy:
+    needs: test
+    name: Deploy to SVN
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: spss12-import-prom-woo
+          path: build
+
+      - name: Install Subversion
+        run: sudo apt-get update && sudo apt-get install -y subversion
+
+      - name: Deploy to WordPress.org SVN
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          SVN_URL="https://plugins.svn.wordpress.org/spss12-import-prom-woo/"
+
+          # Extract zip artifact
+          mkdir -p extracted
+          unzip build/spss12-import-prom-woo.zip -d extracted/
+
+          # Checkout SVN
+          svn checkout --depth immediates "$SVN_URL" svn
+          svn update --set-depth infinity svn/trunk
+
+          # Deploy extracted plugin to trunk
+          rsync -av --delete --checksum extracted/ svn/trunk/
+
+          cd svn
+
+          # Add new files
+          svn add trunk/* --force 2>/dev/null || true
+
+          # Remove deleted files
+          svn status trunk/ | grep '^!' | awk '{print $2}' | xargs -r svn del --force 2>/dev/null || true
+
+          # Tag the release
+          if svn ls "tags/$TAG" 2>/dev/null; then
+            svn rm "tags/$TAG"
+          fi
+          svn copy trunk "tags/$TAG"
+
+          svn commit -m "Release $GITHUB_REF_NAME" --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
