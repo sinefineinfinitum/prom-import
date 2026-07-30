@@ -31,12 +31,13 @@ class FakeProductRepository implements ProductRepositoryInterface
 		return $this->returnId;
 	}
 
-	public function findIdBySkuId( int $scuId ): int|false
+	public function findIdBySkuId( int|string $scuId ): int|false
 	{
 		// not needed yet
 	}
 
-	public function updateProductPrice( ProductDto $dto ): int|false|WP_Error {
-		// TODO: Implement updateProductPrice() method.
+	public function updateProductPrice( ProductDto $dto ): int|false|WP_Error
+	{
+		// not needed yet
 	}
 }

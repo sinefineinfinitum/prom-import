@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Sync\SyncPriceService;
 use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Exception\ImportNotFoundException;
 use SineFine\PromImport\Domain\Import\Import;
 use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
@@ -14,7 +16,7 @@ use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
 use SimpleXMLElement;
-use Exception;
+use Throwable;
 
 class SyncPriceServiceTest extends TestCase
 {
@@ -32,7 +34,8 @@ class SyncPriceServiceTest extends TestCase
         $this->service = new SyncPriceService(
             $this->importRepository,
             $this->xmlService,
-            $this->productRepository
+            $this->productRepository,
+            $this->createMock(LoggerInterface::class),
         );
     }
 
@@ -89,8 +92,7 @@ class SyncPriceServiceTest extends TestCase
     {
         $this->importRepository->method('findById')->willReturn(null);
         
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Import not found');
+        $this->expectException(ImportNotFoundException::class);
         
         $this->service->syncPrices(999);
     }
@@ -108,7 +110,7 @@ class SyncPriceServiceTest extends TestCase
         $this->xmlService->method('getProductsFromXml')->willReturn([$productDto]);
         
         $this->productRepository->method('updateProductPrice')
-            ->willThrowException(new Exception('Update failed'));
+            ->willThrowException(new \Exception('Update failed'));
 
         $result = $this->service->syncPrices($importId);
 
