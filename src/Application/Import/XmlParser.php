@@ -65,7 +65,7 @@ class XmlParser implements XmlParserInterface
     /**
      * Parse categories from <shop><categories><category>...
      *
-     * @return array<int,CategoryDto> keyed by category id
+     * @return array<string,CategoryDto> keyed by category id
      */
     public function parseCategories(SimpleXMLElement $root): array
     {
@@ -74,9 +74,11 @@ class XmlParser implements XmlParserInterface
             return $result;
         }
         foreach ($root->shop->categories->category as $cat) {
-            $id = isset($cat['id']) ? (int) $cat['id'] : 0;
+            $id = isset($cat['id']) ? (string) $cat['id'] : '';
             $name = trim((string) $cat);
-            $result[$id] = CategoryDto::create($id, $name);
+            if ($id !== '') {
+                $result[$id] = CategoryDto::create($id, $name);
+            }
         }
         return $result;
     }
@@ -85,7 +87,7 @@ class XmlParser implements XmlParserInterface
      * Parse products from <shop><offers><offer>...
      *
      * @param  SimpleXMLElement       $root
-     * @param  array<int,CategoryDto> $categories
+     * @param  array<string,CategoryDto> $categories
      * @return ProductDto[]
      */
     public function parseProducts(SimpleXMLElement $root, array $categories = []): array
@@ -113,13 +115,13 @@ class XmlParser implements XmlParserInterface
      * Map a single <offer> item to ProductDto
      *
      * @param  SimpleXMLElement        $offer
-     * @param  array<int, CategoryDto> $categories
+     * @param  array<string, CategoryDto> $categories
      * @return ProductDto|null
      */
     private function mapOfferToProductDto(SimpleXMLElement $offer, array $categories = []): ?ProductDto
     {
-        $id = isset($offer['id']) ? (int) $offer['id'] : 0;
-        if ($id <= 0) {
+        $id = isset($offer['id']) ? (string) $offer['id'] : '';
+        if ($id === '') {
             return null;
         }
         $name = trim((string) ($offer->name ?? $offer->model ?? ''));
@@ -131,8 +133,8 @@ class XmlParser implements XmlParserInterface
         $price = Price::create($priceVal, $currency);
 
         $categoryDto = null;
-        $catId = isset($offer->categoryId) ? (int) $offer->categoryId : 0;
-        if ($catId && isset($categories[$catId])) {
+        $catId = isset($offer->categoryId) ? (string) $offer->categoryId : '';
+        if ($catId !== '' && isset($categories[$catId])) {
             $categoryDto = $categories[$catId];
         }
 

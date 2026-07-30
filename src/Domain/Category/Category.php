@@ -8,13 +8,14 @@ class Category
 {
     public const SINEFINE_PROMIMPORT_CATEGORIES_OPTION = 'sinefine_promimport_categories';
     public function __construct(
-        private int $id,
+        private string|int $id,
         private string $name
     ) {
+        $this->id = (string) $id;
         $this->name = trim($this->name);
     }
 
-    public function id(): int
+    public function id(): string
     {
         return $this->id; 
     }

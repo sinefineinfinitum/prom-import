@@ -9,17 +9,18 @@ use JsonSerializable;
 class CategoryDto implements JsonSerializable
 {
     public function __construct(
-        private int $id,
+        private string|int $id,
         private string $name
     ) {
+        $this->id = (string) $id;
     }
 
-    public static function create(int $id, string $name): self
+    public static function create(string|int $id, string $name): self
     {
         return new self($id, $name);
     }
 
-    public function id(): int
+    public function id(): string
     {
         return $this->id; 
     }
@@ -29,7 +30,7 @@ class CategoryDto implements JsonSerializable
     }
 
     /**
-     * @return array{id: int, name: string}
+     * @return array{id: string, name: string}
      */
     public function jsonSerialize(): array
     {
