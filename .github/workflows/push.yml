@@ -81,7 +81,11 @@ jobs:
         continue-on-error: true
         run: |
           cp -R vendor wp-content/plugins/spss12-import-prom-woo/
-          wp plugin activate spss12-import-prom-woo    
+          wp plugin activate spss12-import-prom-woo
+
+      - name: Run Php CodeSniffer
+        continue-on-error: true
+        run: vendor/bin/phpcs -s
 
       - name: Run PHPStan to add annotations to the code
         continue-on-error: true
@@ -89,9 +93,6 @@ jobs:
 
       - name: Run PhpUnit
         run: vendor/bin/phpunit -c phpunit.xml.dist
-
-      - name: Run Php CodeSniffer
-        run: vendor/bin/phpcs -s
 
       - name: Verify REST API products endpoint
         env:
