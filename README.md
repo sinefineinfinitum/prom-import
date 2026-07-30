@@ -27,6 +27,7 @@
 
 ## Changelog
 
+- version 0.1.5: support string IDs from external sources (Prom.ua, etc.) — product_id, SKU and category_id now accept string|int. Added InvalidSkuException for strict SKU validation. Improved error handling in REST API and price sync.
 - version 0.1.0: add ability to have many different imports and now imports running in the background.
 
 ## Roadmap / Development Plan

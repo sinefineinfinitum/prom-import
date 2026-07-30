@@ -22,7 +22,7 @@ class ProductRepository implements ProductRepositoryInterface
     /**
      * Find product post ID by stored meta value '_sku'.
      */
-    public function findIdBySkuId(int $scuId): int|false
+    public function findIdBySkuId(string|int $scuId): int|false
     {
         $query = new WP_Query(
             [
@@ -32,7 +32,7 @@ class ProductRepository implements ProductRepositoryInterface
                     'key'     => '_sku',
                     'value'   => $scuId,
                     'compare' => '=',
-                    'type'    => 'NUMERIC',
+                    'type'    => 'CHAR',
                 ]
                 ],
                 'fields'                 => 'ids',

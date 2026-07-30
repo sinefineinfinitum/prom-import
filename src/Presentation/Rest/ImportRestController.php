@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Presentation\Rest;
 
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Exception\DomainException;
 use SineFine\PromImport\Domain\Exception\InvalidImportException;
+use SineFine\PromImport\Domain\Exception\InvalidSkuException;
 use SineFine\PromImport\Domain\Product\ProductManagerInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
@@ -74,7 +76,7 @@ class ImportRestController extends WP_REST_Controller
             $title = $request->get_param('product_title');
             $description = $request->get_param('product_description') ?? '';
             $priceVal = (float) ($request->get_param('product_price') ?? 0.0);
-            $externalCategoryId = (int) ($request->get_param('product_category') ?? 0);
+            $externalCategoryId = $request->get_param('product_category');
             $media = $request->get_param('product_featured_media') ?? [];
 
             // Validate and sanitize media URLs
@@ -111,6 +113,12 @@ class ImportRestController extends WP_REST_Controller
                         'edit_url'   => get_edit_post_link($productId, 'raw'),
                     ],
                 ], 201
+            );
+        } catch (InvalidSkuException | InvalidArgumentException $e) {
+            return new WP_Error(
+                'invalid_product_id',
+                $e->getMessage(),
+                ['status' => 400]
             );
         } catch ( Throwable $e) {
             return $this->handle_exception($e);
@@ -173,9 +181,9 @@ class ImportRestController extends WP_REST_Controller
         return [
             'product_id' => [
                 'required'          => true,
-                'type'              => 'integer',
-                'validate_callback' => fn($param) => is_numeric($param) && $param > 0,
-                'sanitize_callback' => 'absint',
+                'type'              => 'string',
+                'validate_callback' => fn($param) => (is_string($param) || is_numeric($param)) && (string)$param !== '',
+                'sanitize_callback' => 'sanitize_text_field',
             ],
             'product_title' => [
                 'required'          => true,
@@ -196,9 +204,8 @@ class ImportRestController extends WP_REST_Controller
             ],
             'product_category' => [
                 'required'          => false,
-                'type'              => 'integer',
-                'sanitize_callback' => 'absint',
-                'default'           => 0,
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
             ],
             'product_featured_media' => [
                 'required' => false,

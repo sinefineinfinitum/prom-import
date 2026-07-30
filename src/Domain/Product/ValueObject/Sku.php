@@ -4,33 +4,34 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Domain\Product\ValueObject;
 
-use InvalidArgumentException;
 use JsonSerializable;
+use SineFine\PromImport\Domain\Exception\InvalidSkuException;
 
 class Sku implements JsonSerializable
 {
-    private int $value;
+    private string $value;
 
-    public function __construct(int $value)
+    public function __construct(string|int $value)
     {
-        if ($value <= 0) {
-            throw new InvalidArgumentException('ProductId must be positive integer');
+        $value = (string) $value;
+        if ($value === '') {
+            throw InvalidSkuException::emptyValue();
         }
         $this->value = $value;
     }
 
-    public function value(): int
+    public function value(): string
     {
         return $this->value;
     }
 
-    public static function create(int $value): self
+    public static function create(string|int $value): self
     {
         return new self($value);
     }
 
     /**
-     * @return array{value: int}
+     * @return array{value: string}
      */
     public function jsonSerialize(): array
     {

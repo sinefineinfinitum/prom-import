@@ -3,10 +3,13 @@
 namespace SineFine\PromImport\Application\Sync;
 
 use DateTime;
-use Exception;
+use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Exception\DomainException;
+use SineFine\PromImport\Domain\Exception\ImportNotFoundException;
 use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
 use SineFine\PromImport\Domain\Product\ProductRepositoryInterface;
+use Throwable;
 
 class SyncPriceService
 {
@@ -14,6 +17,7 @@ class SyncPriceService
         private ImportRepositoryInterface $importRepository,
         private XmlService $xmlService,
         private ProductRepositoryInterface $productRepository,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -22,13 +26,13 @@ class SyncPriceService
      *
      * @param  int $id
      * @return array{success: bool, updated: int, total: int, errors: int}
-     * @throws Exception
+     * @throws DomainException
      */
     public function syncPrices(int $id): array
     {
         $import = $this->importRepository->findById($id);
         if (!$import) {
-            throw new Exception('Import not found');
+            throw ImportNotFoundException::withId($id);
         }
 
         $xml = $this->xmlService->getXmlFromUrl($import->getUrl());
@@ -43,9 +47,31 @@ class SyncPriceService
                 $result = $this->productRepository->updateProductPrice($productDto);
                 if ($result !== false && !is_wp_error($result)) {
                     $updated++;
+                } elseif (is_wp_error($result)) {
+                    $errors++;
+                    $this->logger->warning(
+                        'Price sync failed for product: {error}',
+                        ['error' => $result->get_error_message()]
+                    );
                 }
-            } catch (Exception) {
+            } catch (DomainException $e) {
                 $errors++;
+                $this->logger->warning(
+                    'Price sync domain error for SKU {sku}: {message}',
+                    [
+                        'sku' => $productDto->sku->value(),
+                        'message' => $e->getMessage(),
+                    ]
+                );
+            } catch (Throwable $e) {
+                $errors++;
+                $this->logger->error(
+                    'Price sync unexpected error for SKU {sku}: {message}',
+                    [
+                        'sku' => $productDto->sku->value(),
+                        'message' => $e->getMessage(),
+                    ]
+                );
             }
         }
 

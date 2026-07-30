@@ -116,6 +116,7 @@ class ContainerConfig
                     get(ImportRepositoryInterface::class),
                     get(XmlService::class),
                     get( ProductRepositoryInterface::class ),
+                    get(LoggerInterface::class),
                 ),
             FileServiceInterface::class => autowire( FileService::class ),
 

@@ -15,7 +15,7 @@ interface ProductRepositoryInterface
      */
     public function findIdBySku(Sku $sku): int|false;
 
-    public function findIdBySkuId(int $scuId): int|false;
+    public function findIdBySkuId(string|int $scuId): int|false;
 
     /**
      * Persist product and return WP post ID or WP_Error 
