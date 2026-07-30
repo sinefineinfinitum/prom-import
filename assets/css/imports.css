@@ -1,0 +1,20 @@
+#imports-table td.actions-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#imports-table .actions-primary,
+#imports-table .actions-secondary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+#imports-table .actions-cell .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 2px;
+}

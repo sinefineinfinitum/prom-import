@@ -30,16 +30,25 @@ class Assets
         }
 
         // Determine which file to use (dev or production)
-        $assets_dir = plugin_dir_path( __FILE__ ) . '../../../assets/js/';
-        $assets_url = plugin_dir_url( __FILE__ ) . '../../../assets/js/';
+        $assets_dir = plugin_dir_path( __FILE__ ) . '../../../assets/';
+        $assets_url = plugin_dir_url( __FILE__ ) . '../../../assets/';
+
+        // Enqueue styles
+        $css_file = 'css/imports.css';
+        wp_enqueue_style(
+            'spss12-import-prom-woo-imports',
+            $assets_url . $css_file,
+            [],
+            (string) filemtime( $assets_dir . $css_file )
+        );
 
         // Use minified version in production, source in development
-        $script_file = 'dist/plugin.min.js';
+        $script_file = 'js/dist/plugin.min.js';
         $version     = Plugin::SINEFINE_PROMIMPORT_VERSION;
 
         // Fallback to source if built file doesn't exist
         if ( ! $this->fileService->isExist( $assets_dir . $script_file ) ) {
-            $script_file = 'src/plugin.js';
+            $script_file = 'js/src/plugin.js';
             $version = (string) filemtime( $assets_dir . $script_file );
         }
 
