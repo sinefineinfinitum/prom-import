@@ -20,7 +20,7 @@ class DomainTest extends TestCase
     public function test_category_trims_name_and_returns_values(): void
     {
         $category = new Category(123, "  Electronics  ");
-        $this->assertSame(123, $category->id());
+        $this->assertSame('123', $category->id());
         $this->assertSame("Electronics", $category->name());
     }
 
@@ -66,7 +66,7 @@ class DomainTest extends TestCase
         $product = Product::createFromDto($dto);
 
         $this->assertSame("Title", $product->title());
-        $this->assertSame(123, $product->sku()->value());
+        $this->assertSame('123', $product->sku()->value());
         $this->assertNull($product->category());
     }
 

@@ -92,6 +92,37 @@ class ProductManagerTest extends TestCase
         $this->assertSame('No such category', $res->code);
     }
 
+    public function test_addCategoryToProduct_returns_category_id_when_term_exists(): void
+    {
+        $GLOBALS['_test_term_exists_return'] = new \WP_Term(555);
+
+        $repo = new FakeProductRepository(1);
+        $imageService = new FakeImageService();
+        $service = $this->createService($repo, $imageService);
+
+        $result = $service->addCategoryToProduct(10, 555);
+        $this->assertSame(555, $result);
+
+        unset($GLOBALS['_test_term_exists_return']);
+    }
+
+    public function test_addCategoryToProduct_skips_when_mapping_is_zero(): void
+    {
+        $repo = new FakeProductRepository(1);
+        $imageService = new FakeImageService();
+        $service = $this->createService($repo, $imageService);
+
+        $this->logger->expects($this->once())
+            ->method('warning')
+            ->with(
+                'No mapping found for external category {ext_id} for product {post_id}',
+                ['ext_id' => 0, 'post_id' => 10]
+            );
+
+        $result = $service->addCategoryToProduct(10, 0);
+        $this->assertSame(0, $result);
+    }
+
     public function test_addImagesToProductGallery_skips_first_image_and_adds_others(): void
     {
         $repo = new FakeProductRepository(42);

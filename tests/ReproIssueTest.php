@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use SineFine\PromImport\Application\Import\XmlParser;
 
 class ReproIssueTest extends TestCase
 {
     public function test_parseProducts_with_string_ids(): void
     {
-        $parser = new XmlParser();
+        $parser = new XmlParser($this->createMock(LoggerInterface::class));
         $xmlContent = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <yml_catalog date="2026-07-27 20:40">
