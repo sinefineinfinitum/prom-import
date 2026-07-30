@@ -50,9 +50,9 @@ class ProductManager implements ProductManagerInterface
         return $postId;
     }
 
-    public function addCategoryToProduct(int $productId, int $categoryId): int|WP_Error
+    public function addCategoryToProduct(int $productId, string|int $categoryId): int|WP_Error
     {
-        if ($categoryId === 0) {
+        if ($categoryId === 0 || $categoryId === '0' || $categoryId === '') {
             $this->logger->warning(
                 'No mapping found for external category {ext_id} for product {post_id}', [
                     'ext_id' => $categoryId,
@@ -61,9 +61,9 @@ class ProductManager implements ProductManagerInterface
             );
             return 0;
         }
-        if (term_exists($categoryId, 'product_cat')) {
-            wp_set_object_terms($productId, [$categoryId], 'product_cat');
-            return $categoryId;
+        if (is_numeric($categoryId) && term_exists((int)$categoryId, 'product_cat')) {
+            wp_set_object_terms($productId, [(int)$categoryId], 'product_cat');
+            return (int)$categoryId;
         } else {
             $this->logger->error(
                 'Category {cat_id} does not exist in Woocommerce for product {post_id}', [
