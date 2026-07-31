@@ -199,9 +199,75 @@ if(!function_exists('do_action')){
 }
 
 if (!function_exists('as_enqueue_async_action')) {
-	function as_enqueue_async_action(string $action, array $data): int|false
+	// Real Action Scheduler signature: as_enqueue_async_action($hook, $args, $group, $unique, $priority)
+	function as_enqueue_async_action(string $action, array $data, string $group = '', bool $unique = false, int $priority = 10): int|false
+	{
+		$GLOBALS['as_enqueued_actions'] = $GLOBALS['as_enqueued_actions'] ?? [];
+
+		if ($unique) {
+			foreach ($GLOBALS['as_enqueued_actions'] as $existing) {
+				if ($existing['hook'] === $action && $existing['args'] === $data && $existing['group'] === $group) {
+					return count($GLOBALS['as_enqueued_actions']);
+				}
+			}
+		}
+
+		$GLOBALS['as_enqueued_actions'][] = [
+			'hook' => $action,
+			'args' => $data,
+			'group' => $group,
+			'unique' => $unique,
+			'priority' => $priority,
+		];
+
+		return count($GLOBALS['as_enqueued_actions']);
+	}
+}
+
+if (!function_exists('as_schedule_single_action')) {
+	function as_schedule_single_action(int $timestamp, string $hook, array $args = [], string $group = '', bool $unique = false, int $priority = 10): int
+	{
+		$GLOBALS['as_scheduled_single_actions'] = $GLOBALS['as_scheduled_single_actions'] ?? [];
+
+		if ($unique) {
+			foreach ($GLOBALS['as_scheduled_single_actions'] as $existing) {
+				if ($existing['hook'] === $hook && $existing['args'] === $args && $existing['group'] === $group) {
+					return count($GLOBALS['as_scheduled_single_actions']);
+				}
+			}
+		}
+
+		$GLOBALS['as_scheduled_single_actions'][] = [
+			'timestamp' => $timestamp,
+			'hook' => $hook,
+			'args' => $args,
+			'group' => $group,
+			'unique' => $unique,
+			'priority' => $priority,
+		];
+
+		return count($GLOBALS['as_scheduled_single_actions']);
+	}
+}
+
+if (!function_exists('as_has_scheduled_action')) {
+	function as_has_scheduled_action(string $action, array $args = []): bool
+	{
+		return false;
+	}
+}
+
+if (!function_exists('as_schedule_recurring_action')) {
+	function as_schedule_recurring_action(int $timestamp, int $interval, string $hook, array $args = [], string $group = ''): int
 	{
 		return 1;
+	}
+}
+
+if (!function_exists('current_time')) {
+	function current_time(string $type, bool $gmt = false): string
+	{
+		return date('Y-m-d H:i:s');
 	}
 }
 

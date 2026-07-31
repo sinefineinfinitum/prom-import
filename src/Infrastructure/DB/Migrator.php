@@ -9,7 +9,7 @@ class Migrator
 {
     public const PLUGIN_DB_PREFIX = "spss12_import_";
     private const OPTION_KEY = 'spss12_import_db_schema_version';
-    private const SCHEMA_VERSION = '0.0.2';
+    private const SCHEMA_VERSION = '0.1.0';
 
     public static function migrate(): void
     {
@@ -28,7 +28,7 @@ class Migrator
 
         $queries = [
             self::getImportTable( $prefix ),
-
+            self::getProgressTable( $prefix ),
         ];
 
         foreach ( $queries as $sql ) {
@@ -52,6 +52,22 @@ class Migrator
                 path VARCHAR(2048) NULL,
                 updated_at DATETIME NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;";
+    }
+
+    public static function getProgressTable( string $prefix ): string
+    {
+        return "CREATE TABLE IF NOT EXISTS " . $prefix . "progress (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                import_id BIGINT UNSIGNED NOT NULL,
+                status ENUM('pending','running','completed','failed') NOT NULL DEFAULT 'pending',
+                total INT UNSIGNED NOT NULL DEFAULT 0,
+                imported INT UNSIGNED NOT NULL DEFAULT 0,
+                offset INT UNSIGNED NOT NULL DEFAULT 0,
+                started_at DATETIME NULL,
+                updated_at DATETIME NULL,
+                INDEX idx_status_offset_total (status, offset, total),
+                FOREIGN KEY (import_id) REFERENCES " . $prefix . "imports(id) ON DELETE CASCADE
             ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;";
     }
 }

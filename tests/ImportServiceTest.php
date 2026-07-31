@@ -5,30 +5,51 @@ declare(strict_types=1);
 namespace SineFine\PromImport\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use SimpleXMLElement;
 use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Application\Import\ImportBatchService;
 use SineFine\PromImport\Application\Import\ImportService;
 use SineFine\PromImport\Application\Import\ProductManager;
 use SineFine\PromImport\Application\Import\XmlService;
+use SineFine\PromImport\Domain\Common\OptionRepositoryInterface;
 use SineFine\PromImport\Domain\Exception\DownloadException;
 use SineFine\PromImport\Domain\Import\Import;
 use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
+use SineFine\PromImport\Domain\Product\ProductManagerInterface;
 use SineFine\PromImport\Domain\Product\ValueObject\Price;
 use SineFine\PromImport\Domain\Product\ValueObject\Sku;
+use SineFine\PromImport\Domain\Queue\TaskQueueInterface;
+use SineFine\PromImport\Infrastructure\Persistence\ImportProgressRepository;
 
 class ImportServiceTest extends TestCase
 {
     private $repository;
+    private $optionRepository;
+    private $logger;
+    private $progressRepository;
+    private $taskQueue;
     private $xmlService;
-    private $productManager;
+    private $importBatchService;
     private ImportService $service;
 
     protected function setUp(): void
     {
         $this->repository = $this->createMock(ImportRepositoryInterface::class);
+        $this->optionRepository = $this->createMock(OptionRepositoryInterface::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->progressRepository = $this->createMock(ImportProgressRepository::class);
+        $this->taskQueue = $this->createMock(TaskQueueInterface::class);
         $this->xmlService = $this->createMock(XmlService::class);
-        $this->productManager = $this->createMock(ProductManager::class);
+        $this->importBatchService = $this->createMock(ImportBatchService::class);
         $this->service = new ImportService(
             $this->repository,
+            $this->optionRepository,
+            $this->logger,
+            $this->progressRepository,
+            $this->taskQueue,
+            $this->xmlService,
+            $this->importBatchService,
         );
     }
 
@@ -106,6 +127,9 @@ class ImportServiceTest extends TestCase
 
     public function test_deleteImport_calls_repository_delete(): void
     {
+        $this->optionRepository->expects($this->exactly(4))
+            ->method('deleteOption');
+
         $this->repository->expects($this->once())
             ->method('delete')
             ->with(1)
@@ -122,17 +146,31 @@ class ImportServiceTest extends TestCase
 	public function test_runImport_executes_import_logic(): void
     {
         $import = new Import(1, 'Test', 'http://test.com');
-        $this->repository->method('findById')->willReturn($import);
-        $this->xmlService->method('downloadXmlContent')->willReturn('<xml></xml>');
-        
-        $productDto = new ProductDto(
-            new Sku(1),
-            'Title',
-            'Desc',
-            new Price(10)
-        );
-        $this->xmlService->method('getProductsFromXml')->willReturn([$productDto]);
-        $this->productManager->method( 'createProductFromDto' )->willReturn(456);
+
+        $this->repository->method('findById')
+            ->with(1)
+            ->willReturn($import);
+
+        $this->optionRepository->expects($this->once())
+            ->method('updateOption')
+            ->with('spss12_import_1_status', 'pending');
+
+        $this->optionRepository->expects($this->exactly(3))
+            ->method('deleteOption');
+
+        $xml = new SimpleXMLElement('<root/>');
+        $this->xmlService->method('getXmlFromUrl')
+            ->willReturn($xml);
+
+        $this->xmlService->method('getProductsFromXml')
+            ->willReturn([]);
+
+        $this->progressRepository->method('create')
+            ->with(1, 0)
+            ->willReturn(1);
+
+        $this->importBatchService->method('import')
+            ->willReturn(1);
 
         $result = $this->service->runImport(1);
 

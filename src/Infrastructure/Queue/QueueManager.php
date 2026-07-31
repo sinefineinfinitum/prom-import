@@ -4,63 +4,62 @@ declare(strict_types=1);
 
 namespace SineFine\PromImport\Infrastructure\Queue;
 
-use Psr\Log\LoggerInterface;
-use SineFine\PromImport\Application\Import\ProductManager;
+use SineFine\PromImport\Application\Import\Dto\ProductDto;
+use SineFine\PromImport\Application\Import\ImportBatchService;
 use SineFine\PromImport\Application\Import\XmlService;
 use SineFine\PromImport\Domain\Exception\ImportNotFoundException;
-use SineFine\PromImport\Domain\Exception\InvalidXmlException;
 use SineFine\PromImport\Domain\Import\ImportRepositoryInterface;
 
 class QueueManager
 {
+    private const BATCH_SIZE = 10;
+
     public function __construct(
-        private ProductManager $productManager,
         private ImportRepositoryInterface $importRepository,
         private XmlService $xmlService,
-        private LoggerInterface $logger,
+        private ImportBatchService $importBatchService,
     ) {
     }
 
     /**
-     * @param int $import_id
-     *
-     * @throws ImportNotFoundException
-     * @throws InvalidXmlException
+     * @param int                              $import_id
+     * @param int                              $offset
+     * @param array<int, array<string, mixed>> $products
+     * @param array<int|string, int|string>    $categoryMapping
      */
-    public function run( int $import_id ): void
+    public function run(int $import_id, int $offset = 0, array $products = [], array $categoryMapping = []): void
     {
-        $import = $this->importRepository->findById( $import_id );
-        if ( ! $import ) {
+        if (!empty($products)) {
+            $this->importBatchService->process(
+                [
+                'import_id' => $import_id,
+                'products' => $products,
+                'categoryMapping' => $categoryMapping,
+                ]
+            );
+            return;
+        }
+
+        $import = $this->importRepository->findById($import_id);
+        if (!$import) {
             throw ImportNotFoundException::withId($import_id);
         }
 
-        $xml  = $this->xmlService->getXmlFromUrl( $import->getUrl() );
+        $xml = $this->xmlService->getXmlFromUrl($import->getUrl());
         $mapping = $import->getCategoryMapping()?->getMapping() ?? [];
 
-        $productDtos = $this->xmlService->getProductsFromXml( $xml );
-        $importedCount = 0;
-        foreach ( $productDtos as $productDto ) {
-            $productId = $this->productManager->createProductFromDto( $productDto );
-            if ( is_wp_error( $productId ) ) {
-                $this->logger->error( $productId->get_error_message() );
-                continue;
-            }
-            $this->productManager->addImagesToProductGallery( $productDto, $productId );
-            $importedCount ++;
+        $productDtos = $this->xmlService->getProductsFromXml($xml);
+        $chunk = array_slice($productDtos, $offset, self::BATCH_SIZE);
 
-            // Handle category mapping
-            $externalCatId = (int) $productDto->category?->id();
-            if ( $externalCatId > 0 && isset( $mapping[ $externalCatId ] ) ) {
-                $wooTermId = (int) $mapping[ $externalCatId ];
-                if ( $wooTermId > 0 ) {
-                    $this->productManager->addCategoryToProduct( $productId, $wooTermId );
-                }
-            }
-        }
-        $count = count( $productDtos );
-        $this->logger->info(
-            'Imported {imported_count} from {count} products',
-            [ 'imported_count' => $importedCount, 'count' => $count ]
+        $this->importBatchService->process(
+            [
+            'import_id' => $import_id,
+            'products' => array_map(
+                static fn(ProductDto $dto) => $dto->toArray(),
+                $chunk
+            ),
+            'categoryMapping' => $mapping,
+            ]
         );
     }
 }

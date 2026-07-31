@@ -32,6 +32,11 @@ use SineFine\PromImport\Infrastructure\Persistence\ImageProductService;
 use SineFine\PromImport\Infrastructure\Persistence\ImportRepository;
 use SineFine\PromImport\Infrastructure\Persistence\OptionRepository;
 use SineFine\PromImport\Infrastructure\Persistence\ProductRepository;
+use SineFine\PromImport\Application\Import\ImportBatchService;
+use SineFine\PromImport\Domain\Queue\TaskQueueInterface;
+use SineFine\PromImport\Infrastructure\Cron\ImportChecker;
+use SineFine\PromImport\Infrastructure\Persistence\ImportProgressRepository;
+use SineFine\PromImport\Infrastructure\Queue\ActionSchedulerTaskQueue;
 use SineFine\PromImport\Infrastructure\Queue\QueueManager;
 use SineFine\PromImport\Presentation\AdminController;
 use SineFine\PromImport\Presentation\Middleware\AuthMiddleware;
@@ -100,16 +105,36 @@ class ContainerConfig
             get( ImageAttachable::class ),
             get( LoggerInterface::class )
         ),
+            TaskQueueInterface::class => autowire( ActionSchedulerTaskQueue::class ),
+            ImportProgressRepository::class => create( ImportProgressRepository::class ),
+            ImportBatchService::class => autowire( ImportBatchService::class )
+                ->constructor(
+                    get( TaskQueueInterface::class ),
+                    get( ImportProgressRepository::class ),
+                    get( ProductManagerInterface::class ),
+                    get(LoggerInterface::class),
+                ),
             QueueManager::class => autowire( QueueManager::class )
         ->constructor(
-            get( ProductManagerInterface::class ),
             get(ImportRepositoryInterface::class ),
             get(XmlService::class),
-            get(LoggerInterface::class),
+            get(ImportBatchService::class),
         ),
             ImportService::class => autowire( ImportService::class )
                 ->constructor(
                     get( ImportRepositoryInterface::class ),
+                    get(OptionRepositoryInterface::class),
+                    get(LoggerInterface::class),
+                    get(ImportProgressRepository::class),
+                    get(TaskQueueInterface::class),
+                    get(XmlService::class),
+                    get(ImportBatchService::class),
+                ),
+            ImportChecker::class => autowire( ImportChecker::class )
+                ->constructor(
+                    get(ImportProgressRepository::class),
+                    get(TaskQueueInterface::class),
+                    get(LoggerInterface::class),
                 ),
             SyncPriceService::class => autowire( SyncPriceService::class )
                 ->constructor(

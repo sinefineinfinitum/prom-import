@@ -86,7 +86,7 @@ class XmlParser implements XmlParserInterface
     /**
      * Parse products from <shop><offers><offer>...
      *
-     * @param  SimpleXMLElement       $root
+     * @param  SimpleXMLElement          $root
      * @param  array<string,CategoryDto> $categories
      * @return ProductDto[]
      */
@@ -114,7 +114,7 @@ class XmlParser implements XmlParserInterface
     /**
      * Map a single <offer> item to ProductDto
      *
-     * @param  SimpleXMLElement        $offer
+     * @param  SimpleXMLElement           $offer
      * @param  array<string, CategoryDto> $categories
      * @return ProductDto|null
      */
